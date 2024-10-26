@@ -86,23 +86,58 @@ const PhotoBooth: React.FC = () => {
   };
 
   return (
-    <div className="photo-booth">
-      <div>
-        <button onClick={isCameraOn ? stopCamera : startCamera}>
+    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+      <div className="mb-4 space-x-2">
+        <button
+          onClick={isCameraOn ? stopCamera : startCamera}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        >
           {isCameraOn ? 'Stop Camera' : 'Start Camera'}
         </button>
-        <button onClick={takePhoto} disabled={!isCameraOn}>
+        <button
+          onClick={takePhoto}
+          disabled={!isCameraOn}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Take Photo
         </button>
       </div>
-      <video ref={videoRef} autoPlay hidden={!isCameraOn} />
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
+      <video
+        ref={videoRef}
+        autoPlay
+        hidden={!isCameraOn}
+        className="w-full h-auto mb-4 rounded"
+      />
+      <canvas ref={canvasRef} className="hidden" />
       {photoURL && (
-        <div>
-          <Image src={photoURL} alt="Captured" width={300} height={300} />
-          <button onClick={copyPhoto}>Copy to Clipboard</button>
-          <button onClick={downloadPhoto}>Download</button>
-          <button onClick={uploadPhoto}>Upload Photo</button>
+        <div className="space-y-4">
+          <Image
+            src={photoURL}
+            alt="Captured"
+            width={300}
+            height={300}
+            className="w-full h-auto rounded"
+          />
+          <div className="flex justify-between">
+            <button
+              onClick={copyPhoto}
+              className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+            >
+              Copy to Clipboard
+            </button>
+            <button
+              onClick={downloadPhoto}
+              className="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+            >
+              Download
+            </button>
+            <button
+              onClick={uploadPhoto}
+              className="px-3 py-1 bg-pink-500 text-white rounded hover:bg-pink-600 transition-colors"
+            >
+              Upload Photo
+            </button>
+          </div>
         </div>
       )}
     </div>
