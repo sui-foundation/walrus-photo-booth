@@ -60,6 +60,31 @@ const PhotoBooth: React.FC = () => {
     }
   };
 
+  const uploadPhoto = async () => {
+    if (!canvasRef.current) return;
+    
+    const imageDataUrl = canvasRef.current.toDataURL('image/png');
+    try {
+      const blob = await fetch(imageDataUrl).then(res => res.blob());
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/octet-stream',
+        },
+        body: blob,
+      });
+      if (!response.ok) {
+        console.error('Failed to upload image:', response.statusText);
+      } else {
+        const result = await response.json();
+        console.log('Image uploaded successfully', result);
+      }
+    } catch (err) {
+      console.error('Error uploading image:', err);
+    }
+  };
+
   return (
     <div className="photo-booth">
       <div>
@@ -77,6 +102,7 @@ const PhotoBooth: React.FC = () => {
           <Image src={photoURL} alt="Captured" width={300} height={300} />
           <button onClick={copyPhoto}>Copy to Clipboard</button>
           <button onClick={downloadPhoto}>Download</button>
+          <button onClick={uploadPhoto}>Upload Photo</button>
         </div>
       )}
     </div>
