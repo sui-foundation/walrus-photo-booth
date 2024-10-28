@@ -2,12 +2,16 @@
 
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
+import { Button } from "@/components/ui/button";
+import { Camera, Copy, Download, Upload, Check } from "lucide-react";
 
 const PhotoBooth: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [photoURL, setPhotoURL] = useState<string | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState(false);
+  const [downloadFeedback, setDownloadFeedback] = useState(false);
 
   const startCamera = async () => {
     if (videoRef.current) {
@@ -40,14 +44,19 @@ const PhotoBooth: React.FC = () => {
 
   const copyPhoto = async () => {
     if (photoURL) {
-      const response = await fetch(photoURL);
-      const blob = await response.blob();
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          [blob.type]: blob,
-        }),
-      ]);
-      alert('Image copied to clipboard!');
+      try {
+        const response = await fetch(photoURL);
+        const blob = await response.blob();
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            [blob.type]: blob,
+          }),
+        ]);
+        setCopyFeedback(true);
+        setTimeout(() => setCopyFeedback(false), 2000);
+      } catch (err) {
+        console.error('Error copying image:', err);
+      }
     }
   };
 
@@ -57,6 +66,8 @@ const PhotoBooth: React.FC = () => {
       a.href = photoURL;
       a.download = 'photo.png';
       a.click();
+      setDownloadFeedback(true);
+      setTimeout(() => setDownloadFeedback(false), 2000);
     }
   };
 
@@ -86,60 +97,79 @@ const PhotoBooth: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <div className="mb-4 space-x-2">
-        <button
-          onClick={isCameraOn ? stopCamera : startCamera}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
-          {isCameraOn ? 'Stop Camera' : 'Start Camera'}
-        </button>
-        <button
-          onClick={takePhoto}
-          disabled={!isCameraOn}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Take Photo
-        </button>
-      </div>
-      <video
-        ref={videoRef}
-        autoPlay
-        hidden={!isCameraOn}
-        className="w-full h-auto mb-4 rounded"
-      />
-      <canvas ref={canvasRef} className="hidden" />
-      {photoURL && (
-        <div className="space-y-4">
-          <Image
-            src={photoURL}
-            alt="Captured"
-            width={300}
-            height={300}
-            className="w-full h-auto rounded"
-          />
-          <div className="flex justify-between">
-            <button
-              onClick={copyPhoto}
-              className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+    <div className="min-h-screen w-full flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-zinc-800 rounded-xl shadow-2xl overflow-hidden">
+        <div className="p-4 space-y-4">
+          <div className="flex space-x-2">
+            <Button
+              onClick={isCameraOn ? stopCamera : startCamera}
+              variant={isCameraOn ? "destructive" : "default"}
             >
-              Copy to Clipboard
-            </button>
-            <button
-              onClick={downloadPhoto}
-              className="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+              <Camera className="mr-2 h-4 w-4" />
+              {isCameraOn ? 'Stop Camera' : 'Start Camera'}
+            </Button>
+            <Button
+              onClick={takePhoto}
+              disabled={!isCameraOn}
+              variant="secondary"
             >
-              Download
-            </button>
-            <button
-              onClick={uploadPhoto}
-              className="px-3 py-1 bg-pink-500 text-white rounded hover:bg-pink-600 transition-colors"
-            >
-              Upload Photo
-            </button>
+              <Camera className="mr-2 h-4 w-4" />
+              Take Photo
+            </Button>
           </div>
+          <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+            <video
+              ref={videoRef}
+              autoPlay
+              hidden={!isCameraOn}
+              className="w-full h-full object-cover"
+            />
+            {!isCameraOn && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-zinc-600 text-lg">Camera Preview</span>
+              </div>
+            )}
+          </div>
+          <canvas ref={canvasRef} className="hidden" />
+          {photoURL && (
+            <div className="space-y-4">
+              <div className="relative aspect-video bg-zinc-900 rounded-lg overflow-hidden">
+                <Image
+                  src={photoURL}
+                  alt="Captured"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <div className="flex justify-between gap-2">
+                <Button onClick={copyPhoto} variant="outline" size="sm">
+                  {copyFeedback ? (
+                    <Check className="mr-2 h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="mr-2 h-4 w-4" />
+                  )}
+                  {copyFeedback ? "Copied!" : "Copy"}
+                </Button>
+                <Button onClick={downloadPhoto} variant="outline" size="sm">
+                  {downloadFeedback ? (
+                    <Check className="mr-2 h-4 w-4 text-green-500" />
+                  ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                  )}
+                  {downloadFeedback ? "Downloaded!" : "Download"}
+                </Button>
+                <Button onClick={uploadPhoto} variant="outline" size="sm">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+        <div className="bg-zinc-900 text-zinc-400 text-center py-2 text-sm font-bold tracking-wider">
+          photo booth
+        </div>
+      </div>
     </div>
   );
 };
