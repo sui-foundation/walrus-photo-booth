@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Camera, Copy, Download, Upload, Check } from "lucide-react";
+import JSConfetti from 'js-confetti';
 
 const PhotoBooth: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -12,6 +13,15 @@ const PhotoBooth: React.FC = () => {
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState(false);
   const [downloadFeedback, setDownloadFeedback] = useState(false);
+
+  const jsConfettiRef = useRef<JSConfetti | null>(null);
+
+  useEffect(() => {
+    jsConfettiRef.current = new JSConfetti();
+    return () => {
+      jsConfettiRef.current = null;
+    };
+  }, []);
 
   const startCamera = async () => {
     if (videoRef.current) {
@@ -30,6 +40,13 @@ const PhotoBooth: React.FC = () => {
   };
 
   const takePhoto = () => {
+    if (jsConfettiRef.current) {
+      jsConfettiRef.current.addConfetti({
+        emojis: ['📷'],
+        emojiSize: 100,
+        confettiNumber: 24,
+      });
+    }
     if (videoRef.current && canvasRef.current) {
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
