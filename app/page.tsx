@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Camera, Copy, Download, Upload, Check, XCircle } from "lucide-react";
 import JSConfetti from 'js-confetti';
 import Draggable, { DraggableEvent, DraggableData } from "react-draggable";
+import Link from 'next/link';
 
 const overlayImages = [
   { id: 1, src: "/unicorn.png", name: "Unicorn" },
@@ -60,6 +61,10 @@ const PhotoBooth: React.FC = () => {
   const [downloadFeedback, setDownloadFeedback] = useState(false);
   const [overlays, setOverlays] = useState<Overlay[]>([]);
   const jsConfettiRef = useRef<JSConfetti | null>(null);
+  const [uploadResult, setUploadResult] = useState<{
+    blobId: string;
+    objectId: string;
+  } | null>(null);
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -209,11 +214,21 @@ const PhotoBooth: React.FC = () => {
         },
         body: blob,
       });
+      
       if (!response.ok) {
         console.error('Failed to upload image:', response.statusText);
+        return;
+      }
+      
+      const result = await response.json();
+      
+      if (result?.data?.newlyCreated?.blobObject) {
+        setUploadResult({
+          blobId: result.data.newlyCreated.blobObject.blobId,
+          objectId: result.data.newlyCreated.blobObject.id
+        });
       } else {
-        const result = await response.json();
-        console.log('Image uploaded successfully', result);
+        console.error('Unexpected response structure:', result);
       }
     } catch (err) {
       console.error('Error uploading image:', err);
@@ -327,6 +342,22 @@ const PhotoBooth: React.FC = () => {
                   Upload
                 </Button>
               </div>
+            </div>
+          )}
+          {uploadResult && (
+            <div className="mt-2 text-sm text-zinc-400">
+              <p>Blob ID: {uploadResult.blobId}</p>
+              <p>
+                Object ID:{' '}
+                <Link
+                  href={`https://suiscan.xyz/testnet/object/${uploadResult.objectId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 underline"
+                >
+                  {uploadResult.objectId}
+                </Link>
+              </p>
             </div>
           )}
         </div>
