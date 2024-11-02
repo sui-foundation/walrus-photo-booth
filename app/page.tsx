@@ -7,6 +7,13 @@ import { Camera, Copy, Download, Upload, Check, XCircle } from "lucide-react";
 import JSConfetti from 'js-confetti';
 import Draggable, { DraggableEvent, DraggableData } from "react-draggable";
 import Link from 'next/link';
+import { createClient } from '@supabase/supabase-js';
+
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || ''
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const overlayImages = [
   { id: 1, src: "/unicorn.png", name: "Unicorn" },
@@ -223,6 +230,20 @@ const PhotoBooth: React.FC = () => {
       const result = await response.json();
       
       if (result?.data?.newlyCreated?.blobObject) {
+        // save to supabase
+        const { error } = await supabase
+          .from('photos')
+          .insert([{
+            blob_id: result.data.newlyCreated.blobObject.blobId,
+            object_id: result.data.newlyCreated.blobObject.id,
+            created_at: new Date().toISOString()
+          }]);
+
+        if (error) {
+          console.error('Error saving to Supabase:', error);
+          throw new Error('Failed to save to database');
+        }
+
         setUploadResult({
           blobId: result.data.newlyCreated.blobObject.blobId,
           objectId: result.data.newlyCreated.blobObject.id
