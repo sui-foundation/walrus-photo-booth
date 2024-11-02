@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -50,6 +51,13 @@ export default function PhotosPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {photos.map((photo) => (
           <div key={photo.blob_id} className="border rounded-lg p-4">
+            <Image 
+              src={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
+              alt={`Photo ${photo.blob_id}`}
+              className="w-full h-48 object-cover mb-4 rounded"
+              width={500}
+              height={300}
+            />
             <p className="text-sm mb-2">Blob ID: {photo.blob_id}</p>
             <p className="text-sm mb-2">
               Object ID:{' '}
