@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -50,7 +51,17 @@ export default function PhotosPage() {
         {photos.map((photo) => (
           <div key={photo.blob_id} className="border rounded-lg p-4">
             <p className="text-sm mb-2">Blob ID: {photo.blob_id}</p>
-            <p className="text-sm mb-2">Object ID: {photo.object_id}</p>
+            <p className="text-sm mb-2">
+              Object ID:{' '}
+              <Link 
+                href={`https://suiscan.xyz/testnet/object/${photo.object_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                {photo.object_id}
+              </Link>
+            </p>
             <p className="text-sm">Event: {photo.event || 'No event specified'}</p>
           </div>
         ))}
