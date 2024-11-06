@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
-import { Camera, Copy, Download, Upload, Check, XCircle } from "lucide-react";
+import { Camera, Copy, Download, Upload, Check, XCircle, Loader2 } from "lucide-react";
 import JSConfetti from 'js-confetti';
 import Draggable, { DraggableEvent, DraggableData } from "react-draggable";
 import Link from 'next/link';
@@ -72,6 +72,7 @@ const PhotoBooth: React.FC = () => {
     blobId: string;
     objectId: string;
   } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -209,9 +210,10 @@ const PhotoBooth: React.FC = () => {
 
   const uploadPhoto = async () => {
     if (!canvasRef.current) return;
+    setIsUploading(true);
 
-    const imageDataUrl = canvasRef.current.toDataURL('image/png');
     try {
+      const imageDataUrl = canvasRef.current.toDataURL('image/png');
       const blob = await fetch(imageDataUrl).then(res => res.blob());
 
       const response = await fetch('/api/upload', {
@@ -253,6 +255,8 @@ const PhotoBooth: React.FC = () => {
       }
     } catch (err) {
       console.error('Error uploading image:', err);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -358,9 +362,18 @@ const PhotoBooth: React.FC = () => {
                   )}
                   {downloadFeedback ? "Downloaded!" : "Download"}
                 </Button>
-                <Button onClick={uploadPhoto} variant="outline" size="sm">
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload
+                <Button 
+                  onClick={uploadPhoto} 
+                  variant="outline" 
+                  size="sm"
+                  disabled={isUploading}
+                >
+                  {isUploading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="mr-2 h-4 w-4" />
+                  )}
+                  {isUploading ? "Uploading..." : "Upload"}
                 </Button>
               </div>
             </div>
