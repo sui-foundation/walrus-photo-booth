@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
-import { Camera, Copy, Download, Upload, Check, XCircle, Loader2, RotateCcw, Settings } from "lucide-react";
+import { Camera, Copy, Download, Upload, Check, XCircle, Loader2, RotateCcw } from "lucide-react";
 import JSConfetti from 'js-confetti';
 import Draggable, { DraggableEvent, DraggableData } from "react-draggable";
 import Link from 'next/link';
