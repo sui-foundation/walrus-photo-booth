@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
-import { Camera, Copy, Download, Upload, Check, XCircle, Loader2, RotateCcw } from "lucide-react";
+import { Camera, Copy, Download, Upload, Check, XCircle, Loader2, RotateCcw, Settings } from "lucide-react";
 import JSConfetti from 'js-confetti';
 import Draggable, { DraggableEvent, DraggableData } from "react-draggable";
 import Link from 'next/link';
@@ -81,6 +81,9 @@ const PhotoBooth: React.FC = () => {
   } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [showIntroModal, setShowIntroModal] = useState(true);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [eventId, setEventId] = useState('test');
+  const [tempEventId, setTempEventId] = useState('test');
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -247,7 +250,7 @@ const PhotoBooth: React.FC = () => {
             blob_id: result.data.newlyCreated.blobObject.blobId,
             object_id: result.data.newlyCreated.blobObject.id,
             created_at: new Date().toISOString(),
-            event_id: 'test',
+            event_id: eventId,
           }]);
 
         if (error) {
@@ -283,6 +286,11 @@ const PhotoBooth: React.FC = () => {
     setIsUploading(false);
   };
 
+  const handleSaveSettings = () => {
+    setEventId(tempEventId);
+    setShowSettingsModal(false);
+  };
+
   return (
     <>
       <Dialog open={showIntroModal} onOpenChange={setShowIntroModal}>
@@ -298,7 +306,75 @@ const PhotoBooth: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="min-h-screen w-full flex items-center justify-center p-4">
+      <Dialog 
+        open={showSettingsModal} 
+        onOpenChange={(open) => {
+          if (open) {
+            setTempEventId(eventId);
+          }
+          setShowSettingsModal(open);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Settings ⚙️</DialogTitle>
+          </DialogHeader>
+          <div className="pt-2 space-y-4">
+            <DialogDescription>
+              Configure your photo booth settings
+            </DialogDescription>
+            <div className="space-y-4">
+              <div className="flex flex-col space-y-2">
+                <label htmlFor="event" className="text-sm font-medium">
+                  Event ID
+                </label>
+                <input
+                  id="event"
+                  type="text"
+                  value={tempEventId}
+                  onChange={(e) => setTempEventId(e.target.value)}
+                  className="px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-md text-white"
+                  placeholder="Enter event ID"
+                />
+                <p className="text-xs text-zinc-400">
+                  This ID will be used to group photos together for the same event
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setTempEventId(eventId);
+                  setShowSettingsModal(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveSettings}
+                disabled={tempEventId === eventId || !tempEventId.trim()}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <div className="min-h-screen w-full flex items-center justify-center p-4 relative">
+        <div className="absolute top-4 right-4">
+          <Button
+            onClick={() => setShowSettingsModal(true)}
+            variant="outline"
+            size="sm"
+            className="bg-zinc-800 hover:bg-zinc-700"
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+          </Button>
+        </div>
+
         <div className="max-w-md w-full bg-zinc-800 rounded-xl shadow-2xl overflow-hidden">
           <div className="p-4 space-y-4">
             <div className="flex space-x-2">
