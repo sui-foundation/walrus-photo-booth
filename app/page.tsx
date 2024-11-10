@@ -522,7 +522,7 @@ const PhotoBooth: React.FC = () => {
             )}
           </div>
           <div className="bg-zinc-900 text-zinc-400 text-center py-2 text-sm font-bold tracking-wider">
-            photo booth
+            {eventId} photo booth
           </div>
         </div>
       </div>
