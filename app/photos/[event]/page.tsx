@@ -22,7 +22,7 @@ interface Photo {
 export default function PhotosPage({
   params,
 }: {
-  params: Promise<{ event: string }>;
+  params: Promise<{ event_id: string }>;
 }) {
   const resolvedParams = use(params);
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -33,7 +33,7 @@ export default function PhotosPage({
       const { data, error } = await supabase
         .from('photos')
         .select('blob_id, object_id, event_id')
-        .eq('event_id', resolvedParams.event);
+        .eq('event_id', resolvedParams.event_id);
 
       if (error) {
         setError(error);
@@ -44,7 +44,7 @@ export default function PhotosPage({
     };
 
     fetchPhotos();
-  }, [resolvedParams.event]);
+  }, [resolvedParams.event_id]);
 
   if (error) {
     return <div>Error loading photos</div>;
