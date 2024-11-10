@@ -15,7 +15,7 @@ interface Photo {
   created_at: string;
   blob_id: string;
   object_id: string;
-  event: string | null;
+  event_id: string | null;
   user: string | null;
 }
 
@@ -32,8 +32,8 @@ export default function PhotosPage({
     const fetchPhotos = async () => {
       const { data, error } = await supabase
         .from('photos')
-        .select('blob_id, object_id, event')
-        .eq('event', resolvedParams.event);
+        .select('blob_id, object_id, event_id')
+        .eq('event_id', resolvedParams.event);
 
       if (error) {
         setError(error);
@@ -52,7 +52,7 @@ export default function PhotosPage({
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Event: {resolvedParams.event}</h1>
+      <h1 className="text-3xl font-bold mb-8">Event: {resolvedParams.event_id}</h1>
       
       {photos.length === 0 ? (
         <p>No photos found for this event.</p>
@@ -79,7 +79,7 @@ export default function PhotosPage({
                   {photo.object_id}
                 </Link>
               </p>
-              <p className="text-sm">Event: {photo.event || 'No event specified'}</p>
+              <p className="text-sm">Event: {photo.event_id || 'No event specified'}</p>
             </div>
           ))}
         </div>

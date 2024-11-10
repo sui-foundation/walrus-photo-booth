@@ -246,7 +246,8 @@ const PhotoBooth: React.FC = () => {
           .insert([{
             blob_id: result.data.newlyCreated.blobObject.blobId,
             object_id: result.data.newlyCreated.blobObject.id,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            event_id: 'test',
           }]);
 
         if (error) {
