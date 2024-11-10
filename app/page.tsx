@@ -89,6 +89,7 @@ const PhotoBooth: React.FC = () => {
     return 'test';
   });
   const [tempEventId, setTempEventId] = useState(eventId);
+  const [typedText, setTypedText] = useState('');
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -96,6 +97,26 @@ const PhotoBooth: React.FC = () => {
       jsConfettiRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      const newText = typedText + e.key;
+      setTypedText(newText);
+      
+      const lastChars = newText.slice(-8);
+      if (lastChars === 'settings') {
+        setShowSettingsModal(true);
+        setTypedText('');
+      }
+      
+      if (newText.length > 20) {
+        setTypedText('');
+      }
+    };
+
+    window.addEventListener('keypress', handleKeyPress);
+    return () => window.removeEventListener('keypress', handleKeyPress);
+  }, [typedText]);
 
   const startCamera = async () => {
     if (videoRef.current) {
@@ -369,18 +390,6 @@ const PhotoBooth: React.FC = () => {
       </Dialog>
 
       <div className="min-h-screen w-full flex items-center justify-center p-4 relative">
-        <div className="absolute top-4 right-4">
-          <Button
-            onClick={() => setShowSettingsModal(true)}
-            variant="outline"
-            size="sm"
-            className="bg-zinc-800 hover:bg-zinc-700"
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Button>
-        </div>
-
         <div className="max-w-md w-full bg-zinc-800 rounded-xl shadow-2xl overflow-hidden">
           <div className="p-4 space-y-4">
             <div className="flex space-x-2">
