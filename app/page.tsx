@@ -82,8 +82,13 @@ const PhotoBooth: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [showIntroModal, setShowIntroModal] = useState(true);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [eventId, setEventId] = useState('test');
-  const [tempEventId, setTempEventId] = useState('test');
+  const [eventId, setEventId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('photoBoothEventId') || 'test';
+    }
+    return 'test';
+  });
+  const [tempEventId, setTempEventId] = useState(eventId);
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -288,6 +293,7 @@ const PhotoBooth: React.FC = () => {
 
   const handleSaveSettings = () => {
     setEventId(tempEventId);
+    localStorage.setItem('photoBoothEventId', tempEventId);
     setShowSettingsModal(false);
   };
 
