@@ -2,63 +2,39 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Button } from "@/components/ui/button";
-import { Camera, Copy, Download, Upload, Check, XCircle, Loader2, RotateCcw } from "lucide-react";
-import JSConfetti from 'js-confetti';
-import Draggable, { DraggableEvent, DraggableData } from "react-draggable";
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog"
 
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || ''
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const overlayImages = [
-  { id: 1, src: "/unicorn.png", name: "Unicorn" },
-];
-
-interface Overlay {
-  id: number;
-  src: string;
-  position: { x: number; y: number };
-  text?: string;
-}
-
-interface DraggableOverlayProps {
-  id: number;
-  src: string;
-  position: { x: number; y: number };
-  onDrag: (e: DraggableEvent, data: DraggableData) => void;
-  onRemove: () => void;
-}
-
-const DraggableOverlay = ({ src, id, position, onDrag, onRemove }: DraggableOverlayProps) => {
+const DraggableOverlay = ({
+  src,
+  id,
+  position,
+  onDrag,
+  onRemove,
+}: DraggableOverlayProps) => {
   const nodeRef = useRef(null);
-  
+
   return (
     <Draggable
       position={position}
       onStop={onDrag}
-      bounds="parent"
+      bounds='parent'
       nodeRef={nodeRef}
     >
-      <div className="absolute cursor-move" ref={nodeRef}>
-        <div className="relative">
+      <div className='absolute cursor-move' ref={nodeRef}>
+        <div className='relative'>
           <Image src={src} alt={`Overlay ${id}`} width={64} height={64} />
           <button
             onClick={() => onRemove()}
-            className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1"
+            className='absolute -top-2 -right-2 bg-red-500 rounded-full p-1'
           >
-            <XCircle className="w-4 h-4 text-white" />
+            <XCircle className='w-4 h-4 text-white' />
           </button>
         </div>
       </div>
@@ -102,13 +78,13 @@ const PhotoBooth: React.FC = () => {
     const handleKeyPress = (e: KeyboardEvent) => {
       const newText = typedText + e.key;
       setTypedText(newText);
-      
+
       const lastChars = newText.slice(-8);
       if (lastChars === 'settings') {
         setShowSettingsModal(true);
         setTypedText('');
       }
-      
+
       if (newText.length > 20) {
         setTypedText('');
       }
@@ -161,7 +137,7 @@ const PhotoBooth: React.FC = () => {
         confettiNumber: 24,
       });
     }
-    
+
     if (videoRef.current && canvasRef.current) {
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
@@ -181,14 +157,17 @@ const PhotoBooth: React.FC = () => {
     }
   };
 
-  const renderOverlaysToCanvas = async (canvas: HTMLCanvasElement, basePhotoURL: string) => {
+  const renderOverlaysToCanvas = async (
+    canvas: HTMLCanvasElement,
+    basePhotoURL: string
+  ) => {
     const context = canvas.getContext('2d');
     if (!context) return;
 
     // draw the base photo
     const baseImage = new window.Image();
     baseImage.src = basePhotoURL;
-    
+
     await new Promise((resolve) => {
       baseImage.onload = () => {
         context.drawImage(baseImage, 0, 0, canvas.width, canvas.height);
@@ -197,16 +176,24 @@ const PhotoBooth: React.FC = () => {
     });
 
     // draw all overlays
-    await Promise.all(overlays.map((overlay) => {
-      return new Promise((resolve) => {
-        const overlayImg = new window.Image();
-        overlayImg.src = overlay.src;
-        overlayImg.onload = () => {
-          context.drawImage(overlayImg, overlay.position.x, overlay.position.y, 64, 64);
-          resolve(null);
-        };
-      });
-    }));
+    await Promise.all(
+      overlays.map((overlay) => {
+        return new Promise((resolve) => {
+          const overlayImg = new window.Image();
+          overlayImg.src = overlay.src;
+          overlayImg.onload = () => {
+            context.drawImage(
+              overlayImg,
+              overlay.position.x,
+              overlay.position.y,
+              64,
+              64
+            );
+            resolve(null);
+          };
+        });
+      })
+    );
   };
 
   const copyPhoto = async () => {
@@ -214,7 +201,7 @@ const PhotoBooth: React.FC = () => {
       try {
         await renderOverlaysToCanvas(canvasRef.current, photoURL);
         const dataUrl = canvasRef.current.toDataURL('image/png');
-        const blob = await fetch(dataUrl).then(res => res.blob());
+        const blob = await fetch(dataUrl).then((res) => res.blob());
         await navigator.clipboard.write([
           new ClipboardItem({
             [blob.type]: blob,
@@ -230,14 +217,14 @@ const PhotoBooth: React.FC = () => {
 
   const downloadImage = async () => {
     if (!canvasRef.current || !photoURL) return;
-    
+
     await renderOverlaysToCanvas(canvasRef.current, photoURL);
 
     // create and trigger download
-    const dataUrl = canvasRef.current.toDataURL("image/png");
-    const link = document.createElement("a");
+    const dataUrl = canvasRef.current.toDataURL('image/png');
+    const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = "image.png";
+    link.download = 'image.png';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -251,7 +238,7 @@ const PhotoBooth: React.FC = () => {
 
     try {
       const imageDataUrl = canvasRef.current.toDataURL('image/png');
-      const blob = await fetch(imageDataUrl).then(res => res.blob());
+      const blob = await fetch(imageDataUrl).then((res) => res.blob());
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -260,24 +247,24 @@ const PhotoBooth: React.FC = () => {
         },
         body: blob,
       });
-      
+
       if (!response.ok) {
         console.error('Failed to upload image:', response.statusText);
         return;
       }
-      
+
       const result = await response.json();
-      
+
       if (result?.data?.newlyCreated?.blobObject) {
         // save to supabase
-        const { error } = await supabase
-          .from('photos')
-          .insert([{
+        const { error } = await supabase.from('photos').insert([
+          {
             blob_id: result.data.newlyCreated.blobObject.blobId,
             object_id: result.data.newlyCreated.blobObject.id,
             created_at: new Date().toISOString(),
             event_id: eventId,
-          }]);
+          },
+        ]);
 
         if (error) {
           console.error('Error saving to Supabase:', error);
@@ -286,7 +273,7 @@ const PhotoBooth: React.FC = () => {
 
         setUploadResult({
           blobId: result.data.newlyCreated.blobObject.blobId,
-          objectId: result.data.newlyCreated.blobObject.id
+          objectId: result.data.newlyCreated.blobObject.id,
         });
       } else {
         console.error('Unexpected response structure:', result);
@@ -302,7 +289,7 @@ const PhotoBooth: React.FC = () => {
     if (isCameraOn) {
       stopCamera();
     }
-    
+
     setPhotoURL(null);
     setOverlays([]);
     setUploadResult(null);
@@ -325,7 +312,7 @@ const PhotoBooth: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Welcome to the photo booth! 📸</DialogTitle>
           </DialogHeader>
-          <div className="pt-2 space-y-2">
+          <div className='pt-2 space-y-2'>
             <DialogDescription>
               This app lets you take photos and upload the image to Walrus!
             </DialogDescription>
@@ -333,8 +320,8 @@ const PhotoBooth: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog 
-        open={showSettingsModal} 
+      <Dialog
+        open={showSettingsModal}
         onOpenChange={(open) => {
           if (open) {
             setTempEventId(eventId);
@@ -346,31 +333,32 @@ const PhotoBooth: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Settings ⚙️</DialogTitle>
           </DialogHeader>
-          <div className="pt-2 space-y-4">
+          <div className='pt-2 space-y-4'>
             <DialogDescription>
               Configure your photo booth settings
             </DialogDescription>
-            <div className="space-y-4">
-              <div className="flex flex-col space-y-2">
-                <label htmlFor="event" className="text-sm font-medium">
+            <div className='space-y-4'>
+              <div className='flex flex-col space-y-2'>
+                <label htmlFor='event' className='text-sm font-medium'>
                   Event ID
                 </label>
                 <input
-                  id="event"
-                  type="text"
+                  id='event'
+                  type='text'
                   value={tempEventId}
                   onChange={(e) => setTempEventId(e.target.value)}
-                  className="px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-md text-white"
-                  placeholder="Enter event ID"
+                  className='px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-md text-white'
+                  placeholder='Enter event ID'
                 />
-                <p className="text-xs text-zinc-400">
-                  This ID will be used to group photos together for the same event
+                <p className='text-xs text-zinc-400'>
+                  This ID will be used to group photos together for the same
+                  event
                 </p>
               </div>
             </div>
-            <div className="flex justify-end space-x-2 pt-4">
+            <div className='flex justify-end space-x-2 pt-4'>
               <Button
-                variant="outline"
+                variant='outline'
                 onClick={() => {
                   setTempEventId(eventId);
                   setShowSettingsModal(false);
@@ -389,64 +377,61 @@ const PhotoBooth: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="min-h-screen w-full flex items-center justify-center p-4 relative">
-        <div className="max-w-md w-full bg-zinc-800 rounded-xl shadow-2xl overflow-hidden">
-          <div className="p-4 space-y-4">
-            <div className="flex space-x-2">
+      <div className='min-h-screen w-full flex items-center justify-center p-4 relative'>
+        <div className='max-w-md w-full bg-zinc-800 rounded-xl shadow-2xl overflow-hidden'>
+          <div className='p-4 space-y-4'>
+            <div className='flex space-x-2'>
               <Button
                 onClick={isCameraOn ? stopCamera : startCamera}
-                variant={isCameraOn ? "destructive" : "default"}
+                variant={isCameraOn ? 'destructive' : 'default'}
               >
-                <Camera className="mr-2 h-4 w-4" />
+                <Camera className='mr-2 h-4 w-4' />
                 {isCameraOn ? 'Stop Camera' : 'Start Camera'}
               </Button>
               <Button
                 onClick={takePhoto}
                 disabled={!isCameraOn}
-                variant="secondary"
+                variant='secondary'
               >
-                <Camera className="mr-2 h-4 w-4" />
+                <Camera className='mr-2 h-4 w-4' />
                 Take Photo
               </Button>
-              <Button
-                onClick={resetApp}
-                variant="outline"
-              >
-                <RotateCcw className="mr-2 h-4 w-4" />
+              <Button onClick={resetApp} variant='outline'>
+                <RotateCcw className='mr-2 h-4 w-4' />
                 Reset
               </Button>
             </div>
-            <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+            <div className='relative aspect-video bg-black rounded-lg overflow-hidden'>
               <video
                 ref={videoRef}
                 autoPlay
                 hidden={!isCameraOn}
-                className="w-full h-full object-cover"
+                className='w-full h-full object-cover'
               />
               {!isCameraOn && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-zinc-600 text-lg">Camera Preview</span>
+                <div className='absolute inset-0 flex items-center justify-center'>
+                  <span className='text-zinc-600 text-lg'>Camera Preview</span>
                 </div>
               )}
             </div>
-            <canvas ref={canvasRef} className="hidden" />
-            <div className="space-y-2">
-              <h3 className="text-white text-sm font-medium">Add Overlays</h3>
-              <div className="flex flex-wrap gap-2">
+            <canvas ref={canvasRef} className='hidden' />
+            <div className='space-y-2'>
+              <h3 className='text-white text-sm font-medium'>Add Overlays</h3>
+              <div className='flex flex-wrap gap-2'>
                 {overlayImages.map((overlay) => (
                   <Button
                     key={overlay.id}
                     onClick={() => addOverlay(overlay.src)}
-                    variant="outline"
-                    size="sm"
-                    className="bg-zinc-700 hover:bg-zinc-600"
+                    variant='outline'
+                    size='sm'
+                    className='bg-zinc-700 hover:bg-zinc-600'
                   >
                     <Image
                       src={overlay.src}
                       alt={overlay.src}
                       width={24}
                       height={24}
-                      className="mr-2"
+                      className='mr-2'
                     />
                     {overlay.name}
                   </Button>
@@ -454,13 +439,13 @@ const PhotoBooth: React.FC = () => {
               </div>
             </div>
             {photoURL && (
-              <div className="space-y-4">
-                <div className="relative aspect-video bg-zinc-900 rounded-lg overflow-hidden">
+              <div className='space-y-4'>
+                <div className='relative aspect-video bg-zinc-900 rounded-lg overflow-hidden'>
                   <Image
                     src={photoURL}
-                    alt="Captured"
+                    alt='Captured'
                     fill
-                    className="object-contain"
+                    className='object-contain'
                   />
                   {overlays.map((overlay) => (
                     <DraggableOverlay
@@ -476,53 +461,55 @@ const PhotoBooth: React.FC = () => {
                         );
                         setOverlays(updatedOverlays);
                       }}
-                      onRemove={() => setOverlays(overlays.filter(o => o.id !== overlay.id))}
+                      onRemove={() =>
+                        setOverlays(overlays.filter((o) => o.id !== overlay.id))
+                      }
                     />
                   ))}
                 </div>
-                <div className="flex justify-between gap-2">
-                  <Button onClick={copyPhoto} variant="outline" size="sm">
+                <div className='flex justify-between gap-2'>
+                  <Button onClick={copyPhoto} variant='outline' size='sm'>
                     {copyFeedback ? (
-                      <Check className="mr-2 h-4 w-4 text-green-500" />
+                      <Check className='mr-2 h-4 w-4 text-green-500' />
                     ) : (
-                      <Copy className="mr-2 h-4 w-4" />
+                      <Copy className='mr-2 h-4 w-4' />
                     )}
-                    {copyFeedback ? "Copied!" : "Copy"}
+                    {copyFeedback ? 'Copied!' : 'Copy'}
                   </Button>
-                  <Button onClick={downloadImage} variant="outline" size="sm">
+                  <Button onClick={downloadImage} variant='outline' size='sm'>
                     {downloadFeedback ? (
-                      <Check className="mr-2 h-4 w-4 text-green-500" />
+                      <Check className='mr-2 h-4 w-4 text-green-500' />
                     ) : (
-                      <Download className="mr-2 h-4 w-4" />
+                      <Download className='mr-2 h-4 w-4' />
                     )}
-                    {downloadFeedback ? "Downloaded!" : "Download"}
+                    {downloadFeedback ? 'Downloaded!' : 'Download'}
                   </Button>
-                  <Button 
-                    onClick={uploadPhoto} 
-                    variant="outline" 
-                    size="sm"
+                  <Button
+                    onClick={uploadPhoto}
+                    variant='outline'
+                    size='sm'
                     disabled={isUploading}
                   >
                     {isUploading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                     ) : (
-                      <Upload className="mr-2 h-4 w-4" />
+                      <Upload className='mr-2 h-4 w-4' />
                     )}
-                    {isUploading ? "Uploading..." : "Upload"}
+                    {isUploading ? 'Uploading...' : 'Upload'}
                   </Button>
                 </div>
               </div>
             )}
             {uploadResult && (
-              <div className="mt-2 text-sm text-zinc-400">
+              <div className='mt-2 text-sm text-zinc-400'>
                 <p>Blob ID: {uploadResult.blobId}</p>
                 <p>
                   Object ID:{' '}
                   <Link
                     href={`https://suiscan.xyz/testnet/object/${uploadResult.objectId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline"
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-blue-400 hover:text-blue-300 underline'
                   >
                     {uploadResult.objectId}
                   </Link>
@@ -530,7 +517,7 @@ const PhotoBooth: React.FC = () => {
               </div>
             )}
           </div>
-          <div className="bg-zinc-900 text-zinc-400 text-center py-2 text-sm font-bold tracking-wider">
+          <div className='bg-zinc-900 text-zinc-400 text-center py-2 text-sm font-bold tracking-wider'>
             {eventId} photo booth
           </div>
         </div>
