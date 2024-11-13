@@ -16,29 +16,19 @@ const PhotoBooth: React.FC = () => {
     <>
       <div className='min-h-screen w-full flex flex-col items-center justify-center p-4 relative'>
         <h1>Photo Booth Events</h1>
-        <div className='flex'>
-          <div className=''>1</div>
-          <div className=''>2</div>
-          <div className=''>3</div>
-          <div className=''>4</div>
-        </div>
-        <div className='flex'>
-          <div className=''>5</div>
-          <div className=''>6</div>
-          <div className=''>7</div>
-          <div className=''>8</div>
-        </div>
-        <div className='flex'>
-          <div className=''>9</div>
-          <div className=''>10</div>
-          <div className=''>11</div>
-          <div className=''>12</div>
-        </div>
-        <div className='flex'>
-          <div className=''>13</div>
-          <div className=''>4</div>
-          <div className=''>15</div>
-          <div className=''>16</div>
+        <div className='grid grid-cols-4 gap-4 p-4'>
+          {Array.from({ length: 16 }).map((_, index) => (
+            <div
+              key={index}
+              className={
+                'flex items-center justify-center h-20 border rounded-lg bg-gray-100 hover:bg-gray-200'
+              }
+            >
+              <span className='text-lg font-semibold'>{`Event ${
+                index + 1
+              }`}</span>
+            </div>
+          ))}
         </div>
       </div>
     </>
