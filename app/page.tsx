@@ -4,11 +4,14 @@ import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@supabase/supabase-js';
+import { EnokiFlowProvider } from '@mysten/enoki/react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+const ENOKI_API_KEY = process.env.NEXT_PUBLIC_ENOKI_PUBLIC_API_KEY || '';
 
 interface Event {
   id: number;
@@ -19,6 +22,7 @@ interface Event {
 
 const HomePage: React.FC = () => {
   // const resolvedParams = use(params);
+  const [isLoggedIn, setIsLoggedIn] = useState<Boolean>(false);
   const [events, setEvents] = useState<Event[]>([]);
   const [error, setError] = useState<Error | null>(null);
 
@@ -39,36 +43,44 @@ const HomePage: React.FC = () => {
   }, []);
 
   if (error) {
-    return <div>Error loading photos</div>;
+    return <div>Error loading events</div>;
   }
 
   return (
-    <main className='container mx-auto px-4 py-8'>
-      <div className='w-full flex items-center justify-between relative'>
-        <h1 className='text-3xl font-bold mb-8'>Photo Booth Events</h1>
-        <Button className='mb-4'>Login</Button>
-      </div>
+    <EnokiFlowProvider apiKey={ENOKI_API_KEY}>
+      <main className='container mx-auto px-4 py-8'>
+        <div className='w-full flex items-center justify-between relative'>
+          <h1 className='text-3xl font-bold mb-8'>Photo Booth Events</h1>
+          {isLoggedIn ? (
+            <Button className='mb-4'>Logout</Button>
+          ) : (
+            <Button className='mb-4'>Login</Button>
+          )}
+        </div>
 
-      <div className='w-80 m-auto flex flex-col items-center justify-center p-8 relative'>
-        {events.length > 0 &&
-          events.map((e) => (
-            <a
-              href={`photos/${e.id}`}
-              key={e.id}
-              className='w-full rounded-md text-white bg-black py-3 px-6 mb-4 text-center'
-            >
-              Event {e.id}
-            </a>
-          ))}
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+          {events.length > 0 &&
+            events.map((e) => (
+              <a
+                href={`photos/${e.id}`}
+                key={e.id}
+                className='w-full rounded-md text-white bg-black py-3 px-6 mb-4 text-center'
+              >
+                Event {e.id}
+              </a>
+            ))}
+        </div>
 
-        <a
-          href='#'
-          className='w-full rounded-md text-white bg-gray-700 py-3 px-6 mb-4 text-center'
-        >
-          Create Event
-        </a>
-      </div>
-    </main>
+        {isLoggedIn && (
+          <a
+            href='#'
+            className='w-full rounded-md text-white bg-gray-700 py-3 px-6 mb-4 text-center'
+          >
+            Create Event
+          </a>
+        )}
+      </main>
+    </EnokiFlowProvider>
   );
 };
 
