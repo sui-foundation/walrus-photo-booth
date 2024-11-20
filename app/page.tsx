@@ -17,8 +17,8 @@ interface Event {
 }
 
 const HomePage: React.FC = () => {
-  // const resolvedParams = use(params);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  // const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const isLoggedIn = false;
   const [events, setEvents] = useState<Event[]>([]);
   const [error, setError] = useState<Error | null>(null);
 
