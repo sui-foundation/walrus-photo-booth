@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { createClient } from '@supabase/supabase-js';
 import ProfilePopover from '@/components/ProfilePopover';
+import { TrashIcon } from '@radix-ui/react-icons';
+import { Button } from '@/components/ui/button';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -23,6 +25,8 @@ const HomePage: React.FC = () => {
 
   const { isConnected } = useCustomWallet();
 
+  const currentUserId = 1;
+
   useEffect(() => {
     const fetchEvents = async () => {
       const { data: events, error } = await supabase.from('events').select('*');
@@ -37,6 +41,10 @@ const HomePage: React.FC = () => {
 
     fetchEvents();
   }, []);
+
+  const handleDeleteEvent = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    console.log(e);
+  };
 
   if (error) {
     return <div>Error loading events</div>;
@@ -68,6 +76,14 @@ const HomePage: React.FC = () => {
               key={e.id}
               className='w-full rounded-md text-white bg-black py-6 px-6 mb-4 text-center'
             >
+              {isConnected && e.admin_id === currentUserId && (
+                <Button
+                  onClick={(e) => handleDeleteEvent(e)}
+                  className='cursor-pointer'
+                >
+                  <TrashIcon />
+                </Button>
+              )}
               <p>{e.event_title.toUpperCase()}</p>
             </a>
           ))}
