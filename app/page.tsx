@@ -1,8 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import ProfilePopover from '@/components/ProfilePopover';
 
@@ -20,7 +18,7 @@ interface Event {
 
 const HomePage: React.FC = () => {
   // const resolvedParams = use(params);
-  const [isLoggedIn, setIsLoggedIn] = useState<Boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [events, setEvents] = useState<Event[]>([]);
   const [error, setError] = useState<Error | null>(null);
 
