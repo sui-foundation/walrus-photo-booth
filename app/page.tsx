@@ -4,14 +4,12 @@ import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@supabase/supabase-js';
-import { EnokiFlowProvider } from '@mysten/enoki/react';
+import ProfilePopover from '@/components/ProfilePopover';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
-
-const ENOKI_API_KEY = process.env.NEXT_PUBLIC_ENOKI_PUBLIC_API_KEY || '';
 
 interface Event {
   id: number;
@@ -47,40 +45,34 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <EnokiFlowProvider apiKey={ENOKI_API_KEY}>
-      <main className='container mx-auto px-4 py-8'>
-        <div className='w-full flex items-center justify-between relative'>
-          <h1 className='text-3xl font-bold mb-8'>Photo Booth Events</h1>
-          {isLoggedIn ? (
-            <Button className='mb-4'>Logout</Button>
-          ) : (
-            <Button className='mb-4'>Login</Button>
-          )}
-        </div>
+    <main className='container mx-auto px-4 py-8'>
+      <div className='w-full flex items-center justify-between relative'>
+        <h1 className='text-3xl font-bold mb-8'>Photo Booth Events</h1>
+        <ProfilePopover />
+      </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {events.length > 0 &&
-            events.map((e) => (
-              <a
-                href={`photos/${e.id}`}
-                key={e.id}
-                className='w-full rounded-md text-white bg-black py-3 px-6 mb-4 text-center'
-              >
-                Event {e.id}
-              </a>
-            ))}
-        </div>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+        {events.length > 0 &&
+          events.map((e) => (
+            <a
+              href={`photos/${e.id}`}
+              key={e.id}
+              className='w-full rounded-md text-white bg-black py-3 px-6 mb-4 text-center'
+            >
+              Event {e.id}
+            </a>
+          ))}
+      </div>
 
-        {isLoggedIn && (
-          <a
-            href='#'
-            className='w-full rounded-md text-white bg-gray-700 py-3 px-6 mb-4 text-center'
-          >
-            Create Event
-          </a>
-        )}
-      </main>
-    </EnokiFlowProvider>
+      {isLoggedIn && (
+        <a
+          href='#'
+          className='w-full rounded-md text-white bg-gray-700 py-3 px-6 mb-4 text-center'
+        >
+          Create Event
+        </a>
+      )}
+    </main>
   );
 };
 
