@@ -5,6 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
 import ProfilePopover from '@/components/ProfilePopover';
+import { useCustomWallet } from '@/contexts/CustomWallet';
+import { Button } from '@/components/ui/button';
+import { TrashIcon } from '@radix-ui/react-icons';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -28,8 +31,13 @@ export default function PhotosPage({
   const resolvedParams = use(params);
   const [eventTitle, setEventTitle] = useState('');
   const [eventDate, setEventDate] = useState('');
+  const [eventAdminId, setEventAdminId] = useState(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [error, setError] = useState<Error | null>(null);
+
+  const { isConnected } = useCustomWallet();
+
+  const currentUserId = 1;
 
   useEffect(() => {
     const fetchPhotos = async () => {
@@ -53,21 +61,30 @@ export default function PhotosPage({
     const fetchEventDetails = async () => {
       const { data: events, error } = await supabase
         .from('events')
-        .select('created_at, event_title')
+        .select('created_at, event_title, admin_id')
         .eq('id', resolvedParams.eventId);
 
       if (error) {
         setError(error);
         console.error('Error fetching event name:', error);
       } else {
-        const [et, ed] = [events[0].event_title, events[0].created_at];
+        const [et, ed, ad] = [
+          events[0].event_title,
+          events[0].created_at,
+          events[0].admin_id,
+        ];
         setEventTitle(et);
         setEventDate(ed);
+        setEventAdminId(ad);
       }
     };
 
     fetchEventDetails();
   }, [resolvedParams.eventId]);
+
+  const handleDeletePhoto = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    console.log(e);
+  };
 
   if (error) {
     return <div>Error loading photos</div>;
@@ -116,6 +133,14 @@ export default function PhotosPage({
               <p className='text-sm'>
                 Event: {photo.event_id || 'No event specified'}
               </p>
+              {isConnected && eventAdminId === currentUserId && (
+                <Button
+                  onClick={(e) => handleDeletePhoto(e)}
+                  className='cursor-pointer'
+                >
+                  <TrashIcon />
+                </Button>
+              )}
             </div>
           ))}
         </div>
