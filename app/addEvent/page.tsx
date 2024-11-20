@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { createClient } from '@supabase/supabase-js';
 import ProfilePopover from '@/components/ProfilePopover';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
@@ -45,32 +47,19 @@ const formSchema = z.object({
   }),
 });
 
-interface Event {
-  id: number;
-  created_at: string;
-  event_title: string;
-  admin_id: number;
-}
+// interface Event {
+//   id: number;
+//   created_at: string;
+//   event_title: string;
+//   admin_id: number;
+// }
 
 const AddEvent: React.FC = () => {
+  const router = useRouter();
+
   const [error, setError] = useState<Error | null>(null);
 
   const { isConnected } = useCustomWallet();
-
-  // useEffect(() => {
-  //   const fetchEvents = async () => {
-  //     const { data: events, error } = await supabase.from('events').select('*');
-
-  //     if (error) {
-  //       setError(error);
-  //       console.error('Error fetching events:', error);
-  //     } else {
-  //       setEvents((events as Event[]) || []);
-  //     }
-  //   };
-
-  //   fetchEvents();
-  // }, []);
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -81,16 +70,39 @@ const AddEvent: React.FC = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  async function onSubmit(formData: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    console.log(data);
+    console.log(formData);
+
+    const { data, error } = await supabase
+      .from('events')
+      .insert([
+        {
+          event_date: formData.event_date,
+          event_title: formData.event_title,
+          admin_id: 1,
+        },
+      ])
+      .select();
+
+    if (error) {
+      setError(error);
+      console.error('Error saving to database:', error);
+      throw new Error('Failed to save to database');
+    }
+
+    if (data) {
+      router.push('/');
+    }
 
     toast({
       title: 'You submitted the following values:',
       description: (
         <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>{JSON.stringify(data, null, 2)}</code>
+          <code className='text-white'>
+            {JSON.stringify(formData, null, 2)}
+          </code>
         </pre>
       ),
     });
@@ -106,12 +118,12 @@ const AddEvent: React.FC = () => {
         <h1 className='text-3xl font-bold'>Photo Booth Events</h1>
         <div className='flex items-center gap-2'>
           {isConnected && (
-            <a
-              href='/addEvent'
+            <Link
+              href='/'
               className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 p-2'
             >
-              + Event
-            </a>
+              Return Home
+            </Link>
           )}
 
           <ProfilePopover />
