@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useCustomWallet } from '@/contexts/CustomWallet';
 import { createClient } from '@supabase/supabase-js';
 import ProfilePopover from '@/components/ProfilePopover';
 
@@ -17,10 +18,10 @@ interface Event {
 }
 
 const HomePage: React.FC = () => {
-  // const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const isLoggedIn = false;
   const [events, setEvents] = useState<Event[]>([]);
   const [error, setError] = useState<Error | null>(null);
+
+  const { isConnected } = useCustomWallet();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -45,7 +46,18 @@ const HomePage: React.FC = () => {
     <main className='container mx-auto px-4 py-8'>
       <div className='w-full flex items-center justify-between relative mb-10'>
         <h1 className='text-3xl font-bold'>Photo Booth Events</h1>
-        <ProfilePopover />
+        <div className='flex items-center gap-2'>
+          {isConnected && (
+            <a
+              href='/addEvent'
+              className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 p-2'
+            >
+              + Event
+            </a>
+          )}
+
+          <ProfilePopover />
+        </div>
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
@@ -60,15 +72,6 @@ const HomePage: React.FC = () => {
             </a>
           ))}
       </div>
-
-      {isLoggedIn && (
-        <a
-          href='#'
-          className='w-full rounded-md text-white bg-gray-700 py-3 px-6 mb-4 text-center'
-        >
-          Create Event
-        </a>
-      )}
     </main>
   );
 };
