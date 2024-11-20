@@ -44,7 +44,7 @@ const HomePage: React.FC = () => {
 
   return (
     <main className='container mx-auto px-4 py-8'>
-      <div className='w-full flex items-center justify-between relative'>
+      <div className='w-full flex items-center justify-between relative mb-10'>
         <h1 className='text-3xl font-bold mb-8'>Photo Booth Events</h1>
         <ProfilePopover />
       </div>
