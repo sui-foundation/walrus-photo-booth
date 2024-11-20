@@ -4,6 +4,7 @@ import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
+import ProfilePopover from '@/components/ProfilePopover';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -74,10 +75,18 @@ export default function PhotosPage({
 
   return (
     <main className='container mx-auto px-4 py-8'>
-      <h1 className='text-3xl font-bold'>{eventTitle.toUpperCase()}</h1>
-      <h2 className='text-xl font-bold mb-8'>
-        {new Date(eventDate).toString()}
-      </h2>
+      <div className='w-full flex items-center justify-between relative mb-10'>
+        <div>
+          <h1 className='text-3xl font-bold'>{eventTitle.toUpperCase()}</h1>
+          <h2 className='text-xl font-bold'>
+            {new Date(eventDate).toString()}
+          </h2>
+          <Link href='/' className='underline'>
+            Back to Events
+          </Link>
+        </div>
+        <ProfilePopover />
+      </div>
 
       {photos.length === 0 ? (
         <p>No photos found for this event.</p>
