@@ -62,11 +62,9 @@ export const ProvidersAndLayout = ({ children }: ChildrenProps) => {
           <EnokiFlowProvider apiKey={clientConfig.ENOKI_API_KEY}>
             <AuthenticationProvider>
               <CustomWalletProvider>
-                <main>
-                  {children}
-                  <Toaster duration={2000} />
-                  <Analytics />
-                </main>
+                {children}
+                <Toaster duration={2000} />
+                <Analytics />
               </CustomWalletProvider>
             </AuthenticationProvider>
           </EnokiFlowProvider>
