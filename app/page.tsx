@@ -30,7 +30,6 @@ const HomePage: React.FC = () => {
         setError(error);
         console.error('Error fetching events:', error);
       } else {
-        console.log(events);
         setEvents((events as Event[]) || []);
       }
     };
@@ -45,7 +44,7 @@ const HomePage: React.FC = () => {
   return (
     <main className='container mx-auto px-4 py-8'>
       <div className='w-full flex items-center justify-between relative mb-10'>
-        <h1 className='text-3xl font-bold mb-8'>Photo Booth Events</h1>
+        <h1 className='text-3xl font-bold'>Photo Booth Events</h1>
         <ProfilePopover />
       </div>
 
@@ -55,9 +54,9 @@ const HomePage: React.FC = () => {
             <a
               href={`photos/${e.id}`}
               key={e.id}
-              className='w-full rounded-md text-white bg-black py-3 px-6 mb-4 text-center'
+              className='w-full rounded-md text-white bg-black py-6 px-6 mb-4 text-center'
             >
-              Event {e.id}
+              <p>{e.event_title.toUpperCase()}</p>
             </a>
           ))}
       </div>
