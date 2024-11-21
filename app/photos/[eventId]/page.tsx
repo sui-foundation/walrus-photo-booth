@@ -98,8 +98,18 @@ export default function PhotosPage({
     fetchCurrentAdmin();
   }, [emailAddress]);
 
-  const handleDeletePhoto = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    console.log(e);
+  const handleDeletePhoto = async (blob_id: string) => {
+    const { error } = await supabase
+      .from('photos')
+      .delete()
+      .eq('blob_id', blob_id);
+
+    if (error) {
+      setError(error);
+      console.error('Error deleting event:', error);
+    } else {
+      setPhotos(photos.filter((photo) => photo.blob_id !== blob_id));
+    }
   };
 
   if (error) {
@@ -151,7 +161,7 @@ export default function PhotosPage({
               </p>
               {isConnected && eventAdminId === currentAdminId && (
                 <Button
-                  onClick={(e) => handleDeletePhoto(e)}
+                  onClick={() => handleDeletePhoto(photo.blob_id)}
                   className='cursor-pointer'
                 >
                   <TrashIcon />
