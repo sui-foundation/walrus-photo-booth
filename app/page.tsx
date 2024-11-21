@@ -59,8 +59,15 @@ const HomePage: React.FC = () => {
     fetchCurrentAdmin();
   }, [emailAddress]);
 
-  const handleDeleteEvent = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    console.log(e);
+  const handleDeleteEvent = async (id: number) => {
+    const { error } = await supabase.from('events').delete().eq('id', id);
+
+    if (error) {
+      setError(error);
+      console.error('Error fetching events:', error);
+    } else {
+      setEvents(events.filter((event) => event.id !== id));
+    }
   };
 
   if (error) {
@@ -88,21 +95,21 @@ const HomePage: React.FC = () => {
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
         {events.length > 0 &&
           events.map((e) => (
-            <a
-              href={`photos/${e.id}`}
+            <div
               key={e.id}
               className='w-full rounded-md text-white bg-black py-6 px-6 mb-4 text-center'
             >
-              <p>{e.event_title.toUpperCase()}</p>
+              <a href={`photos/${e.id}`}>{e.event_title.toUpperCase()}</a>
+
               {isConnected && e.admin_id === currentAdminId && (
                 <Button
-                  onClick={(e) => handleDeleteEvent(e)}
+                  onClick={() => handleDeleteEvent(e.id)}
                   className='cursor-pointer'
                 >
                   <TrashIcon />
                 </Button>
               )}
-            </a>
+            </div>
           ))}
       </div>
     </main>
