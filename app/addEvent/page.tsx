@@ -14,7 +14,6 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { cn } from '@/lib/utils';
-import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -47,19 +46,11 @@ const formSchema = z.object({
   }),
 });
 
-// interface Event {
-//   id: number;
-//   created_at: string;
-//   event_title: string;
-//   admin_id: number;
-// }
-
 const AddEvent: React.FC = () => {
   const router = useRouter();
+  const { isConnected } = useCustomWallet();
 
   const [error, setError] = useState<Error | null>(null);
-
-  const { isConnected } = useCustomWallet();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -94,17 +85,6 @@ const AddEvent: React.FC = () => {
     if (data) {
       router.push('/');
     }
-
-    toast({
-      title: 'You submitted the following values:',
-      description: (
-        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>
-            {JSON.stringify(formData, null, 2)}
-          </code>
-        </pre>
-      ),
-    });
   }
 
   if (error) {
@@ -142,7 +122,7 @@ const AddEvent: React.FC = () => {
                 <FormItem>
                   <FormLabel>Event Title</FormLabel>
                   <FormControl>
-                    <Input placeholder='Happy Birthday Enoki' {...field} />
+                    <Input placeholder='Happy Birthday Sui' {...field} />
                   </FormControl>
                   <FormDescription>
                     What event are you creating?
