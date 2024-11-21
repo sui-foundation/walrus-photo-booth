@@ -20,12 +20,11 @@ interface Event {
 }
 
 const HomePage: React.FC = () => {
+  const { isConnected, emailAddress } = useCustomWallet();
+
+  const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [error, setError] = useState<Error | null>(null);
-
-  const { isConnected } = useCustomWallet();
-
-  const currentUserId = 1;
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -41,6 +40,24 @@ const HomePage: React.FC = () => {
 
     fetchEvents();
   }, []);
+
+  useEffect(() => {
+    const fetchCurrentAdmin = async () => {
+      const { data: admins, error } = await supabase
+        .from('admins')
+        .select('id')
+        .eq('email', emailAddress);
+
+      if (error) {
+        setError(error);
+        console.error('Error fetching events:', error);
+      } else {
+        if (admins[0]) setCurrentAdminId(admins[0].id);
+      }
+    };
+
+    fetchCurrentAdmin();
+  }, [emailAddress]);
 
   const handleDeleteEvent = async (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log(e);
@@ -76,7 +93,8 @@ const HomePage: React.FC = () => {
               key={e.id}
               className='w-full rounded-md text-white bg-black py-6 px-6 mb-4 text-center'
             >
-              {isConnected && e.admin_id === currentUserId && (
+              <p>{e.event_title.toUpperCase()}</p>
+              {isConnected && e.admin_id === currentAdminId && (
                 <Button
                   onClick={(e) => handleDeleteEvent(e)}
                   className='cursor-pointer'
@@ -84,7 +102,6 @@ const HomePage: React.FC = () => {
                   <TrashIcon />
                 </Button>
               )}
-              <p>{e.event_title.toUpperCase()}</p>
             </a>
           ))}
       </div>
