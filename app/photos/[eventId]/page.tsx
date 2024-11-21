@@ -11,7 +11,6 @@ import { TrashIcon } from '@radix-ui/react-icons';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
-
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface Photo {
@@ -29,15 +28,14 @@ export default function PhotosPage({
   params: Promise<{ eventId: string }>;
 }) {
   const resolvedParams = use(params);
+  const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [eventTitle, setEventTitle] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [eventAdminId, setEventAdminId] = useState(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [error, setError] = useState<Error | null>(null);
 
-  const { isConnected } = useCustomWallet();
-
-  const currentUserId = 1;
+  const { isConnected, emailAddress } = useCustomWallet();
 
   useEffect(() => {
     const fetchPhotos = async () => {
@@ -81,6 +79,24 @@ export default function PhotosPage({
 
     fetchEventDetails();
   }, [resolvedParams.eventId]);
+
+  useEffect(() => {
+    const fetchCurrentAdmin = async () => {
+      const { data: admins, error } = await supabase
+        .from('admins')
+        .select('id')
+        .eq('email', emailAddress);
+
+      if (error) {
+        setError(error);
+        console.error('Error fetching events:', error);
+      } else {
+        if (admins[0]) setCurrentAdminId(admins[0].id);
+      }
+    };
+
+    fetchCurrentAdmin();
+  }, [emailAddress]);
 
   const handleDeletePhoto = async (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log(e);
@@ -133,7 +149,7 @@ export default function PhotosPage({
               <p className='text-sm'>
                 Event: {photo.event_id || 'No event specified'}
               </p>
-              {isConnected && eventAdminId === currentUserId && (
+              {isConnected && eventAdminId === currentAdminId && (
                 <Button
                   onClick={(e) => handleDeletePhoto(e)}
                   className='cursor-pointer'
