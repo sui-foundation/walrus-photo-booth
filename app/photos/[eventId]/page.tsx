@@ -22,6 +22,14 @@ interface Photo {
   user: string | null;
 }
 
+interface Event {
+  id: number;
+  created_at: string;
+  event_title: string;
+  event_date: string;
+  admin_id: number;
+}
+
 export default function PhotosPage({
   params,
 }: {
@@ -29,9 +37,7 @@ export default function PhotosPage({
 }) {
   const resolvedParams = use(params);
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
-  const [eventTitle, setEventTitle] = useState('');
-  const [eventDate, setEventDate] = useState('');
-  const [eventAdminId, setEventAdminId] = useState(null);
+  const [eventDetails, setEventDetails] = useState<Event | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [error, setError] = useState<Error | null>(null);
 
@@ -59,21 +65,27 @@ export default function PhotosPage({
     const fetchEventDetails = async () => {
       const { data: events, error } = await supabase
         .from('events')
-        .select('created_at, event_title, admin_id')
+        .select('*')
         .eq('id', resolvedParams.eventId);
 
       if (error) {
         setError(error);
         console.error('Error fetching event name:', error);
       } else {
-        const [et, ed, ad] = [
-          events[0].event_title,
-          events[0].created_at,
-          events[0].admin_id,
-        ];
-        setEventTitle(et);
-        setEventDate(ed);
-        setEventAdminId(ad);
+        if (events[0]) {
+          const id = events[0].id;
+          const et = events[0].event_title.toUpperCase();
+          const ed = new Date(events[0].event_date).toString();
+          const ca = new Date(events[0].created_at).toString();
+          const ai = events[0].admin_id;
+          setEventDetails({
+            id: id,
+            event_title: et,
+            event_date: ed,
+            created_at: ca,
+            admin_id: ai,
+          } as Event);
+        }
       }
     };
 
@@ -120,10 +132,13 @@ export default function PhotosPage({
     <main className='container mx-auto px-4 py-8'>
       <div className='w-full flex items-center justify-between relative mb-10'>
         <div>
-          <h1 className='text-3xl font-bold'>{eventTitle.toUpperCase()}</h1>
-          <h2 className='text-xl font-bold'>
-            {new Date(eventDate).toString()}
+          <h1 className='text-3xl font-bold'>{eventDetails?.event_title}</h1>
+          <h2 className='text-lg font-bold'>
+            Date: {eventDetails?.event_date}
           </h2>
+          <p className='text-xs font-bold'>
+            Created: {eventDetails?.created_at}
+          </p>
           <Link href='/' className='underline'>
             Back to Events
           </Link>
@@ -159,7 +174,7 @@ export default function PhotosPage({
               <p className='text-sm'>
                 Event: {photo.event_id || 'No event specified'}
               </p>
-              {isConnected && eventAdminId === currentAdminId && (
+              {isConnected && eventDetails?.admin_id === currentAdminId && (
                 <Button
                   onClick={() => handleDeletePhoto(photo.blob_id)}
                   className='cursor-pointer'
