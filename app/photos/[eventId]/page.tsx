@@ -9,6 +9,17 @@ import { useCustomWallet } from '@/contexts/CustomWallet';
 import { Button } from '@/components/ui/button';
 import { TrashIcon } from '@radix-ui/react-icons';
 import Loading from '@/components/Loading';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -121,7 +132,6 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
   }, [emailAddress]);
 
   const handleDeletePhoto = async (blob_id: string) => {
-    setIsLoading(true);
     const { error } = await supabase
       .from('photos')
       .delete()
@@ -208,16 +218,37 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
                   {photo.object_id}
                 </Link>
               </p>
-              <p className='text-sm'>
+              {/* <p className='text-sm'>
                 Event: {photo.event_id || 'No event specified'}
-              </p>
+              </p> */}
               {isConnected && eventDetails?.admin_id === currentAdminId && (
-                <Button
-                  onClick={() => handleDeletePhoto(photo.blob_id)}
-                  className='cursor-pointer'
-                >
-                  <TrashIcon />
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger
+                    asChild
+                    className='ml-2 cursor-pointer p-2 z-10 bg-gray-800 rounded-sm'
+                  >
+                    <Button>
+                      <TrashIcon className='cursor-pointer' />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Delete photo {photo.blob_id}? This action cannot be
+                        undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeletePhoto(photo.blob_id)}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
             </div>
           ))}
