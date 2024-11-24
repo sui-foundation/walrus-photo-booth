@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import ProfilePopover from '@/components/ProfilePopover';
 import { TrashIcon } from '@radix-ui/react-icons';
 import { Button } from '@/components/ui/button';
+import Loading from '@/components/Loading';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -21,6 +22,7 @@ interface Event {
 
 const HomePage: React.FC = () => {
   const { isConnected, emailAddress } = useCustomWallet();
+  const [isLoading, setIsLoading] = useState(true);
 
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
@@ -28,6 +30,8 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const fetchEvents = async () => {
+      setIsLoading(true);
+
       const { data: events, error } = await supabase.from('events').select('*');
 
       if (error) {
@@ -36,6 +40,8 @@ const HomePage: React.FC = () => {
       } else {
         setEvents((events as Event[]) || []);
       }
+
+      setIsLoading(false);
     };
 
     fetchEvents();
@@ -43,6 +49,8 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
+      setIsLoading(true);
+
       const { data: admins, error } = await supabase
         .from('admins')
         .select('id')
@@ -54,6 +62,8 @@ const HomePage: React.FC = () => {
       } else {
         if (admins[0]) setCurrentAdminId(admins[0].id);
       }
+
+      setIsLoading(false);
     };
 
     fetchCurrentAdmin();
@@ -68,10 +78,16 @@ const HomePage: React.FC = () => {
     } else {
       setEvents(events.filter((event) => event.id !== id));
     }
+
+    setIsLoading(true);
   };
 
   if (error) {
     return <div>Error loading events</div>;
+  }
+
+  if (isLoading) {
+    return <Loading />;
   }
 
   return (
