@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { createClient } from '@supabase/supabase-js';
 import ProfilePopover from '@/components/ProfilePopover';
@@ -33,6 +33,8 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
+import Loading from '@/components/Loading';
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -49,8 +51,14 @@ const formSchema = z.object({
 const AddEvent: React.FC = () => {
   const router = useRouter();
   const { isConnected } = useCustomWallet();
-
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (isConnected) {
+    }
+    setIsLoading(false);
+  }, [isConnected, router]);
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -64,6 +72,8 @@ const AddEvent: React.FC = () => {
   async function onSubmit(formData: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
+
+    setIsLoading(true);
 
     const { data, error } = await supabase
       .from('events')
@@ -91,15 +101,29 @@ const AddEvent: React.FC = () => {
     return <div>Error creating event</div>;
   }
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (!isConnected) {
+    return (
+      <main className='container mx-auto'>
+        <div className='min-h-screen w-full flex items-center justify-center p-4 relative'>
+          <ProfilePopover />
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className='container mx-auto px-4 py-8'>
       <div className='w-full flex items-center justify-between relative mb-10'>
         <h1 className='text-3xl font-bold'>Photo Booth Events</h1>
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center gap-4'>
           {isConnected && (
             <Link
               href='/'
-              className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 p-2'
+              className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 py-2 px-6'
             >
               Return Home
             </Link>
