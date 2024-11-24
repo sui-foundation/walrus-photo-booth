@@ -413,149 +413,147 @@ const PhotoBooth: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <div className='min-h-screen w-full flex items-center justify-center p-4 relative'>
-        <div className='max-w-md w-full bg-zinc-800 rounded-xl shadow-2xl overflow-hidden'>
-          <div className='p-4 space-y-4'>
-            <div className='flex space-x-2'>
-              <Button
-                onClick={isCameraOn ? stopCamera : startCamera}
-                variant={isCameraOn ? 'destructive' : 'default'}
-              >
-                <Camera className='mr-2 h-4 w-4' />
-                {isCameraOn ? 'Stop Camera' : 'Start Camera'}
-              </Button>
-              <Button
-                onClick={takePhoto}
-                disabled={!isCameraOn}
-                variant='secondary'
-              >
-                <Camera className='mr-2 h-4 w-4' />
-                Take Photo
-              </Button>
-              <Button onClick={resetApp} variant='outline'>
-                <RotateCcw className='mr-2 h-4 w-4' />
-                Reset
-              </Button>
+      <div className='max-w-md w-full bg-zinc-800 rounded-xl shadow-2xl overflow-hidden'>
+        <div className='p-4 space-y-4'>
+          <div className='flex space-x-2'>
+            <Button
+              onClick={isCameraOn ? stopCamera : startCamera}
+              variant={isCameraOn ? 'destructive' : 'default'}
+            >
+              <Camera className='mr-2 h-4 w-4' />
+              {isCameraOn ? 'Stop Camera' : 'Start Camera'}
+            </Button>
+            <Button
+              onClick={takePhoto}
+              disabled={!isCameraOn}
+              variant='secondary'
+            >
+              <Camera className='mr-2 h-4 w-4' />
+              Take Photo
+            </Button>
+            <Button onClick={resetApp} variant='outline'>
+              <RotateCcw className='mr-2 h-4 w-4' />
+              Reset
+            </Button>
+          </div>
+          <div className='relative aspect-video bg-black rounded-lg overflow-hidden'>
+            <video
+              ref={videoRef}
+              autoPlay
+              hidden={!isCameraOn}
+              className='w-full h-full object-cover'
+            />
+            {!isCameraOn && (
+              <div className='absolute inset-0 flex items-center justify-center'>
+                <span className='text-zinc-600 text-lg'>Camera Preview</span>
+              </div>
+            )}
+          </div>
+          <canvas ref={canvasRef} className='hidden' />
+          <div className='space-y-2'>
+            <h3 className='text-white text-sm font-medium'>Add Overlays</h3>
+            <div className='flex flex-wrap gap-2'>
+              {overlayImages.map((overlay) => (
+                <Button
+                  key={overlay.id}
+                  onClick={() => addOverlay(overlay.src)}
+                  variant='outline'
+                  size='sm'
+                  className='bg-zinc-700 hover:bg-zinc-600'
+                >
+                  <Image
+                    src={overlay.src}
+                    alt={overlay.src}
+                    width={24}
+                    height={24}
+                    className='mr-2'
+                  />
+                  {overlay.name}
+                </Button>
+              ))}
             </div>
-            <div className='relative aspect-video bg-black rounded-lg overflow-hidden'>
-              <video
-                ref={videoRef}
-                autoPlay
-                hidden={!isCameraOn}
-                className='w-full h-full object-cover'
-              />
-              {!isCameraOn && (
-                <div className='absolute inset-0 flex items-center justify-center'>
-                  <span className='text-zinc-600 text-lg'>Camera Preview</span>
-                </div>
-              )}
-            </div>
-            <canvas ref={canvasRef} className='hidden' />
-            <div className='space-y-2'>
-              <h3 className='text-white text-sm font-medium'>Add Overlays</h3>
-              <div className='flex flex-wrap gap-2'>
-                {overlayImages.map((overlay) => (
-                  <Button
+          </div>
+          {photoURL && (
+            <div className='space-y-4'>
+              <div className='relative aspect-video bg-zinc-900 rounded-lg overflow-hidden'>
+                <Image
+                  src={photoURL}
+                  alt='Captured'
+                  fill
+                  className='object-contain'
+                />
+                {overlays.map((overlay) => (
+                  <DraggableOverlay
                     key={overlay.id}
-                    onClick={() => addOverlay(overlay.src)}
-                    variant='outline'
-                    size='sm'
-                    className='bg-zinc-700 hover:bg-zinc-600'
-                  >
-                    <Image
-                      src={overlay.src}
-                      alt={overlay.src}
-                      width={24}
-                      height={24}
-                      className='mr-2'
-                    />
-                    {overlay.name}
-                  </Button>
+                    id={overlay.id}
+                    src={overlay.src}
+                    position={overlay.position}
+                    onDrag={(e, data) => {
+                      const updatedOverlays = overlays.map((o) =>
+                        o.id === overlay.id
+                          ? { ...o, position: { x: data.x, y: data.y } }
+                          : o
+                      );
+                      setOverlays(updatedOverlays);
+                    }}
+                    onRemove={() =>
+                      setOverlays(overlays.filter((o) => o.id !== overlay.id))
+                    }
+                  />
                 ))}
               </div>
+              <div className='flex justify-between gap-2'>
+                <Button onClick={copyPhoto} variant='outline' size='sm'>
+                  {copyFeedback ? (
+                    <Check className='mr-2 h-4 w-4 text-green-500' />
+                  ) : (
+                    <Copy className='mr-2 h-4 w-4' />
+                  )}
+                  {copyFeedback ? 'Copied!' : 'Copy'}
+                </Button>
+                <Button onClick={downloadImage} variant='outline' size='sm'>
+                  {downloadFeedback ? (
+                    <Check className='mr-2 h-4 w-4 text-green-500' />
+                  ) : (
+                    <Download className='mr-2 h-4 w-4' />
+                  )}
+                  {downloadFeedback ? 'Downloaded!' : 'Download'}
+                </Button>
+                <Button
+                  onClick={uploadPhoto}
+                  variant='outline'
+                  size='sm'
+                  disabled={isUploading}
+                >
+                  {isUploading ? (
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  ) : (
+                    <Upload className='mr-2 h-4 w-4' />
+                  )}
+                  {isUploading ? 'Uploading...' : 'Upload'}
+                </Button>
+              </div>
             </div>
-            {photoURL && (
-              <div className='space-y-4'>
-                <div className='relative aspect-video bg-zinc-900 rounded-lg overflow-hidden'>
-                  <Image
-                    src={photoURL}
-                    alt='Captured'
-                    fill
-                    className='object-contain'
-                  />
-                  {overlays.map((overlay) => (
-                    <DraggableOverlay
-                      key={overlay.id}
-                      id={overlay.id}
-                      src={overlay.src}
-                      position={overlay.position}
-                      onDrag={(e, data) => {
-                        const updatedOverlays = overlays.map((o) =>
-                          o.id === overlay.id
-                            ? { ...o, position: { x: data.x, y: data.y } }
-                            : o
-                        );
-                        setOverlays(updatedOverlays);
-                      }}
-                      onRemove={() =>
-                        setOverlays(overlays.filter((o) => o.id !== overlay.id))
-                      }
-                    />
-                  ))}
-                </div>
-                <div className='flex justify-between gap-2'>
-                  <Button onClick={copyPhoto} variant='outline' size='sm'>
-                    {copyFeedback ? (
-                      <Check className='mr-2 h-4 w-4 text-green-500' />
-                    ) : (
-                      <Copy className='mr-2 h-4 w-4' />
-                    )}
-                    {copyFeedback ? 'Copied!' : 'Copy'}
-                  </Button>
-                  <Button onClick={downloadImage} variant='outline' size='sm'>
-                    {downloadFeedback ? (
-                      <Check className='mr-2 h-4 w-4 text-green-500' />
-                    ) : (
-                      <Download className='mr-2 h-4 w-4' />
-                    )}
-                    {downloadFeedback ? 'Downloaded!' : 'Download'}
-                  </Button>
-                  <Button
-                    onClick={uploadPhoto}
-                    variant='outline'
-                    size='sm'
-                    disabled={isUploading}
-                  >
-                    {isUploading ? (
-                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    ) : (
-                      <Upload className='mr-2 h-4 w-4' />
-                    )}
-                    {isUploading ? 'Uploading...' : 'Upload'}
-                  </Button>
-                </div>
-              </div>
-            )}
-            {uploadResult && (
-              <div className='mt-2 text-sm text-zinc-400'>
-                <p>Blob ID: {uploadResult.blobId}</p>
-                <p>
-                  Object ID:{' '}
-                  <Link
-                    href={`https://suiscan.xyz/testnet/object/${uploadResult.objectId}`}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-blue-400 hover:text-blue-300 underline'
-                  >
-                    {uploadResult.objectId}
-                  </Link>
-                </p>
-              </div>
-            )}
-          </div>
-          <div className='bg-zinc-900 text-zinc-400 text-center py-2 text-sm font-bold tracking-wider'>
-            {eventId} photo booth
-          </div>
+          )}
+          {uploadResult && (
+            <div className='mt-2 text-sm text-zinc-400'>
+              <p>Blob ID: {uploadResult.blobId}</p>
+              <p>
+                Object ID:{' '}
+                <Link
+                  href={`https://suiscan.xyz/testnet/object/${uploadResult.objectId}`}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='text-blue-400 hover:text-blue-300 underline'
+                >
+                  {uploadResult.objectId}
+                </Link>
+              </p>
+            </div>
+          )}
+        </div>
+        <div className='bg-zinc-900 text-zinc-400 text-center py-2 text-sm font-bold tracking-wider'>
+          {eventId} photo booth
         </div>
       </div>
     </>
