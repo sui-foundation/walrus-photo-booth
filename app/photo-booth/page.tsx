@@ -34,7 +34,16 @@ const PhotoBoothPage: React.FC = () => {
     );
   }
 
-  return <PhotoBooth />;
+  return (
+    <main className='container min-h-screen mx-auto px-4 py-8 flex flex-col'>
+      <div className='w-full flex items-center justify-center grow-0 p-4'>
+        <ProfilePopover />
+      </div>
+      <div className='w-full flex items-center justify-center grow p-4'>
+        <PhotoBooth />
+      </div>
+    </main>
+  );
 };
 
 export default PhotoBoothPage;
