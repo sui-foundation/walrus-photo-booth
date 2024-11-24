@@ -8,6 +8,7 @@ import ProfilePopover from '@/components/ProfilePopover';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { Button } from '@/components/ui/button';
 import { TrashIcon } from '@radix-ui/react-icons';
+import Loading from '@/components/Loading';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -38,9 +39,17 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
   const [error, setError] = useState<Error | null>(null);
 
   const { isConnected, emailAddress } = useCustomWallet();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (isConnected) {
+    }
+    setIsLoading(false);
+  }, [isConnected]);
 
   useEffect(() => {
     const fetchPhotos = async () => {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('photos')
         .select('blob_id, object_id, event_id')
@@ -52,6 +61,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
       } else {
         setPhotos((data as Photo[]) || []);
       }
+      setIsLoading(false);
     };
 
     fetchPhotos();
@@ -59,6 +69,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
 
   useEffect(() => {
     const fetchEventDetails = async () => {
+      setIsLoading(true);
       const { data: events, error } = await supabase
         .from('events')
         .select('*')
@@ -83,6 +94,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
           } as Event);
         }
       }
+      setIsLoading(false);
     };
 
     fetchEventDetails();
@@ -90,6 +102,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
+      setIsLoading(true);
       const { data: admins, error } = await supabase
         .from('admins')
         .select('id')
@@ -101,12 +114,14 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
       } else {
         if (admins[0]) setCurrentAdminId(admins[0].id);
       }
+      setIsLoading(false);
     };
 
     fetchCurrentAdmin();
   }, [emailAddress]);
 
   const handleDeletePhoto = async (blob_id: string) => {
+    setIsLoading(true);
     const { error } = await supabase
       .from('photos')
       .delete()
@@ -118,10 +133,15 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
     } else {
       setPhotos(photos.filter((photo) => photo.blob_id !== blob_id));
     }
+    setIsLoading(false);
   };
 
   if (error) {
     return <div>Error loading photos</div>;
+  }
+
+  if (isLoading) {
+    return <Loading />;
   }
 
   return (
@@ -139,7 +159,25 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
             Back to Events
           </Link>
         </div>
-        <ProfilePopover />
+        <div className='flex items-center gap-4'>
+          {isConnected && (
+            <>
+              <Link
+                href='/addEvent'
+                className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 py-2 px-6'
+              >
+                + Event
+              </Link>
+              <Link
+                href='/photo-booth'
+                className='flex items-center justify-center rounded-md text-sm text-black bg-gray-300 py-2 px-6'
+              >
+                Booth
+              </Link>
+            </>
+          )}
+          <ProfilePopover />
+        </div>
       </div>
 
       {photos.length === 0 ? (
