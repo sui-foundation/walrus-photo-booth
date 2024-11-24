@@ -78,14 +78,22 @@ const HomePage: React.FC = () => {
     <main className='container mx-auto px-4 py-8'>
       <div className='w-full flex items-center justify-between relative mb-10'>
         <h1 className='text-3xl font-bold'>Photo Booth Events</h1>
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center gap-4'>
           {isConnected && (
-            <a
-              href='/addEvent'
-              className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 p-2'
-            >
-              + Event
-            </a>
+            <>
+              <a
+                href='/addEvent'
+                className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 py-2 px-6'
+              >
+                + Event
+              </a>
+              <a
+                href='/photo-booth'
+                className='flex items-center justify-center rounded-md text-sm text-black bg-gray-300 py-2 px-6'
+              >
+                Booth
+              </a>
+            </>
           )}
 
           <ProfilePopover />
