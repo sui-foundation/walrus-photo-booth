@@ -7,6 +7,7 @@ import ProfilePopover from '@/components/ProfilePopover';
 import { TrashIcon } from '@radix-ui/react-icons';
 import { Button } from '@/components/ui/button';
 import Loading from '@/components/Loading';
+import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -97,21 +98,20 @@ const HomePage: React.FC = () => {
         <div className='flex items-center gap-4'>
           {isConnected && (
             <>
-              <a
+              <Link
                 href='/addEvent'
                 className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 py-2 px-6'
               >
                 + Event
-              </a>
-              <a
+              </Link>
+              <Link
                 href='/photo-booth'
                 className='flex items-center justify-center rounded-md text-sm text-black bg-gray-300 py-2 px-6'
               >
                 Booth
-              </a>
+              </Link>
             </>
           )}
-
           <ProfilePopover />
         </div>
       </div>
