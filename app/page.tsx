@@ -5,9 +5,21 @@ import { useCustomWallet } from '@/contexts/CustomWallet';
 import { createClient } from '@supabase/supabase-js';
 import ProfilePopover from '@/components/ProfilePopover';
 import { TrashIcon } from '@radix-ui/react-icons';
-import { Button } from '@/components/ui/button';
 import Loading from '@/components/Loading';
 import Link from 'next/link';
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -80,7 +92,7 @@ const HomePage: React.FC = () => {
       setEvents(events.filter((event) => event.id !== id));
     }
 
-    setIsLoading(true);
+    setIsLoading(false);
   };
 
   if (error) {
@@ -121,18 +133,42 @@ const HomePage: React.FC = () => {
           events.map((e) => (
             <div
               key={e.id}
-              className='w-full rounded-md text-white bg-black py-6 px-6 mb-4 text-center'
+              className='w-full rounded-xl text-white bg-black mb-4 p-6 text-center'
             >
-              <a href={`photos/${e.id}`}>{e.event_title.toUpperCase()}</a>
-
-              {isConnected && e.admin_id === currentAdminId && (
-                <Button
-                  onClick={() => handleDeleteEvent(e.id)}
-                  className='cursor-pointer'
-                >
-                  <TrashIcon />
-                </Button>
-              )}
+              <div className='w-full flex gap-2 items-center justify-center'>
+                <a href={`photos/${e.id}`} className='block relative'>
+                  {e.event_title.toUpperCase()}
+                </a>
+                {isConnected && e.admin_id === currentAdminId && (
+                  <AlertDialog>
+                    <AlertDialogTrigger
+                      asChild
+                      className='ml-2 cursor-pointer p-2 z-10 bg-gray-800 rounded-sm'
+                    >
+                      <Button>
+                        <TrashIcon className='z-10' />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Delete event &apos;{e.event_title}&apos;? This action
+                          cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDeleteEvent(e.id)}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </div>
             </div>
           ))}
       </div>
