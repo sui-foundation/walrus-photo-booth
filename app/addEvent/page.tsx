@@ -50,8 +50,10 @@ const formSchema = z.object({
 
 const AddEvent: React.FC = () => {
   const router = useRouter();
-  const { isConnected } = useCustomWallet();
-  const [isLoading, setIsLoading] = useState(true);
+  const { isConnected, emailAddress } = useCustomWallet();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
@@ -59,6 +61,28 @@ const AddEvent: React.FC = () => {
     }
     setIsLoading(false);
   }, [isConnected, router]);
+
+  useEffect(() => {
+    const fetchCurrentAdmin = async () => {
+      setIsLoading(true);
+
+      const { data: admins, error } = await supabase
+        .from('admins')
+        .select('id')
+        .eq('email', emailAddress);
+
+      if (error) {
+        setError(error);
+        console.error('Error fetching events:', error);
+      } else {
+        if (admins[0]) setCurrentAdminId(admins[0].id);
+      }
+
+      setIsLoading(false);
+    };
+
+    fetchCurrentAdmin();
+  }, [emailAddress]);
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -73,6 +97,8 @@ const AddEvent: React.FC = () => {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
 
+    const timestamp = formData.event_date;
+
     setIsLoading(true);
 
     const { data, error } = await supabase
@@ -81,7 +107,7 @@ const AddEvent: React.FC = () => {
         {
           event_date: formData.event_date,
           event_title: formData.event_title,
-          admin_id: 1,
+          admin_id: currentAdminId,
         },
       ])
       .select();
@@ -118,7 +144,7 @@ const AddEvent: React.FC = () => {
   return (
     <main className='container mx-auto px-4 py-8'>
       <div className='w-full flex items-center justify-between relative mb-10'>
-        <h1 className='text-3xl font-bold'>Photo Booth Events</h1>
+        <h1 className='text-3xl font-bold'>Add New Event</h1>
         <div className='flex items-center gap-4'>
           {isConnected && (
             <Link
@@ -133,7 +159,7 @@ const AddEvent: React.FC = () => {
         </div>
       </div>
 
-      <div className='m-auto mb-10'>
+      <div className='w-96 m-auto mb-10'>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -143,7 +169,7 @@ const AddEvent: React.FC = () => {
               control={form.control}
               name='event_title'
               render={({ field }) => (
-                <FormItem>
+                <FormItem className='flex flex-col'>
                   <FormLabel>Event Title</FormLabel>
                   <FormControl>
                     <Input placeholder='Happy Birthday Sui' {...field} />
@@ -196,7 +222,37 @@ const AddEvent: React.FC = () => {
                 </FormItem>
               )}
             />
-            <Button type='submit'>Submit</Button>
+            {/* <FormField
+              control={form.control}
+              name='event_time'
+              render={({ field }) => (
+                <FormItem className='flex flex-col'>
+                  <FormLabel>Event Time</FormLabel>
+                  <FormControl>
+                    <Input type='time' value={field.value} {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    What time is this event taking place?
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='event_timezone'
+              render={({ field }) => (
+                <FormItem className='flex flex-col'>
+                  <FormLabel>Timezone</FormLabel>
+                  <FormControl>
+                    <Input type='text' value={field.value} {...field} />
+                  </FormControl>
+                  <FormDescription>Select a timezone</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            /> */}
+            <Button type='submit'>Create Event</Button>
           </form>
         </Form>
       </div>
