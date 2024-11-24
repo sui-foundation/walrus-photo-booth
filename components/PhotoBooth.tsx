@@ -24,10 +24,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { useCustomWallet } from '@/contexts/CustomWallet';
-import { useRouter } from 'next/navigation';
-import Loading from '@/components/Loading';
-import ProfilePopover from '@/components/ProfilePopover';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
