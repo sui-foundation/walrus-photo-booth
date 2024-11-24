@@ -30,11 +30,7 @@ interface Event {
   admin_id: number;
 }
 
-export default function PhotosPage({
-  params,
-}: {
-  params: Promise<{ eventId: string }>;
-}) {
+const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
   const resolvedParams = use(params);
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [eventDetails, setEventDetails] = useState<Event | null>(null);
@@ -147,7 +143,10 @@ export default function PhotosPage({
       </div>
 
       {photos.length === 0 ? (
-        <p>No photos found for this event.</p>
+        <>
+          <p>No photos found for this event yet.</p>
+          {isConnected && <Button>Activate Cam?</Button>}
+        </>
       ) : (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
           {photos.map((photo) => (
@@ -188,4 +187,6 @@ export default function PhotosPage({
       )}
     </main>
   );
-}
+};
+
+export default PhotosPage;
