@@ -16,8 +16,8 @@ const PhotoBoothPage: React.FC = () => {
 
   useEffect(() => {
     if (isConnected) {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   }, [isConnected, router]);
 
   if (isLoading) {
