@@ -42,6 +42,17 @@ interface Event {
   admin_id: number;
 }
 
+interface DateTimeFormatOptions {
+  weekday?: 'narrow' | 'short' | 'long';
+  month?: 'narrow' | 'short' | 'long' | 'numeric' | '2-digit';
+  day?: 'numeric' | '2-digit';
+  year?: 'numeric' | '2-digit';
+  hour?: 'numeric' | '2-digit';
+  minute?: 'numeric' | '2-digit';
+  hour12?: boolean;
+  timeZoneName?: 'short' | 'long';
+}
+
 const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
   const resolvedParams = use(params);
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
@@ -88,12 +99,22 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
 
       if (error) {
         setError(error);
-        console.error('Error fetching event name:', error);
+        console.error('Error fetching event details:', error);
       } else {
         if (events[0]) {
+          const options: DateTimeFormatOptions = {
+            weekday: 'short',
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            timeZoneName: 'short',
+          };
           const id = events[0].id;
           const et = events[0].event_title.toUpperCase();
-          const ed = new Date(events[0].event_date).toString();
+          const ed = new Date(events[0].event_date).toLocaleString([], options);
           const ca = new Date(events[0].created_at).toString();
           const ai = events[0].admin_id;
           setEventDetails({
@@ -159,12 +180,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
       <div className='w-full flex items-center justify-between relative mb-10'>
         <div>
           <h1 className='text-3xl font-bold'>{eventDetails?.event_title}</h1>
-          <h2 className='text-lg font-bold'>
-            Date: {eventDetails?.event_date}
-          </h2>
-          <p className='text-xs font-bold'>
-            Created: {eventDetails?.created_at}
-          </p>
+          <h2 className='text-md font-bold'>{eventDetails?.event_date}</h2>
           <Link href='/' className='underline'>
             Back to Events
           </Link>
@@ -218,9 +234,6 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
                   {photo.object_id}
                 </Link>
               </p>
-              {/* <p className='text-sm'>
-                Event: {photo.event_id || 'No event specified'}
-              </p> */}
               {isConnected && eventDetails?.admin_id === currentAdminId && (
                 <AlertDialog>
                   <AlertDialogTrigger
