@@ -123,13 +123,11 @@ const PhotoBoothPage: React.FC = () => {
     const eNum = parseInt(e);
     const foundEvent = currAdminsEvents.filter((e) => e.id === eNum);
     localStorage.setItem('selectedEvent', JSON.stringify(foundEvent[0]));
-    localStorage.setItem('camActivated', 'true');
     setSelectedEvent(foundEvent[0]);
   };
 
   const handleEditCam = () => {
     setIsLoading(true);
-    localStorage.setItem('camActivated', JSON.stringify(false));
     localStorage.removeItem('selectedEvent');
     setSelectedEvent(null);
     setIsLoading(false);
