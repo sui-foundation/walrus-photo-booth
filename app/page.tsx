@@ -31,6 +31,7 @@ interface Event {
   created_at: string;
   event_title: string;
   admin_id: number;
+  event_date: string;
 }
 
 const HomePage: React.FC = () => {
