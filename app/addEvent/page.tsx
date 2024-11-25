@@ -56,12 +56,6 @@ const AddEvent: React.FC = () => {
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
-  // const [selectedTimezone, setSelectedTimezone] = useState<string | undefined>(
-  //   Intl.DateTimeFormat().resolvedOptions().timeZone
-  // );
-
-  // const timezones = Intl.supportedValuesOf('timeZone');
-
   useEffect(() => {
     if (isConnected) {
     }
@@ -102,10 +96,6 @@ const AddEvent: React.FC = () => {
   async function onSubmit(formData: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-
-    // const timestamp = formData.event_date;
-
-    // console.log('formData.event_date: ', timestamp);
 
     setIsLoading(true);
 
@@ -230,45 +220,6 @@ const AddEvent: React.FC = () => {
                 </FormItem>
               )}
             />
-            {/* <FormField
-              control={form.control}
-              name='event_time'
-              render={({ field }) => (
-                <FormItem className='flex flex-col'>
-                  <FormLabel>Event Time</FormLabel>
-                  <FormControl>
-                    <Input type='time' {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    What time is this event taking place?
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='timezone'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Timezone</FormLabel>
-                  <Select
-                    value={selectedTimezone}
-                    onChange={setSelectedTimezone}
-                  >
-                    <SelectContent>
-                      {timezones.map((timezone) => (
-                        <SelectItem key={timezone} value={timezone}>
-                          {timezone}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>Select a timezone.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
             <Button type='submit'>Create Event</Button>
           </form>
         </Form>
