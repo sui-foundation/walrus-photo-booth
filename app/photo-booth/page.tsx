@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -155,6 +156,14 @@ const PhotoBoothPage: React.FC = () => {
   return (
     <main className='container min-h-screen mx-auto px-4 py-8 flex flex-col'>
       <div className='w-full flex items-center justify-center p-4 gap-3'>
+        {isConnected && !selectedEvent && (
+          <Link
+            href='/'
+            className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 py-2 px-6'
+          >
+            Events
+          </Link>
+        )}
         <ProfilePopover />
         {isConnected && selectedEvent && (
           <Button variant='destructive' onClick={handleEditCam}>
