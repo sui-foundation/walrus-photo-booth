@@ -50,29 +50,6 @@ const PhotoBoothPage: React.FC = () => {
     return null;
   });
 
-  // const [showAdminButtons, setShowAdminButtons] = useState(false);
-  // const [typedText, setTypedText] = useState<string>('');
-
-  // useEffect(() => {
-  //   const handleKeyPress = (e: KeyboardEvent) => {
-  //     const newText = typedText + e.key;
-  //     setTypedText(newText);
-
-  //     const lastChars = newText.slice(-8);
-  //     if (lastChars === 'admin') {
-  //       // setShowAdminButtons(true);
-  //       setTypedText('');
-  //     }
-
-  //     if (newText.length > 20) {
-  //       setTypedText('');
-  //     }
-  //   };
-
-  //   window.addEventListener('keypress', handleKeyPress);
-  //   return () => window.removeEventListener('keypress', handleKeyPress);
-  // }, [typedText]);
-
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
       setIsLoading(true);
