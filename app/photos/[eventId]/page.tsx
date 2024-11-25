@@ -50,7 +50,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
   const [error, setError] = useState<Error | null>(null);
 
   const { isConnected, emailAddress } = useCustomWallet();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (isConnected) {
