@@ -80,7 +80,6 @@ const PhotoBooth: React.FC<Props> = ({
   selectedEventTitle,
   selectedEventId,
 }) => {
-  console.log(selectedEventTitle, selectedEventId);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [photoURL, setPhotoURL] = useState<string | null>(null);
