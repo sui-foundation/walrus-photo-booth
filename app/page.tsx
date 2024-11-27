@@ -74,7 +74,7 @@ const HomePage: React.FC = () => {
         setError(error);
         console.error('Error fetching events:', error);
       } else {
-        if (admins[0]) setCurrentAdminId(admins[0].id);
+        if (admins.length > 0) setCurrentAdminId(admins[0].id);
       }
 
       setIsLoading(false);
@@ -109,7 +109,7 @@ const HomePage: React.FC = () => {
       <div className='w-full flex items-center justify-between relative mb-10'>
         <h1 className='text-3xl font-bold'>Photo Booth Events</h1>
         <div className='flex items-center gap-4'>
-          {isConnected && (
+          {isConnected && currentAdminId && (
             <>
               <Link
                 href='/addEvent'
