@@ -63,7 +63,7 @@ const PhotoBoothPage: React.FC = () => {
         setError(error);
         console.error('Error fetching admin info:', error);
       } else {
-        if (admins[0]) setCurrentAdminId(admins[0].id);
+        if (admins.length > 0) setCurrentAdminId(admins[0].id);
       }
 
       setIsLoading(false);
@@ -140,7 +140,7 @@ const PhotoBoothPage: React.FC = () => {
           </Link>
         )}
         <ProfilePopover />
-        {isConnected && selectedEvent && (
+        {isConnected && currentAdminId && selectedEvent && (
           <Button variant='destructive' onClick={handleEditCam}>
             Deactivate Cam / Change Event
           </Button>
@@ -153,21 +153,25 @@ const PhotoBoothPage: React.FC = () => {
             selectedEventId={selectedEvent.id}
           />
         ) : (
-          <Select onValueChange={handleSelectEvent}>
-            <SelectTrigger className='w-[200px]'>
-              <SelectValue placeholder='Select an Event' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {currAdminsEvents &&
-                  currAdminsEvents.map((el: Event, index) => (
-                    <SelectItem key={index} value={el.id.toString()}>
-                      {el.event_title.toUpperCase()} / {el.event_date}
-                    </SelectItem>
-                  ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <>
+            {currentAdminId && (
+              <Select onValueChange={handleSelectEvent}>
+                <SelectTrigger className='w-[200px]'>
+                  <SelectValue placeholder='Select an Event' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {currAdminsEvents &&
+                      currAdminsEvents.map((el: Event, index) => (
+                        <SelectItem key={index} value={el.id.toString()}>
+                          {el.event_title.toUpperCase()} / {el.event_date}
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
+          </>
         )}
       </div>
     </main>
