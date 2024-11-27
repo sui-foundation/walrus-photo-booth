@@ -121,14 +121,15 @@ const AddEvent: React.FC = () => {
   const { isConnected, emailAddress } = useCustomWallet();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const [isAdmin, setIsAdmin] = useState<boolean | undefined>();
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (isConnected) {
+    if (!isAdmin) {
+      router.push('/');
     }
-    setIsLoading(false);
-  }, [isConnected, router]);
+  }, [isAdmin, router]);
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
@@ -141,9 +142,13 @@ const AddEvent: React.FC = () => {
 
       if (error) {
         setError(error);
-        console.error('Error fetching events:', error);
+        console.error('Error fetching admin:', error);
       } else {
-        if (admins[0]) setCurrentAdminId(admins[0].id);
+        if (admins.length > 0) {
+          setCurrentAdminId(admins[0].id);
+        } else {
+          setIsAdmin(false);
+        }
       }
 
       setIsLoading(false);
