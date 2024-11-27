@@ -142,9 +142,9 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
 
       if (error) {
         setError(error);
-        console.error('Error fetching events:', error);
+        console.error('Error fetching admin:', error);
       } else {
-        if (admins[0]) setCurrentAdminId(admins[0].id);
+        if (admins.length > 0) setCurrentAdminId(admins[0].id);
       }
       setIsLoading(false);
     };
@@ -186,7 +186,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
           </Link>
         </div>
         <div className='flex items-center gap-4'>
-          {isConnected && (
+          {isConnected && currentAdminId && (
             <>
               <Link
                 href='/addEvent'
