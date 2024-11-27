@@ -11,7 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -19,12 +19,20 @@ import { Calendar } from '@/components/ui/calendar';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
 import { Input } from '@/components/ui/input';
 
 import {
@@ -39,12 +47,72 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const formSchema = z.object({
-  event_title: z.string().min(1, {
-    message: 'Event name must be at least 1 characters.',
-  }),
-  event_date: z.date({
+const timezones = [
+  { value: '-10:00', name: '(GMT -10:00) Hawaii' },
+  { value: '-09:00', name: '(GMT -9:00) Alaska' },
+  { value: '-08:00', name: '(GMT -8:00) Pacific Time (US & Canada)' },
+  { value: '-07:00', name: '(GMT -7:00) Mountain Time (US & Canada)' },
+  {
+    value: '-06:00',
+    name: '(GMT -6:00) Central Time (US & Canada), Mexico City',
+  },
+  {
+    value: '-05:00',
+    name: '(GMT -5:00) Eastern Time (US & Canada), Bogota, Lima',
+  },
+  {
+    value: '-04:00',
+    name: '(GMT -4:00) Atlantic Time (Canada), Caracas, La Paz',
+  },
+  { value: '-03:30', name: '(GMT -3:30) Newfoundland' },
+  { value: '-03:00', name: '(GMT -3:00) Brazil, Buenos Aires, Georgetown' },
+];
+// Then use this array to populate your select element
+const hours = [
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '10',
+  '11',
+  '12',
+] as const;
+const mins = ['00', '15', '30', '45'] as const;
+
+type FormData = {
+  eventTitle: string;
+  eventDate: Date;
+  eventTimeHour: string;
+  eventTimeMin: string;
+  eventTimeAMPM: string;
+  eventTimezone: string;
+};
+
+const EventSchema: ZodType<FormData> = z.object({
+  eventTitle: z
+    .string({ required_error: 'Please enter an event name.' })
+    .min(1, {
+      message: 'Event name must be at least 1 character.',
+    }),
+  eventDate: z.date({
     required_error: 'A date for this event is required.',
+  }),
+  eventTimeHour: z.enum(hours, {
+    message: 'A time for this event is required.',
+  }),
+  eventTimeMin: z.enum(mins, {
+    message: 'A time for this event is required.',
+  }),
+  eventTimeAMPM: z.enum(['AM', 'PM'], {
+    message: 'Please select AM or PM.',
+  }),
+  eventTimezone: z.string({
+    required_error: 'The timezone for this event is required.',
   }),
 });
 
@@ -85,26 +153,54 @@ const AddEvent: React.FC = () => {
   }, [emailAddress]);
 
   // 1. Define your form.
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof EventSchema>>({
+    resolver: zodResolver(EventSchema),
     defaultValues: {
-      event_title: '',
+      eventTitle: '',
+      eventTimeHour: '',
+      eventTimeMin: '',
+      eventTimeAMPM: '',
     },
   });
 
   // 2. Define a submit handler.
-  async function onSubmit(formData: z.infer<typeof formSchema>) {
+  async function onSubmit(formData: z.infer<typeof EventSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
 
-    setIsLoading(true);
+    // setIsLoading(true);
+
+    console.log(formData.eventDate);
+
+    let hr;
+
+    if (formData.eventTimeAMPM === 'PM') {
+      hr = parseInt(formData.eventTimeHour) + 12;
+    } else {
+      hr = formData.eventTimeHour;
+    }
+
+    const formattedTime = `${hr}:${formData.eventTimeMin}:00`;
+
+    const date = new Date(formData.eventDate);
+
+    const day = date.toLocaleString('en-US', { weekday: 'short' });
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const dateNum = date.getDate();
+    const year = date.getFullYear();
+
+    const formattedDate = `${day} ${month} ${dateNum} ${year} ${formattedTime} ${formData.eventTimezone}`;
+
+    console.log(new Date(formattedDate));
+
+    // return;
 
     const { data, error } = await supabase
       .from('events')
       .insert([
         {
-          event_date: formData.event_date,
-          event_title: formData.event_title,
+          event_date: formattedDate,
+          event_title: formData.eventTitle,
           admin_id: currentAdminId,
         },
       ])
@@ -165,26 +261,27 @@ const AddEvent: React.FC = () => {
           >
             <FormField
               control={form.control}
-              name='event_title'
+              name='eventTitle'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
                   <FormLabel>Event Title</FormLabel>
                   <FormControl>
-                    <Input placeholder='Happy Birthday Sui' {...field} />
+                    <Input
+                      type='text'
+                      placeholder='Happy Birthday Sui'
+                      {...field}
+                    />
                   </FormControl>
-                  <FormDescription>
-                    What event are you creating?
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name='event_date'
+              name='eventDate'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
-                  <FormLabel>Date of Event</FormLabel>
+                  <FormLabel>Event Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -213,13 +310,125 @@ const AddEvent: React.FC = () => {
                       />
                     </PopoverContent>
                   </Popover>
-                  <FormDescription>
-                    On what date is this event taking place?
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <div className='flex gap-4'>
+              <FormField
+                control={form.control}
+                name='eventTimeHour'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hour</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Hour' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {hours.map((hr) => (
+                          <SelectItem key={hr} value={hr}>
+                            {hr}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='eventTimeMin'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Minute</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Minute' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {mins.map((m) => (
+                          <SelectItem key={m} value={m}>
+                            {m}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='eventTimeAMPM'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>AM/PM</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='AM/PM' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem key='am' value='AM'>
+                          AM
+                        </SelectItem>
+                        <SelectItem key='pm' value='PM'>
+                          PM
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name='eventTimezone'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Timezone</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Timezone' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {timezones.map((tz) => (
+                        <SelectItem key={tz.name} value={tz.value}>
+                          {tz.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <Button type='submit'>Create Event</Button>
           </form>
         </Form>
