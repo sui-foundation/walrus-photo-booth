@@ -119,17 +119,10 @@ const EventSchema: ZodType<FormData> = z.object({
 const AddEvent: React.FC = () => {
   const router = useRouter();
   const { isConnected, emailAddress } = useCustomWallet();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const [isAdmin, setIsAdmin] = useState<boolean | undefined>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    if (!isAdmin) {
-      router.push('/');
-    }
-  }, [isAdmin, router]);
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
@@ -147,7 +140,7 @@ const AddEvent: React.FC = () => {
         if (admins.length > 0) {
           setCurrentAdminId(admins[0].id);
         } else {
-          setIsAdmin(false);
+          setCurrentAdminId(0);
         }
       }
 
