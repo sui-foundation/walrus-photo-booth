@@ -134,7 +134,7 @@ const HomePage: React.FC = () => {
           events.map((e) => (
             <div
               key={e.id}
-              className='w-full rounded-xl text-white bg-black mb-4 p-6 text-center'
+              className='w-full rounded-xl text-white bg-black p-6 text-center'
             >
               <div className='w-full flex gap-2 items-center justify-center'>
                 <a href={`photos/${e.id}`} className='block relative'>
