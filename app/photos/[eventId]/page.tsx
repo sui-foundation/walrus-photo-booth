@@ -64,12 +64,6 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (isConnected) {
-    }
-    setIsLoading(false);
-  }, [isConnected]);
-
-  useEffect(() => {
     const fetchPhotos = async () => {
       setIsLoading(true);
       const { data, error } = await supabase
@@ -153,6 +147,8 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
   }, [emailAddress]);
 
   const handleDeletePhoto = async (blob_id: string) => {
+    setIsLoading(true);
+
     const { error } = await supabase
       .from('photos')
       .delete()
@@ -160,7 +156,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
 
     if (error) {
       setError(error);
-      console.error('Error deleting event:', error);
+      console.error('Error deleting photo:', error);
     } else {
       setPhotos(photos.filter((photo) => photo.blob_id !== blob_id));
     }
