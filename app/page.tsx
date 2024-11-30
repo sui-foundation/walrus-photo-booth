@@ -36,8 +36,8 @@ interface Event {
 
 const HomePage: React.FC = () => {
   const { isConnected, emailAddress } = useCustomWallet();
-  const [isLoading, setIsLoading] = useState(true);
 
+  const [isLoading, setIsLoading] = useState(true);
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [error, setError] = useState<Error | null>(null);
@@ -72,7 +72,7 @@ const HomePage: React.FC = () => {
 
       if (error) {
         setError(error);
-        console.error('Error fetching events:', error);
+        console.error('Error fetching current admin:', error);
       } else {
         if (admins.length > 0) setCurrentAdminId(admins[0].id);
       }
@@ -84,11 +84,13 @@ const HomePage: React.FC = () => {
   }, [emailAddress]);
 
   const handleDeleteEvent = async (id: number) => {
+    setIsLoading(true);
+
     const { error } = await supabase.from('events').delete().eq('id', id);
 
     if (error) {
       setError(error);
-      console.error('Error fetching events:', error);
+      console.error('Error deleting event:', error);
     } else {
       setEvents(events.filter((event) => event.id !== id));
     }
