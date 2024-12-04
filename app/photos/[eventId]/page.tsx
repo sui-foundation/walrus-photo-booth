@@ -203,10 +203,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
       </div>
 
       {photos.length === 0 ? (
-        <>
-          <p>No photos found for this event yet.</p>
-          {isConnected && <Button>Activate Cam?</Button>}
-        </>
+        <p>No photos found for this event yet.</p>
       ) : (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
           {photos.map((photo) => (
