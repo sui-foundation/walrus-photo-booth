@@ -8,12 +8,10 @@ import {
   Download,
   Upload,
   Check,
-  XCircle,
   Loader2,
   RotateCcw,
 } from 'lucide-react';
 import JSConfetti from 'js-confetti';
-import Draggable, { DraggableEvent, DraggableData } from 'react-draggable';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 
@@ -22,58 +20,10 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const overlayImages = [{ id: 1, src: '/unicorn.png', name: 'Unicorn' }];
-
-interface Overlay {
-  id: number;
-  src: string;
-  position: { x: number; y: number };
-  text?: string;
-}
-
-interface DraggableOverlayProps {
-  id: number;
-  src: string;
-  position: { x: number; y: number };
-  onDrag: (e: DraggableEvent, data: DraggableData) => void;
-  onRemove: () => void;
-}
-
 interface Props {
   selectedEventId: number;
   selectedEventTitle: string;
 }
-
-const DraggableOverlay = ({
-  src,
-  id,
-  position,
-  onDrag,
-  onRemove,
-}: DraggableOverlayProps) => {
-  const nodeRef = useRef(null);
-
-  return (
-    <Draggable
-      position={position}
-      onStop={onDrag}
-      bounds='parent'
-      nodeRef={nodeRef}
-    >
-      <div className='absolute cursor-move' ref={nodeRef}>
-        <div className='relative'>
-          <Image src={src} alt={`Overlay ${id}`} width={64} height={64} />
-          <button
-            onClick={() => onRemove()}
-            className='absolute -top-2 -right-2 bg-red-500 rounded-full p-1'
-          >
-            <XCircle className='w-4 h-4 text-white' />
-          </button>
-        </div>
-      </div>
-    </Draggable>
-  );
-};
 
 const PhotoBooth: React.FC<Props> = ({
   selectedEventTitle,
@@ -84,7 +34,6 @@ const PhotoBooth: React.FC<Props> = ({
   const [photoURL, setPhotoURL] = useState<string | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [downloadFeedback, setDownloadFeedback] = useState(false);
-  const [overlays, setOverlays] = useState<Overlay[]>([]);
   const jsConfettiRef = useRef<JSConfetti | null>(null);
   const [uploadResult, setUploadResult] = useState<{
     blobId: string;
@@ -115,25 +64,6 @@ const PhotoBooth: React.FC<Props> = ({
     }
   };
 
-  const addOverlay = (src: string) => {
-    setOverlays([
-      ...overlays,
-      { id: Date.now(), src, position: { x: 0, y: 0 } },
-    ]);
-    // update canvas with the new overlay
-    if (canvasRef.current && photoURL) {
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
-      if (context) {
-        const img = new window.Image();
-        img.src = photoURL;
-        img.onload = () => {
-          context.drawImage(img, 0, 0, canvas.width, canvas.height);
-        };
-      }
-    }
-  };
-
   const takePhoto = () => {
     if (jsConfettiRef.current) {
       jsConfettiRef.current.addConfetti({
@@ -149,67 +79,17 @@ const PhotoBooth: React.FC<Props> = ({
       if (context) {
         canvas.width = videoRef.current.videoWidth;
         canvas.height = videoRef.current.videoHeight;
-
         context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-
-        // clear overlays
-        setOverlays([]);
-
-        setTimeout(() => {
-          setPhotoURL(canvas.toDataURL('image/png'));
-        }, 200);
+        setPhotoURL(canvas.toDataURL('image/png'));
       }
     }
-  };
-
-  const renderOverlaysToCanvas = async (
-    canvas: HTMLCanvasElement,
-    basePhotoURL: string
-  ) => {
-    const context = canvas.getContext('2d');
-    if (!context) return;
-
-    // draw the base photo
-    const baseImage = new window.Image();
-    baseImage.src = basePhotoURL;
-
-    await new Promise((resolve) => {
-      baseImage.onload = () => {
-        context.drawImage(baseImage, 0, 0, canvas.width, canvas.height);
-        resolve(null);
-      };
-    });
-
-    // draw all overlays
-    await Promise.all(
-      overlays.map((overlay) => {
-        return new Promise((resolve) => {
-          const overlayImg = new window.Image();
-          overlayImg.src = overlay.src;
-          overlayImg.onload = () => {
-            context.drawImage(
-              overlayImg,
-              overlay.position.x,
-              overlay.position.y,
-              64,
-              64
-            );
-            resolve(null);
-          };
-        });
-      })
-    );
   };
 
   const downloadImage = async () => {
     if (!canvasRef.current || !photoURL) return;
 
-    await renderOverlaysToCanvas(canvasRef.current, photoURL);
-
-    // create and trigger download
-    const dataUrl = canvasRef.current.toDataURL('image/png');
     const link = document.createElement('a');
-    link.href = dataUrl;
+    link.href = photoURL;
     link.download = 'image.png';
     document.body.appendChild(link);
     link.click();
@@ -275,9 +155,7 @@ const PhotoBooth: React.FC<Props> = ({
     if (isCameraOn) {
       stopCamera();
     }
-
     setPhotoURL(null);
-    setOverlays([]);
     setUploadResult(null);
     setDownloadFeedback(false);
     setIsUploading(false);
@@ -321,29 +199,6 @@ const PhotoBooth: React.FC<Props> = ({
           )}
         </div>
         <canvas ref={canvasRef} className='hidden' />
-        <div className='space-y-2'>
-          <h3 className='text-white text-sm font-medium'>Add Overlays</h3>
-          <div className='flex flex-wrap gap-2'>
-            {overlayImages.map((overlay) => (
-              <Button
-                key={overlay.id}
-                onClick={() => addOverlay(overlay.src)}
-                variant='outline'
-                size='sm'
-                className='bg-zinc-700 hover:bg-zinc-600'
-              >
-                <Image
-                  src={overlay.src}
-                  alt={overlay.src}
-                  width={24}
-                  height={24}
-                  className='mr-2'
-                />
-                {overlay.name}
-              </Button>
-            ))}
-          </div>
-        </div>
         {photoURL && (
           <div className='space-y-4'>
             <div className='relative aspect-video bg-zinc-900 rounded-lg overflow-hidden'>
@@ -353,25 +208,6 @@ const PhotoBooth: React.FC<Props> = ({
                 fill
                 className='object-contain'
               />
-              {overlays.map((overlay) => (
-                <DraggableOverlay
-                  key={overlay.id}
-                  id={overlay.id}
-                  src={overlay.src}
-                  position={overlay.position}
-                  onDrag={(e, data) => {
-                    const updatedOverlays = overlays.map((o) =>
-                      o.id === overlay.id
-                        ? { ...o, position: { x: data.x, y: data.y } }
-                        : o
-                    );
-                    setOverlays(updatedOverlays);
-                  }}
-                  onRemove={() =>
-                    setOverlays(overlays.filter((o) => o.id !== overlay.id))
-                  }
-                />
-              ))}
             </div>
             <div className='flex justify-between gap-2'>
               <Button onClick={downloadImage} variant='outline' size='sm'>
