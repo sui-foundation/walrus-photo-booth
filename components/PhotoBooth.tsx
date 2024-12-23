@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
   Camera,
-  Copy,
   Download,
   Upload,
   Check,
@@ -84,7 +83,6 @@ const PhotoBooth: React.FC<Props> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [photoURL, setPhotoURL] = useState<string | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
-  const [copyFeedback, setCopyFeedback] = useState(false);
   const [downloadFeedback, setDownloadFeedback] = useState(false);
   const [overlays, setOverlays] = useState<Overlay[]>([]);
   const jsConfettiRef = useRef<JSConfetti | null>(null);
@@ -203,25 +201,6 @@ const PhotoBooth: React.FC<Props> = ({
     );
   };
 
-  const copyPhoto = async () => {
-    if (canvasRef.current && photoURL) {
-      try {
-        await renderOverlaysToCanvas(canvasRef.current, photoURL);
-        const dataUrl = canvasRef.current.toDataURL('image/png');
-        const blob = await fetch(dataUrl).then((res) => res.blob());
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            [blob.type]: blob,
-          }),
-        ]);
-        setCopyFeedback(true);
-        setTimeout(() => setCopyFeedback(false), 2000);
-      } catch (err) {
-        console.error('Error copying image:', err);
-      }
-    }
-  };
-
   const downloadImage = async () => {
     if (!canvasRef.current || !photoURL) return;
 
@@ -300,7 +279,6 @@ const PhotoBooth: React.FC<Props> = ({
     setPhotoURL(null);
     setOverlays([]);
     setUploadResult(null);
-    setCopyFeedback(false);
     setDownloadFeedback(false);
     setIsUploading(false);
   };
@@ -396,14 +374,6 @@ const PhotoBooth: React.FC<Props> = ({
               ))}
             </div>
             <div className='flex justify-between gap-2'>
-              <Button onClick={copyPhoto} variant='outline' size='sm'>
-                {copyFeedback ? (
-                  <Check className='mr-2 h-4 w-4 text-green-500' />
-                ) : (
-                  <Copy className='mr-2 h-4 w-4' />
-                )}
-                {copyFeedback ? 'Copied!' : 'Copy'}
-              </Button>
               <Button onClick={downloadImage} variant='outline' size='sm'>
                 {downloadFeedback ? (
                   <Check className='mr-2 h-4 w-4 text-green-500' />
