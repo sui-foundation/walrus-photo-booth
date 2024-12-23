@@ -14,6 +14,12 @@ import {
 import JSConfetti from 'js-confetti';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -40,6 +46,9 @@ const PhotoBooth: React.FC<Props> = ({
     objectId: string;
   } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -64,24 +73,99 @@ const PhotoBooth: React.FC<Props> = ({
     }
   };
 
-  const takePhoto = () => {
+  const takePhotoSequence = async () => {
+    setIsCapturing(true);
+    setShowModal(false);
+    setUploadResult(null);
+
+    const newPhotos: string[] = [];
+  
+    // take four photos
+    for (let i = 0; i < 4; ++i) {
+      // count down for each photo
+      for (let count = 3; count >= 0; --count) {
+        setCountdown(count);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+  
+      if (videoRef.current && canvasRef.current) {
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
+        if (context) {
+          canvas.width = videoRef.current.videoWidth;
+          canvas.height = videoRef.current.videoHeight;
+          context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+          const photoData = canvas.toDataURL('image/png');
+          newPhotos.push(photoData);
+        }
+      }
+  
+      if (i < 3) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+    }
+  
+    // generate final photo strip
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      if (context && newPhotos.length === 4) {
+        const singleWidth = videoRef.current?.videoWidth || 640;
+        const singleHeight = videoRef.current?.videoHeight || 480;
+        const padding = 20;
+        const borderWidth = 40;
+  
+        canvas.width = singleWidth + borderWidth * 2;
+        canvas.height = singleHeight * 4 + padding * 3 + borderWidth * 2;
+  
+        // fill with white background
+        context.fillStyle = 'white';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+  
+        // load and draw images
+        const images = await Promise.all(
+          newPhotos.map(
+            (photo) =>
+              new Promise<HTMLImageElement>((resolve, reject) => {
+                const img = new window.Image();
+                img.crossOrigin = 'anonymous';
+                img.src = photo;
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('Failed to load image'));
+              })
+          )
+        );
+  
+        images.forEach((img, index) => {
+          const x = borderWidth;
+          const y = borderWidth + index * (singleHeight + padding);
+          context.drawImage(img, x, y, singleWidth, singleHeight);
+        });
+  
+        // add text
+        context.font = '20px';
+        context.fillStyle = 'black';
+        context.textAlign = 'center';
+        context.fillText(selectedEventTitle, canvas.width / 2, 25);
+  
+        const date = new Date().toLocaleDateString();
+        context.fillText(date, canvas.width / 2, canvas.height - 10);
+  
+        const finalPhotoURL = canvas.toDataURL('image/png');
+        setPhotoURL(finalPhotoURL);
+        setShowModal(true);
+      }
+    }
+  
+    setIsCapturing(false);
+    setCountdown(null);
+  
     if (jsConfettiRef.current) {
       jsConfettiRef.current.addConfetti({
         emojis: ['📷'],
         emojiSize: 100,
         confettiNumber: 24,
       });
-    }
-
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
-      if (context) {
-        canvas.width = videoRef.current.videoWidth;
-        canvas.height = videoRef.current.videoHeight;
-        context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        setPhotoURL(canvas.toDataURL('image/png'));
-      }
     }
   };
 
@@ -159,58 +243,85 @@ const PhotoBooth: React.FC<Props> = ({
     setUploadResult(null);
     setDownloadFeedback(false);
     setIsUploading(false);
+    setIsCapturing(false);
+    setCountdown(null);
   };
 
   return (
-    <div className='max-w-md w-full bg-zinc-800 rounded-xl shadow-2xl overflow-hidden'>
-      <div className='p-4 space-y-4'>
-        <div className='flex space-x-2'>
-          <Button
-            onClick={isCameraOn ? stopCamera : startCamera}
-            variant={isCameraOn ? 'destructive' : 'default'}
-          >
-            <Camera className='mr-2 h-4 w-4' />
-            {isCameraOn ? 'Stop Camera' : 'Start Camera'}
-          </Button>
-          <Button
-            onClick={takePhoto}
-            disabled={!isCameraOn}
-            variant='secondary'
-          >
-            <Camera className='mr-2 h-4 w-4' />
-            Take Photo
-          </Button>
-          <Button onClick={resetApp} variant='outline'>
-            <RotateCcw className='mr-2 h-4 w-4' />
-            Reset
-          </Button>
+    <>
+      <div className='max-w-md w-full bg-zinc-800 rounded-xl shadow-2xl overflow-hidden'>
+        <div className='p-4 space-y-4'>
+          <div className='flex space-x-2'>
+            <Button
+              onClick={isCameraOn ? stopCamera : startCamera}
+              variant={isCameraOn ? 'destructive' : 'default'}
+            >
+              <Camera className='mr-2 h-4 w-4' />
+              {isCameraOn ? 'Stop Camera' : 'Start Camera'}
+            </Button>
+            <Button
+              onClick={takePhotoSequence}
+              disabled={!isCameraOn || isCapturing}
+              variant='secondary'
+            >
+              <Camera className='mr-2 h-4 w-4' />
+              {isCapturing ? 'Capturing...' : 'Take Photos'}
+            </Button>
+            <Button onClick={resetApp} variant='outline'>
+              <RotateCcw className='mr-2 h-4 w-4' />
+              Reset
+            </Button>
+          </div>
+          <div className='relative aspect-video bg-black rounded-lg overflow-hidden w-full'>
+            <video
+              ref={videoRef}
+              autoPlay
+              hidden={!isCameraOn}
+              className='w-full h-full object-cover'
+            />
+            {!isCameraOn && (
+              <div className='absolute inset-0 flex items-center justify-center'>
+                <span className='text-zinc-400 text-lg'>Camera Preview</span>
+              </div>
+            )}
+            {countdown !== null && (
+              <div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50'>
+                <span className='text-white text-6xl font-bold'>{countdown || 'Snap!'}</span>
+              </div>
+            )}
+          </div>
+          <canvas ref={canvasRef} className='hidden' />
         </div>
-        <div className='relative aspect-video bg-black rounded-lg overflow-hidden'>
-          <video
-            ref={videoRef}
-            autoPlay
-            hidden={!isCameraOn}
-            className='w-full h-full object-cover'
-          />
-          {!isCameraOn && (
-            <div className='absolute inset-0 flex items-center justify-center'>
-              <span className='text-zinc-600 text-lg'>Camera Preview</span>
-            </div>
-          )}
+        <div className='bg-zinc-900 text-zinc-400 text-center py-2 text-sm font-bold tracking-wider'>
+          {selectedEventTitle}
         </div>
-        <canvas ref={canvasRef} className='hidden' />
-        {photoURL && (
-          <div className='space-y-4'>
-            <div className='relative aspect-video bg-zinc-900 rounded-lg overflow-hidden'>
-              <Image
-                src={photoURL}
-                alt='Captured'
-                fill
-                className='object-contain'
-              />
-            </div>
-            <div className='flex justify-between gap-2'>
-              <Button onClick={downloadImage} variant='outline' size='sm'>
+      </div>
+
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className='max-w-md'>
+          <DialogHeader>
+            <DialogTitle className='text-center mb-4'>Your Photo Strip</DialogTitle>
+          </DialogHeader>
+          
+          <div className='flex flex-col items-center gap-6'>
+            {photoURL && (
+              <div className='relative w-full' style={{ height: '80vh' }}>
+                <Image
+                  src={photoURL}
+                  alt='Photo Strip'
+                  fill
+                  className='object-contain'
+                  priority
+                />
+              </div>
+            )}
+            
+            <div className='flex gap-4 w-full justify-center'>
+              <Button 
+                onClick={downloadImage} 
+                variant='outline'
+                className='w-40'
+              >
                 {downloadFeedback ? (
                   <Check className='mr-2 h-4 w-4 text-green-500' />
                 ) : (
@@ -218,10 +329,11 @@ const PhotoBooth: React.FC<Props> = ({
                 )}
                 {downloadFeedback ? 'Downloaded!' : 'Download'}
               </Button>
+              
               <Button
                 onClick={uploadPhoto}
                 variant='outline'
-                size='sm'
+                className='w-40'
                 disabled={isUploading}
               >
                 {isUploading ? (
@@ -232,29 +344,27 @@ const PhotoBooth: React.FC<Props> = ({
                 {isUploading ? 'Uploading...' : 'Upload'}
               </Button>
             </div>
+
+            {uploadResult && (
+              <div className='text-sm text-zinc-400'>
+                <p>Blob ID: {uploadResult.blobId}</p>
+                <p>
+                  Object ID:{' '}
+                  <Link
+                    href={`https://suiscan.xyz/testnet/object/${uploadResult.objectId}`}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-blue-400 hover:text-blue-300 underline'
+                  >
+                    {uploadResult.objectId}
+                  </Link>
+                </p>
+              </div>
+            )}
           </div>
-        )}
-        {uploadResult && (
-          <div className='mt-2 text-sm text-zinc-400'>
-            <p>Blob ID: {uploadResult.blobId}</p>
-            <p>
-              Object ID:{' '}
-              <Link
-                href={`https://suiscan.xyz/testnet/object/${uploadResult.objectId}`}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='text-blue-400 hover:text-blue-300 underline'
-              >
-                {uploadResult.objectId}
-              </Link>
-            </p>
-          </div>
-        )}
-      </div>
-      <div className='bg-zinc-900 text-zinc-400 text-center py-2 text-sm font-bold tracking-wider'>
-        {selectedEventTitle}
-      </div>
-    </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
