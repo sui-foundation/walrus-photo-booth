@@ -49,6 +49,7 @@ const PhotoBooth: React.FC<Props> = ({
   const [isCapturing, setIsCapturing] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [isUploaded, setIsUploaded] = useState(false);
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -77,6 +78,7 @@ const PhotoBooth: React.FC<Props> = ({
     setIsCapturing(true);
     setShowModal(false);
     setUploadResult(null);
+    setIsUploaded(false);
 
     const newPhotos: string[] = [];
   
@@ -183,7 +185,7 @@ const PhotoBooth: React.FC<Props> = ({
   };
 
   const uploadPhoto = async () => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || isUploaded) return;
     setIsUploading(true);
 
     try {
@@ -225,6 +227,7 @@ const PhotoBooth: React.FC<Props> = ({
           blobId: result.data.newlyCreated.blobObject.blobId,
           objectId: result.data.newlyCreated.blobObject.id,
         });
+        setIsUploaded(true);
       } else {
         console.error('Unexpected response structure:', result);
       }
@@ -245,6 +248,7 @@ const PhotoBooth: React.FC<Props> = ({
     setIsUploading(false);
     setIsCapturing(false);
     setCountdown(null);
+    setIsUploaded(false);
   };
 
   return (
@@ -334,14 +338,16 @@ const PhotoBooth: React.FC<Props> = ({
                 onClick={uploadPhoto}
                 variant='outline'
                 className='w-40'
-                disabled={isUploading}
+                disabled={isUploading || isUploaded}
               >
-                {isUploading ? (
+                {isUploaded ? (
+                  <Check className='mr-2 h-4 w-4 text-green-500' />
+                ) : isUploading ? (
                   <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 ) : (
                   <Upload className='mr-2 h-4 w-4' />
                 )}
-                {isUploading ? 'Uploading...' : 'Upload'}
+                {isUploaded ? 'Uploaded!' : isUploading ? 'Uploading...' : 'Upload'}
               </Button>
             </div>
 
