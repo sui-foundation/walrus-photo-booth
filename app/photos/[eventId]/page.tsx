@@ -20,6 +20,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -172,94 +178,147 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
   }
 
   return (
-    <main className='container mx-auto px-4 py-8'>
-      <div className='w-full flex items-center justify-between relative mb-10'>
-        <div>
-          <h1 className='text-3xl font-bold'>{eventDetails?.event_title}</h1>
-          <h2 className='text-md font-bold'>{eventDetails?.event_date}</h2>
-          <Link href='/' className='underline'>
-            Back to Events
-          </Link>
-        </div>
-        <div className='flex items-center gap-4'>
-          {isConnected && currentAdminId && (
-            <>
-              <Link
-                href='/addEvent'
-                className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 py-2 px-6'
-              >
-                + Event
-              </Link>
-              <Link
-                href='/photo-booth'
-                className='flex items-center justify-center rounded-md text-sm text-black bg-gray-300 py-2 px-6'
-              >
-                Booth
-              </Link>
-            </>
-          )}
-          <ProfilePopover />
-        </div>
-      </div>
-
-      {photos.length === 0 ? (
-        <p>No photos found for this event yet.</p>
-      ) : (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {photos.map((photo) => (
-            <div key={photo.blob_id} className='border rounded-lg p-4'>
-              <Image
-                src={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
-                alt={`Photo ${photo.blob_id}`}
-                className='w-full h-48 object-cover mb-4 rounded'
-                width={500}
-                height={300}
-              />
-              <p className='text-sm mb-2'>Blob ID: {photo.blob_id}</p>
-              <p className='text-sm mb-2'>
-                Object ID:{' '}
+    <main className='min-h-screen bg-gray-50 dark:bg-gray-900'>
+      <div className='container mx-auto px-4 py-12'>
+        <div className='w-full flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg'>
+          <div className='space-y-2'>
+            <h1 className='text-4xl font-bold text-gray-900 dark:text-white'>
+              {eventDetails?.event_title}
+            </h1>
+            <h2 className='text-lg text-gray-600 dark:text-gray-300'>
+              {eventDetails?.event_date}
+            </h2>
+            <Link 
+              href='/' 
+              className='inline-block text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors'
+            >
+              ← Back to Events
+            </Link>
+          </div>
+          
+          <div className='flex items-center gap-4'>
+            {isConnected && currentAdminId && (
+              <>
                 <Link
-                  href={`https://suiscan.xyz/testnet/object/${photo.object_id}`}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='text-blue-500 hover:underline'
+                  href='/addEvent'
+                  className='flex items-center justify-center rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors py-2.5 px-6'
                 >
-                  {photo.object_id}
+                  + Event
                 </Link>
-              </p>
-              {isConnected && eventDetails?.admin_id === currentAdminId && (
-                <AlertDialog>
-                  <AlertDialogTrigger
-                    asChild
-                    className='ml-2 cursor-pointer p-2 z-10 bg-gray-800 rounded-sm'
-                  >
-                    <Button>
-                      <TrashIcon className='cursor-pointer' />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Delete photo {photo.blob_id}? This action cannot be
-                        undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDeletePhoto(photo.blob_id)}
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
-            </div>
-          ))}
+                <Link
+                  href='/photo-booth'
+                  className='flex items-center justify-center rounded-lg text-sm font-medium text-gray-900 bg-gray-100 hover:bg-gray-200 transition-colors py-2.5 px-6'
+                >
+                  Booth
+                </Link>
+              </>
+            )}
+            <ProfilePopover />
+          </div>
         </div>
-      )}
+
+        {photos.length === 0 ? (
+          <div className='text-center py-12'>
+            <p className='text-lg text-gray-600 dark:text-gray-400'>
+              No photos found for this event yet.
+            </p>
+          </div>
+        ) : (
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+            {photos.map((photo) => (
+              <div 
+                key={photo.blob_id} 
+                className='bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg transition-transform hover:scale-[1.02]'
+              >
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div className='relative aspect-[3/2] cursor-pointer'>
+                      <Image
+                        src={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
+                        alt={`Photo ${photo.blob_id}`}
+                        className='object-contain hover:opacity-90 transition-opacity'
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
+                    <DialogTitle className="sr-only">
+                      Photo from {eventDetails?.event_title}
+                    </DialogTitle>
+                    <div className="relative w-full h-[90vh]">
+                      <Image
+                        src={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
+                        alt={`Photo ${photo.blob_id}`}
+                        className='object-contain'
+                        fill
+                        sizes="90vw"
+                        priority
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <div className='p-5'>
+                  <div className='space-y-2 mb-4'>
+                    <div className='flex items-center gap-2'>
+                      <span className='text-xs font-semibold uppercase text-gray-500 dark:text-gray-400'>
+                        Blob ID:
+                      </span>
+                      <span className='text-sm font-mono text-gray-700 dark:text-gray-300 truncate'>
+                        {photo.blob_id}
+                      </span>
+                    </div>
+                    <div className='flex items-center gap-2'>
+                      <span className='text-xs font-semibold uppercase text-gray-500 dark:text-gray-400'>
+                        Object ID:
+                      </span>
+                      <Link
+                        href={`https://suiscan.xyz/testnet/object/${photo.object_id}`}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='text-sm font-mono text-indigo-600 dark:text-indigo-400 hover:underline truncate'
+                      >
+                        {photo.object_id}
+                      </Link>
+                    </div>
+                  </div>
+                  {isConnected && eventDetails?.admin_id === currentAdminId && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button className='w-full mt-2 bg-red-600 hover:bg-red-700 text-white transition-colors'>
+                          <TrashIcon className='mr-2 h-4 w-4' />
+                          Delete Photo
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className='bg-white dark:bg-gray-800'>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className='text-gray-900 dark:text-white'>
+                            Are you sure?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription className='text-gray-600 dark:text-gray-400'>
+                            Delete photo {photo.blob_id}? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className='bg-gray-100 hover:bg-gray-200 text-gray-900'>
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeletePhoto(photo.blob_id)}
+                            className='bg-red-600 hover:bg-red-700 text-white'
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   );
 };
