@@ -253,30 +253,36 @@ const PhotoBooth: React.FC<Props> = ({
 
   return (
     <>
-      <div className='max-w-md w-full bg-zinc-800 rounded-xl shadow-2xl overflow-hidden'>
-        <div className='p-4 space-y-4'>
-          <div className='flex space-x-2'>
+      <div className='max-w-4xl w-full bg-black/80 rounded-xl shadow-2xl overflow-hidden'>
+        <div className='p-6 space-y-6'>
+          <div className='flex space-x-3 justify-center'>
             <Button
               onClick={isCameraOn ? stopCamera : startCamera}
               variant={isCameraOn ? 'destructive' : 'default'}
+              className='min-w-[140px] transition-all duration-200 hover:scale-105'
             >
-              <Camera className='mr-2 h-4 w-4' />
+              <Camera className='mr-2 h-5 w-5' />
               {isCameraOn ? 'Stop Camera' : 'Start Camera'}
             </Button>
             <Button
               onClick={takePhotoSequence}
               disabled={!isCameraOn || isCapturing}
               variant='secondary'
+              className='min-w-[140px] transition-all duration-200 hover:scale-105'
             >
-              <Camera className='mr-2 h-4 w-4' />
+              <Camera className='mr-2 h-5 w-5' />
               {isCapturing ? 'Capturing...' : 'Take Photos'}
             </Button>
-            <Button onClick={resetApp} variant='outline'>
-              <RotateCcw className='mr-2 h-4 w-4' />
+            <Button 
+              onClick={resetApp} 
+              variant='outline'
+              className='transition-all duration-200 hover:scale-105'
+            >
+              <RotateCcw className='mr-2 h-5 w-5' />
               Reset
             </Button>
           </div>
-          <div className='relative aspect-video bg-black rounded-lg overflow-hidden w-full'>
+          <div className='relative aspect-video bg-black rounded-lg overflow-hidden w-full shadow-xl border border-zinc-700'>
             <video
               ref={videoRef}
               autoPlay
@@ -284,32 +290,37 @@ const PhotoBooth: React.FC<Props> = ({
               className='w-full h-full object-cover'
             />
             {!isCameraOn && (
-              <div className='absolute inset-0 flex items-center justify-center'>
-                <span className='text-zinc-400 text-lg'>Camera Preview</span>
+              <div className='absolute inset-0 flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm'>
+                <span className='text-zinc-400 text-xl font-medium'>Camera Preview</span>
               </div>
             )}
             {countdown !== null && (
-              <div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50'>
-                <span className='text-white text-6xl font-bold'>{countdown || 'Snap!'}</span>
+              <div className='absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm'>
+                <span className='text-white text-8xl font-bold animate-pulse'>
+                  {countdown || 'Snap!'}
+                </span>
               </div>
             )}
           </div>
           <canvas ref={canvasRef} className='hidden' />
         </div>
-        <div className='bg-zinc-900 text-zinc-400 text-center py-2 text-sm font-bold tracking-wider'>
+        <div className='bg-black/80 backdrop-blur-sm text-white text-center py-3 text-base font-medium tracking-wider border-t border-zinc-700'>
           {selectedEventTitle}
         </div>
       </div>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className='max-w-md'>
+        <DialogContent className='max-w-2xl bg-black/90 border-zinc-700'>
           <DialogHeader>
-            <DialogTitle className='text-center mb-4'>Your Photo Strip</DialogTitle>
+            <DialogTitle className='text-center text-2xl font-semibold mb-4 text-white'>
+              Your Photo Strip
+            </DialogTitle>
           </DialogHeader>
           
           <div className='flex flex-col items-center gap-6'>
             {photoURL && (
-              <div className='relative w-full' style={{ height: '80vh' }}>
+              <div className='relative w-full rounded-lg overflow-hidden border border-zinc-700 bg-black/40' 
+                   style={{ height: '80vh' }}>
                 <Image
                   src={photoURL}
                   alt='Photo Strip'
@@ -324,7 +335,7 @@ const PhotoBooth: React.FC<Props> = ({
               <Button 
                 onClick={downloadImage} 
                 variant='outline'
-                className='w-40'
+                className='w-40 transition-all duration-200 hover:scale-105'
               >
                 {downloadFeedback ? (
                   <Check className='mr-2 h-4 w-4 text-green-500' />
@@ -337,7 +348,7 @@ const PhotoBooth: React.FC<Props> = ({
               <Button
                 onClick={uploadPhoto}
                 variant='outline'
-                className='w-40'
+                className='w-40 transition-all duration-200 hover:scale-105'
                 disabled={isUploading || isUploaded}
               >
                 {isUploaded ? (
@@ -352,7 +363,7 @@ const PhotoBooth: React.FC<Props> = ({
             </div>
 
             {uploadResult && (
-              <div className='text-sm text-zinc-400'>
+              <div className='text-sm text-white bg-black/40 p-4 rounded-lg border border-zinc-700'>
                 <p>Blob ID: {uploadResult.blobId}</p>
                 <p>
                   Object ID:{' '}
