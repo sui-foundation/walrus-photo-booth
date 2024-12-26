@@ -14,8 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -38,17 +36,7 @@ const PhotoBoothPage: React.FC = () => {
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [currAdminsEvents, setCurrAdminsEvents] = useState<Event[]>([]);
 
-  const [selectedEvent, setSelectedEvent] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const jsonStr = localStorage.getItem('selectedEvent');
-
-      if (jsonStr !== null) {
-        return JSON.parse(jsonStr);
-      }
-      return null;
-    }
-    return null;
-  });
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
@@ -102,14 +90,7 @@ const PhotoBoothPage: React.FC = () => {
     localStorage.setItem('selectedEvent', JSON.stringify(foundEvent[0]));
     setSelectedEvent(foundEvent[0]);
   };
-
-  const handleEditCam = () => {
-    setIsLoading(true);
-    localStorage.removeItem('selectedEvent');
-    setSelectedEvent(null);
-    setIsLoading(false);
-  };
-
+  
   if (error) {
     return <div>Error loading events</div>;
   }
@@ -130,22 +111,6 @@ const PhotoBoothPage: React.FC = () => {
 
   return (
     <main className='container min-h-screen mx-auto px-4 py-8 flex flex-col'>
-      <div className='w-full flex items-center justify-center p-4 gap-3'>
-        {isConnected && !selectedEvent && (
-          <Link
-            href='/'
-            className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 py-2 px-6'
-          >
-            Events
-          </Link>
-        )}
-        <ProfilePopover />
-        {isConnected && currentAdminId && selectedEvent && (
-          <Button variant='destructive' onClick={handleEditCam}>
-            Deactivate Cam / Change Event
-          </Button>
-        )}
-      </div>
       <div className='w-full flex items-center justify-center grow p-4'>
         {selectedEvent ? (
           <PhotoBooth
@@ -155,21 +120,24 @@ const PhotoBoothPage: React.FC = () => {
         ) : (
           <>
             {currentAdminId && (
-              <Select onValueChange={handleSelectEvent}>
-                <SelectTrigger className='w-[200px]'>
-                  <SelectValue placeholder='Select an Event' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {currAdminsEvents &&
-                      currAdminsEvents.map((el: Event, index) => (
-                        <SelectItem key={index} value={el.id.toString()}>
-                          {el.event_title.toUpperCase()} / {el.event_date}
-                        </SelectItem>
-                      ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col items-center justify-center w-full gap-4">
+                <ProfilePopover />
+                <Select onValueChange={handleSelectEvent}>
+                  <SelectTrigger className='w-[280px]'>
+                    <SelectValue placeholder='Select an Event' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {currAdminsEvents &&
+                        currAdminsEvents.map((el: Event, index) => (
+                          <SelectItem key={index} value={el.id.toString()}>
+                            {el.event_title.toUpperCase()} / {el.event_date}
+                          </SelectItem>
+                        ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
             )}
           </>
         )}
