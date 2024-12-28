@@ -37,6 +37,7 @@
     "react-dom": "^18.2.0",
     "react-draggable": "^4.4.6",
     "react-hook-form": "^7.53.2",
+    "react-qr-code": "^2.0.15",
     "react-spinners": "^0.14.1",
     "sonner": "^1.7.0",
     "tailwind-merge": "^2.5.4",
