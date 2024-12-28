@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
   Camera,
-  Download,
   Upload,
   Check,
   Loader2,
@@ -20,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import QRCode from 'react-qr-code';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -39,7 +39,6 @@ const PhotoBooth: React.FC<Props> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [photoURL, setPhotoURL] = useState<string | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
-  const [downloadFeedback, setDownloadFeedback] = useState(false);
   const jsConfettiRef = useRef<JSConfetti | null>(null);
   const [uploadResult, setUploadResult] = useState<{
     blobId: string;
@@ -50,6 +49,10 @@ const PhotoBooth: React.FC<Props> = ({
   const [countdown, setCountdown] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
+  const eventUrl = useMemo(() => 
+    `${window.location.origin}/events/${selectedEventId}`,
+    [selectedEventId]
+  );
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -171,19 +174,6 @@ const PhotoBooth: React.FC<Props> = ({
     }
   };
 
-  const downloadImage = async () => {
-    if (!canvasRef.current || !photoURL) return;
-
-    const link = document.createElement('a');
-    link.href = photoURL;
-    link.download = 'image.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setDownloadFeedback(true);
-    setTimeout(() => setDownloadFeedback(false), 2000);
-  };
-
   const uploadPhoto = async () => {
     if (!canvasRef.current || isUploaded) return;
     setIsUploading(true);
@@ -244,7 +234,6 @@ const PhotoBooth: React.FC<Props> = ({
     }
     setPhotoURL(null);
     setUploadResult(null);
-    setDownloadFeedback(false);
     setIsUploading(false);
     setIsCapturing(false);
     setCountdown(null);
@@ -332,23 +321,20 @@ const PhotoBooth: React.FC<Props> = ({
             )}
             
             <div className='flex gap-4 w-full justify-center'>
-              <Button 
-                onClick={downloadImage} 
-                variant='outline'
-                className='w-40 transition-all duration-200 hover:scale-105'
-              >
-                {downloadFeedback ? (
-                  <Check className='mr-2 h-4 w-4 text-green-500' />
-                ) : (
-                  <Download className='mr-2 h-4 w-4' />
-                )}
-                {downloadFeedback ? 'Downloaded!' : 'Download'}
-              </Button>
+              <div className='bg-white/90 p-3 rounded-lg shadow-lg'>
+                <QRCode
+                  value={eventUrl}
+                  size={120}
+                  style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                  viewBox={`0 0 256 256`}
+                  className="rounded"
+                />
+              </div>
               
               <Button
                 onClick={uploadPhoto}
                 variant='outline'
-                className='w-40 transition-all duration-200 hover:scale-105'
+                className='h-12 px-6 transition-all duration-200 hover:scale-105'
                 disabled={isUploading || isUploaded}
               >
                 {isUploaded ? (
