@@ -259,29 +259,6 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
                   </DialogContent>
                 </Dialog>
                 <div className='p-5'>
-                  <div className='space-y-2 mb-4'>
-                    <div className='flex items-center gap-2'>
-                      <span className='text-xs font-semibold uppercase text-gray-500 dark:text-gray-400'>
-                        Blob ID:
-                      </span>
-                      <span className='text-sm font-mono text-gray-700 dark:text-gray-300 truncate'>
-                        {photo.blob_id}
-                      </span>
-                    </div>
-                    <div className='flex items-center gap-2'>
-                      <span className='text-xs font-semibold uppercase text-gray-500 dark:text-gray-400'>
-                        Object ID:
-                      </span>
-                      <Link
-                        href={`https://suiscan.xyz/testnet/object/${photo.object_id}`}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='text-sm font-mono text-indigo-600 dark:text-indigo-400 hover:underline truncate'
-                      >
-                        {photo.object_id}
-                      </Link>
-                    </div>
-                  </div>
                   {isConnected && eventDetails?.admin_id === currentAdminId && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
