@@ -8,7 +8,6 @@ import {
   Upload,
   Check,
   Loader2,
-  RotateCcw,
 } from 'lucide-react';
 import JSConfetti from 'js-confetti';
 import Link from 'next/link';

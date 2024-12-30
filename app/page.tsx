@@ -4,22 +4,8 @@ import { useState, useEffect } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { createClient } from '@supabase/supabase-js';
 import ProfilePopover from '@/components/ProfilePopover';
-import { TrashIcon } from '@radix-ui/react-icons';
 import Loading from '@/components/Loading';
 import Link from 'next/link';
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
 import { EventCard } from '@/components/EventCard';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
