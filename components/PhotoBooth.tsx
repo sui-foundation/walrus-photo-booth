@@ -228,18 +228,6 @@ const PhotoBooth: React.FC<Props> = ({
     }
   };
 
-  const resetApp = () => {
-    if (isCameraOn) {
-      stopCamera();
-    }
-    setPhotoURL(null);
-    setUploadResult(null);
-    setIsUploading(false);
-    setIsCapturing(false);
-    setCountdown(null);
-    setIsUploaded(false);
-  };
-
   return (
     <>
       <div className='max-w-4xl w-full bg-black/80 rounded-xl shadow-2xl overflow-hidden'>
@@ -261,14 +249,6 @@ const PhotoBooth: React.FC<Props> = ({
             >
               <Camera className='mr-2 h-5 w-5' />
               {isCapturing ? 'Capturing...' : 'Take Photos'}
-            </Button>
-            <Button 
-              onClick={resetApp} 
-              variant='outline'
-              className='transition-all duration-200 hover:scale-105'
-            >
-              <RotateCcw className='mr-2 h-5 w-5' />
-              Reset
             </Button>
           </div>
           <div className='relative aspect-video bg-black rounded-lg overflow-hidden w-full shadow-xl border border-zinc-700'>
