@@ -20,6 +20,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { EventCard } from '@/components/EventCard';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -107,23 +108,23 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <main className='container mx-auto px-4 py-8'>
-      <div className='w-full flex items-center justify-between relative mb-10'>
-        <h1 className='text-3xl font-bold'>Photo Booth Events</h1>
-        <div className='flex items-center gap-4'>
+    <main className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold">Photo Booth Events</h1>
+        <div className="flex items-center gap-4">
           {isConnected && currentAdminId && (
             <>
               <Link
-                href='/addEvent'
-                className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 py-2 px-6'
+                href="/addEvent"
+                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
               >
-                + Event
+                + New Event
               </Link>
               <Link
-                href='/photo-booth'
-                className='flex items-center justify-center rounded-md text-sm text-black bg-gray-300 py-2 px-6'
+                href="/photo-booth"
+                className="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium hover:bg-secondary/90"
               >
-                Booth
+                Photo Booth
               </Link>
             </>
           )}
@@ -131,49 +132,16 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {events.length > 0 &&
-          events.map((e) => (
-            <div
-              key={e.id}
-              className='w-full rounded-xl border border-black p-6 text-center'
-            >
-              <div className='w-full flex gap-2 items-center justify-center'>
-                <a href={`photos/${e.id}`} className='block relative'>
-                  {e.event_title.toUpperCase()}
-                </a>
-                {isConnected && e.admin_id === currentAdminId && (
-                  <AlertDialog>
-                    <AlertDialogTrigger
-                      asChild
-                      className='ml-2 cursor-pointer p-2 z-10 bg-gray-800 rounded-sm'
-                    >
-                      <Button>
-                        <TrashIcon className='z-10' />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Delete event &apos;{e.event_title}&apos;? This action
-                          cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDeleteEvent(e.id)}
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                )}
-              </div>
-            </div>
-          ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {events.map((event) => (
+          <EventCard
+            key={event.id}
+            event={event}
+            isConnected={isConnected}
+            currentAdminId={currentAdminId}
+            onDelete={handleDeleteEvent}
+          />
+        ))}
       </div>
     </main>
   );
