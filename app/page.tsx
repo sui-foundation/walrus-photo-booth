@@ -72,17 +72,31 @@ const HomePage: React.FC = () => {
 
   const handleDeleteEvent = async (id: number) => {
     setIsLoading(true);
+    
+    try {
+      // delete all photos associated with the event
+      const { error: photosError } = await supabase
+        .from('photos')
+        .delete()
+        .eq('event_id', id);
 
-    const { error } = await supabase.from('events').delete().eq('id', id);
+      if (photosError) throw photosError;
 
-    if (error) {
-      setError(error);
-      console.error('Error deleting event:', error);
-    } else {
+      // delete the event
+      const { error: eventError } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', id);
+
+      if (eventError) throw eventError;
+
       setEvents(events.filter((event) => event.id !== id));
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      setError(error as Error);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   if (error) {
