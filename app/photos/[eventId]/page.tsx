@@ -255,7 +255,15 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
                         sizes="90vw"
                         priority
                       />
-                      <div className="absolute bottom-4 right-4">
+                      <div className="absolute bottom-4 right-4 flex gap-2">
+                        <a
+                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out this photo from ${eventDetails?.event_title}!`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
+                        >
+                          Share on Twitter
+                        </a>
                         <a
                           href={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
                           download
