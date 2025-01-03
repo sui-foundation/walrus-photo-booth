@@ -5,8 +5,6 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
   Camera,
-  Upload,
-  Check,
   Loader2,
 } from 'lucide-react';
 import JSConfetti from 'js-confetti';
@@ -158,6 +156,7 @@ const PhotoBooth: React.FC<Props> = ({
         const finalPhotoURL = canvas.toDataURL('image/png');
         setPhotoURL(finalPhotoURL);
         setShowModal(true);
+        await uploadPhoto();
       }
     }
   
@@ -281,7 +280,7 @@ const PhotoBooth: React.FC<Props> = ({
         <DialogContent className='max-w-2xl bg-black/90 border-zinc-700'>
           <DialogHeader>
             <DialogTitle className='text-center text-2xl font-semibold mb-4 text-white'>
-              Your Photo Strip
+              {isUploading ? 'Uploading Photo...' : isUploaded ? 'Photo Uploaded!' : 'Your Photo Strip'}
             </DialogTitle>
           </DialogHeader>
           
@@ -296,6 +295,11 @@ const PhotoBooth: React.FC<Props> = ({
                   className='object-contain'
                   priority
                 />
+                {isUploading && (
+                  <div className='absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm'>
+                    <Loader2 className='h-8 w-8 animate-spin text-white' />
+                  </div>
+                )}
               </div>
             )}
             
@@ -309,22 +313,6 @@ const PhotoBooth: React.FC<Props> = ({
                   className="rounded"
                 />
               </div>
-              
-              <Button
-                onClick={uploadPhoto}
-                variant='outline'
-                className='h-12 px-6 transition-all duration-200 hover:scale-105'
-                disabled={isUploading || isUploaded}
-              >
-                {isUploaded ? (
-                  <Check className='mr-2 h-4 w-4 text-green-500' />
-                ) : isUploading ? (
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                ) : (
-                  <Upload className='mr-2 h-4 w-4' />
-                )}
-                {isUploaded ? 'Uploaded!' : isUploading ? 'Uploading...' : 'Upload'}
-              </Button>
             </div>
 
             {uploadResult && (
