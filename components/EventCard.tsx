@@ -22,14 +22,14 @@ interface EventCardProps {
 export const EventCard = ({ event, isConnected, currentAdminId, onDelete }: EventCardProps) => {
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
-      <div className="relative aspect-[16/9] overflow-hidden rounded-t-lg">
-        <img
-          src={event.photo_url || '/test.png'}
-          alt={event.event_title}
-          className="object-cover w-full h-full bg-blue-500"
-        />
-      </div>
       <Link href={`/photos/${event.id}`} className="block">
+        <div className="relative aspect-[16/9] overflow-hidden rounded-t-lg">
+          <img
+            src={event.photo_url || '/test.png'}
+            alt={event.event_title}
+            className="object-cover w-full h-full bg-blue-500"
+          />
+        </div>
         <div className="p-6">
           <h2 className="text-xl font-semibold mb-2">{event.event_title}</h2>
           <p className="text-gray-600 mb-2">{new Date(event.event_date).toLocaleDateString()}</p>
