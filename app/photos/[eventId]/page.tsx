@@ -103,14 +103,9 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
       } else {
         if (events[0]) {
           const options: DateTimeFormatOptions = {
-            weekday: 'short',
-            month: 'short',
+            month: 'long',
             day: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-            timeZoneName: 'short',
+            year: 'numeric'
           };
           const id = events[0].id;
           const et = events[0].event_title.toUpperCase();
