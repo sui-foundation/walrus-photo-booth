@@ -110,7 +110,12 @@ const HomePage: React.FC = () => {
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Photo Booth Events</h1>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-4xl font-bold text-primary">Events</h1>
+          <p className="text-lg text-gray-600">
+            Click on an event to view photos from the event
+          </p>
+        </div>
         <div className="flex items-center gap-4">
           {isConnected && currentAdminId && (
             <>
