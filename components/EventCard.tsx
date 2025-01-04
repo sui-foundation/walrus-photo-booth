@@ -32,7 +32,13 @@ export const EventCard = ({ event, isConnected, currentAdminId, onDelete }: Even
         </div>
         <div className="p-6">
           <h2 className="text-xl font-semibold mb-2">{event.event_title}</h2>
-          <p className="text-gray-600 mb-2">{new Date(event.event_date).toLocaleDateString()}</p>
+          <p className="text-gray-600 mb-2">
+            {new Date(event.event_date).toLocaleDateString('en-US', {
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric'
+            })}
+          </p>
         </div>
       </Link>
       {isConnected && event.admin_id === currentAdminId && (
