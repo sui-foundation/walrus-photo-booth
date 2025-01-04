@@ -25,6 +25,7 @@ import {
   DialogContent,
   DialogTrigger,
   DialogTitle,
+  DialogClose,
 } from '@/components/ui/dialog'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -58,6 +59,13 @@ interface DateTimeFormatOptions {
   hour12?: boolean;
   timeZoneName?: 'short' | 'long';
 }
+
+const fadeInAnimation = `
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+`;
 
 const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
   const resolvedParams = use(params);
@@ -173,9 +181,11 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
   }
 
   return (
-    <main className='min-h-screen bg-gray-50 dark:bg-gray-900'>
+    <main className='min-h-screen bg-gradient-to-br from-sky-100 via-blue-50 to-white dark:from-sky-900 dark:via-blue-900 dark:to-gray-900'>
       <div className='container mx-auto px-4 py-12'>
-        <div className='w-full flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg'>
+        <div className='w-full flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 
+                       bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm 
+                       rounded-xl p-6 shadow-lg'>
           <div className='space-y-2'>
             <h1 className='text-4xl font-bold text-gray-900 dark:text-white'>
               {eventDetails?.event_title}
@@ -213,101 +223,132 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
         </div>
 
         {photos.length === 0 ? (
-          <div className='text-center py-12'>
+          <div className='text-center py-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl'>
             <p className='text-lg text-gray-600 dark:text-gray-400'>
               No photos found for this event yet.
             </p>
           </div>
         ) : (
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
-            {photos.map((photo) => (
-              <div 
-                key={photo.blob_id} 
-                className='bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg transition-transform hover:scale-[1.02]'
-              >
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <div className='relative aspect-[3/2] cursor-pointer'>
-                      <Image
-                        src={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
-                        alt={`Photo ${photo.blob_id}`}
-                        className='object-contain hover:opacity-90 transition-opacity'
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    </div>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
-                    <DialogTitle className="sr-only">
-                      Photo from {eventDetails?.event_title}
-                    </DialogTitle>
-                    <div className="relative w-full h-[90vh]">
-                      <Image
-                        src={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
-                        alt={`Photo ${photo.blob_id}`}
-                        className='object-contain'
-                        fill
-                        sizes="90vw"
-                        priority
-                      />
-                      <div className="absolute bottom-4 right-4 flex gap-2">
-                        <a
-                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out this photo from ${eventDetails?.event_title}!`)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
-                        >
-                          Share on Twitter
-                        </a>
-                        <a
-                          href={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
-                          download
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-white/90 hover:bg-white text-gray-900 px-4 py-2 rounded-lg shadow-lg transition-colors"
-                        >
-                          Download
-                        </a>
+          <>
+            <style>{fadeInAnimation}</style>
+            <div className='columns-2 sm:columns-3 md:columns-4 gap-3 space-y-3 p-3'>
+              {photos.map((photo, index) => (
+                <div 
+                  key={photo.blob_id} 
+                  style={{
+                    animation: `fadeIn 0.6s ease-out ${index * 0.1}s both`
+                  }}
+                  className='relative bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg shadow-sm
+                             aspect-square flex flex-col items-center justify-center mb-3
+                             transform-gpu hover:scale-[1.02] hover:shadow-lg transition-all duration-300
+                             break-inside-avoid group'
+                >
+                  <div className='absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 
+                                transition-all duration-300 rounded-lg' />
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <div className='relative w-[80%] h-full cursor-pointer z-10'> 
+                        <Image
+                          src={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
+                          alt={`Photo ${photo.blob_id}`}
+                          className='rounded-md transition-all duration-300 object-contain'
+                          fill
+                          sizes="(max-width: 768px) 40vw, 25vw"
+                          style={{ transform: 'translateZ(0)' }}
+                        />
+                        <div className='absolute inset-0 flex items-center justify-center'>
+                          <span className='opacity-0 group-hover:opacity-100 text-white text-sm bg-black px-3 py-1 rounded-full transition-opacity'>
+                            View
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <div className='p-5'>
-                  {isConnected && eventDetails?.admin_id === currentAdminId && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button className='w-full mt-2 bg-red-600 hover:bg-red-700 text-white transition-colors'>
-                          <TrashIcon className='mr-2 h-4 w-4' />
-                          Delete Photo
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent className='bg-white dark:bg-gray-800'>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle className='text-gray-900 dark:text-white'>
-                            Are you sure?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription className='text-gray-600 dark:text-gray-400'>
-                            Delete photo {photo.blob_id}? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel className='bg-gray-100 hover:bg-gray-200 text-gray-900'>
-                            Cancel
-                          </AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeletePhoto(photo.blob_id)}
-                            className='bg-red-600 hover:bg-red-700 text-white'
+                    </DialogTrigger>
+                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 !bg-black/80 border-none 
+                                             data-[state=open]:!bg-black/80 dark:!bg-black/80">
+                      <DialogTitle className="sr-only">
+                        Photo from {eventDetails?.event_title}
+                      </DialogTitle>
+                      <div className="relative w-full h-[95vh] !bg-black/80">
+                        <DialogClose className="absolute top-4 right-4 z-50 
+                                                bg-black/60 hover:bg-black/80
+                                                w-8 h-8
+                                                flex items-center justify-center
+                                                shadow-lg transition-all 
+                                                hover:scale-110"
+                                     aria-label="Close dialog">
+                          <span className="text-white text-xl leading-none font-semibold">
+                            ×
+                          </span>
+                        </DialogClose>
+                        <Image
+                          src={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
+                          alt={`Photo ${photo.blob_id}`}
+                          className='object-contain transition-opacity duration-300'
+                          fill
+                          sizes="95vw"
+                          priority
+                        />
+                        <div className="absolute bottom-4 right-4 flex gap-2 opacity-80 hover:opacity-100 transition-opacity">
+                          <a
+                            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out this photo from ${eventDetails?.event_title}!`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
                           >
+                            Share on Twitter
+                          </a>
+                          <a
+                            href={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-white/90 hover:bg-white text-gray-900 px-4 py-2 rounded-lg shadow-lg transition-colors"
+                          >
+                            Download
+                          </a>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  
+                  {isConnected && eventDetails?.admin_id === currentAdminId && (
+                    <div className='mt-3 w-full z-10'>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button className='w-full bg-red-600/90 hover:bg-red-700 text-white transition-colors text-sm'>
+                            <TrashIcon className='mr-2 h-3 w-3' />
                             Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className='bg-white dark:bg-gray-800'>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className='text-gray-900 dark:text-white'>
+                              Are you sure?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className='text-gray-600 dark:text-gray-400'>
+                              Delete photo {photo.blob_id}? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className='bg-gray-100 hover:bg-gray-200 text-gray-900'>
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeletePhoto(photo.blob_id)}
+                              className='bg-red-600 hover:bg-red-700 text-white'
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   )}
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </main>
