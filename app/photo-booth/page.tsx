@@ -110,39 +110,41 @@ const PhotoBoothPage: React.FC = () => {
   }
 
   return (
-    <main className='container min-h-screen mx-auto px-4 py-8 flex flex-col'>
-      <div className='w-full flex items-center justify-center grow p-4'>
-        {selectedEvent ? (
-          <PhotoBooth
-            selectedEventTitle={selectedEvent.event_title}
-            selectedEventId={selectedEvent.id}
-          />
-        ) : (
-          <>
-            {currentAdminId && (
-              <div className="flex flex-col items-center justify-center w-full gap-4">
-                <ProfilePopover />
-                <Select onValueChange={handleSelectEvent}>
-                  <SelectTrigger className='w-[280px]'>
-                    <SelectValue placeholder='Select an Event' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {currAdminsEvents &&
-                        currAdminsEvents.map((el: Event, index) => (
-                          <SelectItem key={index} value={el.id.toString()}>
-                            {el.event_title.toUpperCase()} / {el.event_date}
-                          </SelectItem>
-                        ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </main>
+    <div className={`min-h-screen w-full flex items-center justify-center ${selectedEvent ? 'bg-zinc-900' : ''}`}>
+      <main className='container mx-auto px-4 py-8 flex flex-col w-full'>
+        <div className='w-full flex items-center justify-center grow p-4'>
+          {selectedEvent ? (
+            <PhotoBooth
+              selectedEventTitle={selectedEvent.event_title}
+              selectedEventId={selectedEvent.id}
+            />
+          ) : (
+            <>
+              {currentAdminId && (
+                <div className="flex flex-col items-center justify-center w-full gap-4">
+                  <ProfilePopover />
+                  <Select onValueChange={handleSelectEvent}>
+                    <SelectTrigger className='w-[280px]'>
+                      <SelectValue placeholder='Select an Event' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {currAdminsEvents &&
+                          currAdminsEvents.map((el: Event, index) => (
+                            <SelectItem key={index} value={el.id.toString()}>
+                              {el.event_title.toUpperCase()} / {el.event_date}
+                            </SelectItem>
+                          ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </main>
+    </div>
   );
 };
 
