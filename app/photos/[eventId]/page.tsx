@@ -289,24 +289,8 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
                           sizes="95vw"
                           priority
                         />
-                        <div className="absolute bottom-4 right-4 flex gap-2 opacity-80 hover:opacity-100 transition-opacity">
-                          <a
-                            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out this photo from ${eventDetails?.event_title}!`)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
-                          >
-                            Share on Twitter
-                          </a>
-                          <a
-                            href={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
-                            download
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-white/90 hover:bg-white text-gray-900 px-4 py-2 rounded-lg shadow-lg transition-colors"
-                          >
-                            Download
-                          </a>
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm">
+                          <span className="">Click and hold image to download (on mobile)</span>
                         </div>
                       </div>
                     </DialogContent>
