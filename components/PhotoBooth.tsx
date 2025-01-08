@@ -88,10 +88,15 @@ const PhotoBooth: React.FC<Props> = ({
       if (videoRef.current && canvasRef.current) {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
+        const videoElement = videoRef.current;
+  
         if (context) {
-          canvas.width = videoRef.current.videoWidth;
-          canvas.height = videoRef.current.videoHeight;
-          context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+          const { videoWidth, videoHeight } = videoElement;
+  
+          canvas.width = videoWidth;
+          canvas.height = videoHeight;
+  
+          context.drawImage(videoElement, 0, 0, videoWidth, videoHeight);
           const photoData = canvas.toDataURL('image/png');
           newPhotos.push(photoData);
         }
@@ -107,8 +112,9 @@ const PhotoBooth: React.FC<Props> = ({
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       if (context && newPhotos.length === 4) {
-        const singleWidth = videoRef.current?.videoWidth || 640;
-        const singleHeight = videoRef.current?.videoHeight || 480;
+        const { videoWidth, videoHeight } = videoRef.current!;
+        const singleWidth = videoWidth;
+        const singleHeight = videoHeight;
         const padding = 20;
         const borderWidth = 40;
   
@@ -251,7 +257,7 @@ const PhotoBooth: React.FC<Props> = ({
               ref={videoRef}
               autoPlay
               hidden={!isCameraOn}
-              className='w-full h-full object-cover'
+              className='w-full h-full object-contain'
             />
             {!isCameraOn && (
               <div className='absolute inset-0 flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm'>
