@@ -231,7 +231,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
         ) : (
           <>
             <style>{fadeInAnimation}</style>
-            <div className='columns-2 sm:columns-3 md:columns-4 gap-3 space-y-3 p-3'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 p-3'>
               {photos.map((photo, index) => (
                 <div 
                   key={photo.blob_id} 
@@ -290,7 +290,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
                           priority
                         />
                         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm">
-                          <span className="">Click and hold image to download (on mobile)</span>
+                          <span className="">Click and hold image to download (on mobile) or use native</span>
                         </div>
                       </div>
                     </DialogContent>
