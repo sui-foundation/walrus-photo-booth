@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { TrashIcon } from '@radix-ui/react-icons';
+import Image from 'next/image'
 
 interface Event {
   id: number;
@@ -24,10 +25,11 @@ export const EventCard = ({ event, isConnected, currentAdminId, onDelete }: Even
     <div className="rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
       <Link href={`/photos/${event.id}`} className="block">
         <div className="relative aspect-[16/9] overflow-hidden rounded-t-lg">
-          <img
+          <Image
             src={event.photo_url || '/test.png'}
             alt={event.event_title}
-            className="object-cover w-full h-full bg-blue-500"
+            fill
+            className="object-cover bg-blue-500"
           />
         </div>
         <div className="p-6">
