@@ -175,7 +175,7 @@ const PhotoBooth: React.FC<Props> = ({
   };
 
   const uploadPhoto = async () => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || isUploaded) return;
     setIsUploading(true);
 
     try {
