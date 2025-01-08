@@ -290,7 +290,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
                           priority
                         />
                         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm">
-                          <span className="">Click and hold image to download (on mobile) or use native</span>
+                          <span className="">Click and hold image to download (on mobile)</span>
                         </div>
                       </div>
                     </DialogContent>
