@@ -68,14 +68,6 @@ const PhotoBooth: React.FC<Props> = ({
     }
   };
 
-  const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
-      setIsCameraOn(false);
-    }
-  };
-
   const takePhotoSequence = async () => {
     setIsCapturing(true);
     setShowModal(false);
@@ -234,14 +226,16 @@ const PhotoBooth: React.FC<Props> = ({
       <div className='max-w-4xl w-full bg-black/80 rounded-xl shadow-2xl overflow-hidden'>
         <div className='p-6 space-y-6'>
           <div className='flex space-x-3 justify-center'>
-            <Button
-              onClick={isCameraOn ? stopCamera : startCamera}
-              variant={isCameraOn ? 'destructive' : 'default'}
-              className='min-w-[140px] transition-all duration-200 hover:scale-105'
-            >
-              <Camera className='mr-2 h-5 w-5' />
-              {isCameraOn ? 'Stop Camera' : 'Start Camera'}
-            </Button>
+            {!isCameraOn && (
+              <Button
+                onClick={startCamera}
+                variant='default'
+                className='min-w-[140px] transition-all duration-200 hover:scale-105'
+              >
+                <Camera className='mr-2 h-5 w-5' />
+                Start Camera
+              </Button>
+            )}
             <Button
               onClick={takePhotoSequence}
               disabled={!isCameraOn || isCapturing}
