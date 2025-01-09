@@ -10,7 +10,6 @@ import {
   Loader2,
 } from 'lucide-react';
 import JSConfetti from 'js-confetti';
-import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import {
   Dialog,
@@ -39,10 +38,6 @@ const PhotoBooth: React.FC<Props> = ({
   const [photoURL, setPhotoURL] = useState<string | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const jsConfettiRef = useRef<JSConfetti | null>(null);
-  const [uploadResult, setUploadResult] = useState<{
-    blobId: string;
-    objectId: string;
-  } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -71,7 +66,6 @@ const PhotoBooth: React.FC<Props> = ({
   const takePhotoSequence = async () => {
     setIsCapturing(true);
     setShowModal(false);
-    setUploadResult(null);
     setIsUploaded(false);
     setIsUploading(false);
 
@@ -211,10 +205,6 @@ const PhotoBooth: React.FC<Props> = ({
           throw new Error('Failed to save to database');
         }
 
-        setUploadResult({
-          blobId: result.data.newlyCreated.blobObject.blobId,
-          objectId: result.data.newlyCreated.blobObject.id,
-        });
         setIsUploaded(true);
       } else {
         console.error('Unexpected response structure:', result);
@@ -280,32 +270,33 @@ const PhotoBooth: React.FC<Props> = ({
       </div>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className='max-w-2xl bg-black/90 border-zinc-700'>
+        <DialogContent className='max-w-2xl bg-black/90 border-zinc-700 h-[90vh] flex flex-col'>
           <DialogHeader>
-            <DialogTitle className='text-center text-2xl font-semibold mb-4 text-white'>
+            <DialogTitle className='text-center text-2xl font-semibold mb-2 text-white'>
               Your Photo Strip
             </DialogTitle>
           </DialogHeader>
           
-          <div className='flex flex-col items-center gap-6'>
+          <div className='flex-1 flex flex-col justify-between min-h-0'>
             {photoURL && (
-              <div className='relative w-full rounded-lg overflow-hidden border border-zinc-700 bg-black/40' 
-                   style={{ height: '80vh' }}>
-                <Image
-                  src={photoURL}
-                  alt='Photo Strip'
-                  fill
-                  className='object-contain'
-                  priority
-                />
+              <div className='flex-1 min-h-0 relative w-full rounded-lg overflow-hidden border border-zinc-700 bg-black/40 mb-4'>
+                <div className='absolute inset-0'>
+                  <Image
+                    src={photoURL}
+                    alt='Photo Strip'
+                    fill
+                    className='object-contain'
+                    priority
+                  />
+                </div>
               </div>
             )}
             
-            <div className='flex gap-4 w-full justify-center'>
+            <div className='flex flex-wrap gap-4 justify-center items-center p-4'>
               <div className='bg-white/90 p-3 rounded-lg shadow-lg'>
                 <QRCode
                   value={eventUrl}
-                  size={120}
+                  size={100}
                   style={{ height: "auto", maxWidth: "100%", width: "100%" }}
                   viewBox={`0 0 256 256`}
                   className="rounded"
@@ -328,23 +319,6 @@ const PhotoBooth: React.FC<Props> = ({
                 {isUploaded ? 'Uploaded!' : isUploading ? 'Uploading...' : 'Upload'}
               </Button>
             </div>
-
-            {uploadResult && (
-              <div className='text-sm text-white bg-black/40 p-4 rounded-lg border border-zinc-700'>
-                <p>Blob ID: {uploadResult.blobId}</p>
-                <p>
-                  Object ID:{' '}
-                  <Link
-                    href={`https://suiscan.xyz/testnet/object/${uploadResult.objectId}`}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-blue-400 hover:text-blue-300 underline'
-                  >
-                    {uploadResult.objectId}
-                  </Link>
-                </p>
-              </div>
-            )}
           </div>
         </DialogContent>
       </Dialog>
