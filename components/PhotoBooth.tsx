@@ -204,7 +204,6 @@ const PhotoBooth: React.FC<Props> = ({
           console.error('Error saving to Supabase:', error);
           throw new Error('Failed to save to database');
         }
-
         setIsUploaded(true);
       } else {
         console.error('Unexpected response structure:', result);
@@ -292,32 +291,37 @@ const PhotoBooth: React.FC<Props> = ({
               </div>
             )}
             
-            <div className='flex flex-wrap gap-4 justify-center items-center p-4'>
-              <div className='bg-white/90 p-3 rounded-lg shadow-lg'>
-                <QRCode
-                  value={eventUrl}
-                  size={100}
-                  style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                  viewBox={`0 0 256 256`}
-                  className="rounded"
-                />
+            <div className='mt-auto border-t border-zinc-700/50 pt-4'>
+              <div className='flex flex-col sm:flex-row items-center justify-center gap-6 p-4'>
+                <div className='flex flex-col items-center gap-2'>
+                  <div className='bg-white p-3 rounded-lg shadow-lg'>
+                    <QRCode
+                      value={eventUrl}
+                      size={120}
+                      style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                      viewBox={`0 0 256 256`}
+                      className="rounded"
+                    />
+                  </div>
+                  <span className='text-zinc-400 text-sm'>Scan to view event</span>
+                </div>
+                
+                <Button
+                  onClick={uploadPhoto}
+                  variant='outline'
+                  className='h-12 px-8 transition-all duration-200 hover:scale-105 bg-white/10 hover:bg-white/20 text-white border-zinc-700'
+                  disabled={isUploading || isUploaded}
+                >
+                  {isUploaded ? (
+                    <Check className='mr-2 h-5 w-5 text-green-500' />
+                  ) : isUploading ? (
+                    <Loader2 className='mr-2 h-5 w-5 animate-spin' />
+                  ) : (
+                    <Upload className='mr-2 h-5 w-5' />
+                  )}
+                  {isUploaded ? 'Uploaded!' : isUploading ? 'Uploading...' : 'Upload Photo'}
+                </Button>
               </div>
-              
-              <Button
-                onClick={uploadPhoto}
-                variant='outline'
-                className='h-12 px-6 transition-all duration-200 hover:scale-105'
-                disabled={isUploading || isUploaded}
-              >
-                {isUploaded ? (
-                  <Check className='mr-2 h-4 w-4 text-green-500' />
-                ) : isUploading ? (
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                ) : (
-                  <Upload className='mr-2 h-4 w-4' />
-                )}
-                {isUploaded ? 'Uploaded!' : isUploading ? 'Uploading...' : 'Upload'}
-              </Button>
             </div>
           </div>
         </DialogContent>
