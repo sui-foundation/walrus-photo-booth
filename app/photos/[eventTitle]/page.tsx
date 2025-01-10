@@ -26,7 +26,7 @@ import {
   DialogTrigger,
   DialogTitle,
   DialogClose,
-} from '@/components/ui/dialog'
+} from '@/components/ui/dialog';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -67,7 +67,11 @@ const fadeInAnimation = `
   }
 `;
 
-const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
+const PhotosPage = ({
+  params,
+}: {
+  params: Promise<{ eventTitle: string }>;
+}) => {
   const resolvedParams = use(params);
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [eventDetails, setEventDetails] = useState<Event | null>(null);
@@ -77,13 +81,17 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
   const { isConnected, emailAddress } = useCustomWallet();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const eventTitle = resolvedParams.eventTitle.replace(/-/g, ' ');
+
   useEffect(() => {
     const fetchPhotos = async () => {
+      if (!eventDetails?.id) return;
+
       setIsLoading(true);
       const { data, error } = await supabase
         .from('photos')
         .select('blob_id, object_id, event_id')
-        .eq('event_id', resolvedParams.eventId);
+        .eq('event_id', eventDetails?.id);
 
       if (error) {
         setError(error);
@@ -95,7 +103,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
     };
 
     fetchPhotos();
-  }, [resolvedParams.eventId]);
+  }, [eventDetails?.id]);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -103,7 +111,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
       const { data: events, error } = await supabase
         .from('events')
         .select('*')
-        .eq('id', resolvedParams.eventId);
+        .eq('event_title', eventTitle);
 
       if (error) {
         setError(error);
@@ -113,7 +121,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
           const options: DateTimeFormatOptions = {
             month: 'long',
             day: '2-digit',
-            year: 'numeric'
+            year: 'numeric',
           };
           const id = events[0].id;
           const et = events[0].event_title.toUpperCase();
@@ -133,7 +141,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
     };
 
     fetchEventDetails();
-  }, [resolvedParams.eventId]);
+  }, [eventTitle]);
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
@@ -183,9 +191,11 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
   return (
     <main className='min-h-screen bg-gradient-to-br from-sky-100 via-blue-50 to-white dark:from-sky-900 dark:via-blue-900 dark:to-gray-900'>
       <div className='container mx-auto px-4 py-12'>
-        <div className='w-full flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 
+        <div
+          className='w-full flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 
                        bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm 
-                       rounded-xl p-6 shadow-lg'>
+                       rounded-xl p-6 shadow-lg'
+        >
           <div className='space-y-2'>
             <h1 className='text-4xl font-bold text-gray-900 dark:text-white'>
               {eventDetails?.event_title}
@@ -193,14 +203,14 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
             <h2 className='text-lg text-gray-600 dark:text-gray-300'>
               {eventDetails?.event_date}
             </h2>
-            <Link 
-              href='/' 
+            <Link
+              href='/'
               className='inline-block text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors'
             >
               ← Back to Events
             </Link>
           </div>
-          
+
           <div className='flex items-center gap-4'>
             {isConnected && currentAdminId && (
               <>
@@ -233,28 +243,30 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
             <style>{fadeInAnimation}</style>
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 p-3'>
               {photos.map((photo, index) => (
-                <div 
-                  key={photo.blob_id} 
+                <div
+                  key={photo.blob_id}
                   style={{
-                    animation: `fadeIn 0.6s ease-out ${index * 0.1}s both`
+                    animation: `fadeIn 0.6s ease-out ${index * 0.1}s both`,
                   }}
                   className='relative bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg shadow-sm
                              aspect-square flex flex-col items-center justify-center mb-3
                              transform-gpu hover:scale-[1.02] hover:shadow-lg transition-all duration-300
                              break-inside-avoid group'
                 >
-                  <div className='absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 
-                                transition-all duration-300 rounded-lg' />
-                  
+                  <div
+                    className='absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 
+                                transition-all duration-300 rounded-lg'
+                  />
+
                   <Dialog>
                     <DialogTrigger asChild>
-                      <div className='relative w-[80%] h-full cursor-pointer z-10'> 
+                      <div className='relative w-[80%] h-full cursor-pointer z-10'>
                         <Image
                           src={`https://aggregator.walrus-testnet.walrus.space/v1/${photo.blob_id}`}
                           alt={`Photo ${photo.blob_id}`}
                           className='rounded-md transition-all duration-300 object-contain'
                           fill
-                          sizes="(max-width: 768px) 40vw, 25vw"
+                          sizes='(max-width: 768px) 40vw, 25vw'
                           style={{ transform: 'translateZ(0)' }}
                         />
                         <div className='absolute inset-0 flex items-center justify-center'>
@@ -264,20 +276,24 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
                         </div>
                       </div>
                     </DialogTrigger>
-                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 !bg-black/80 border-none 
-                                             data-[state=open]:!bg-black/80 dark:!bg-black/80">
-                      <DialogTitle className="sr-only">
+                    <DialogContent
+                      className='max-w-[95vw] max-h-[95vh] p-0 !bg-black/80 border-none 
+                                             data-[state=open]:!bg-black/80 dark:!bg-black/80'
+                    >
+                      <DialogTitle className='sr-only'>
                         Photo from {eventDetails?.event_title}
                       </DialogTitle>
-                      <div className="relative w-full h-[95vh] !bg-black/80">
-                        <DialogClose className="absolute top-4 right-4 z-50 
+                      <div className='relative w-full h-[95vh] !bg-black/80'>
+                        <DialogClose
+                          className='absolute top-4 right-4 z-50 
                                                 bg-black/60 hover:bg-black/80
                                                 w-8 h-8
                                                 flex items-center justify-center
                                                 shadow-lg transition-all 
-                                                hover:scale-110"
-                                     aria-label="Close dialog">
-                          <span className="text-white text-xl leading-none font-semibold">
+                                                hover:scale-110'
+                          aria-label='Close dialog'
+                        >
+                          <span className='text-white text-xl leading-none font-semibold'>
                             ×
                           </span>
                         </DialogClose>
@@ -286,16 +302,18 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
                           alt={`Photo ${photo.blob_id}`}
                           className='object-contain transition-opacity duration-300'
                           fill
-                          sizes="95vw"
+                          sizes='95vw'
                           priority
                         />
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm">
-                          <span className="">Click and hold image to download (on mobile)</span>
+                        <div className='absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm'>
+                          <span className=''>
+                            Click and hold image to download (on mobile)
+                          </span>
                         </div>
                       </div>
                     </DialogContent>
                   </Dialog>
-                  
+
                   {isConnected && eventDetails?.admin_id === currentAdminId && (
                     <div className='mt-3 w-full z-10'>
                       <AlertDialog>
@@ -311,7 +329,8 @@ const PhotosPage = ({ params }: { params: Promise<{ eventId: string }> }) => {
                               Are you sure?
                             </AlertDialogTitle>
                             <AlertDialogDescription className='text-gray-600 dark:text-gray-400'>
-                              Delete photo {photo.blob_id}? This action cannot be undone.
+                              Delete photo {photo.blob_id}? This action cannot
+                              be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>

@@ -1,8 +1,18 @@
 import Link from 'next/link';
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { TrashIcon } from '@radix-ui/react-icons';
-import Image from 'next/image'
+import Image from 'next/image';
 
 interface Event {
   id: number;
@@ -20,35 +30,42 @@ interface EventCardProps {
   onDelete: (id: number) => void;
 }
 
-export const EventCard = ({ event, isConnected, currentAdminId, onDelete }: EventCardProps) => {
+export const EventCard = ({
+  event,
+  isConnected,
+  currentAdminId,
+  onDelete,
+}: EventCardProps) => {
+  const eventTitle = event.event_title.replace(/\s+/g, '-').toLowerCase();
+
   return (
-    <div className="rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
-      <Link href={`/photos/${event.id}`} className="block">
-        <div className="relative aspect-[16/9] overflow-hidden rounded-t-lg">
+    <div className='rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl'>
+      <Link href={`/photos/${eventTitle}`} className='block'>
+        <div className='relative aspect-[16/9] overflow-hidden rounded-t-lg'>
           <Image
             src={event.photo_url || '/test.png'}
             alt={event.event_title}
             fill
-            className="object-cover bg-blue-500"
+            className='object-cover bg-blue-500'
           />
         </div>
-        <div className="p-6">
-          <h2 className="text-xl font-semibold mb-2">{event.event_title}</h2>
-          <p className="text-gray-600 mb-2">
+        <div className='p-6'>
+          <h2 className='text-xl font-semibold mb-2'>{event.event_title}</h2>
+          <p className='text-gray-600 mb-2'>
             {new Date(event.event_date).toLocaleDateString('en-US', {
               month: 'long',
               day: 'numeric',
-              year: 'numeric'
+              year: 'numeric',
             })}
           </p>
         </div>
       </Link>
       {isConnected && event.admin_id === currentAdminId && (
-        <div className="px-6 pb-4">
+        <div className='px-6 pb-4'>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                <TrashIcon className="mr-2 h-4 w-4" />
+              <Button variant='destructive' size='sm'>
+                <TrashIcon className='mr-2 h-4 w-4' />
                 Delete Event
               </Button>
             </AlertDialogTrigger>
@@ -56,8 +73,8 @@ export const EventCard = ({ event, isConnected, currentAdminId, onDelete }: Even
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the event
-                  and all associated photos.
+                  This action cannot be undone. This will permanently delete the
+                  event and all associated photos.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
