@@ -33,7 +33,10 @@ const HomePage: React.FC = () => {
     const fetchEvents = async () => {
       setIsLoading(true);
 
-      const { data: events, error } = await supabase.from('events').select('*');
+      const { data: events, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('event_date', { ascending: false });
 
       if (error) {
         setError(error);
