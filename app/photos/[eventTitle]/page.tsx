@@ -90,8 +90,9 @@ const PhotosPage = ({
       setIsLoading(true);
       const { data, error } = await supabase
         .from('photos')
-        .select('blob_id, object_id, event_id')
-        .eq('event_id', eventDetails?.id);
+        .select('blob_id, object_id, event_id, created_at')
+        .eq('event_id', eventDetails?.id)
+        .order('created_at', { ascending: false });
 
       if (error) {
         setError(error);
