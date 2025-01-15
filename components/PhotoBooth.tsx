@@ -145,8 +145,7 @@ const PhotoBooth: React.FC<Props> = ({
         context.textAlign = 'center';
         context.fillText(selectedEventTitle, canvas.width / 2, 25);
   
-        const date = new Date().toLocaleDateString();
-        context.fillText(date, canvas.width / 2, canvas.height - 10);
+        context.fillText("Reliably Yours 💜 Walrus", canvas.width / 2, canvas.height - 20);
   
         const finalPhotoURL = canvas.toDataURL('image/png');
         setPhotoURL(finalPhotoURL);
