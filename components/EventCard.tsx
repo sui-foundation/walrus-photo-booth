@@ -43,10 +43,10 @@ export const EventCard = ({
       <Link href={`/photos/${eventTitle}`} className='block'>
         <div className='relative aspect-[16/9] overflow-hidden rounded-t-lg'>
           <Image
-            src={event.photo_url || '/test.png'}
+            src={event.photo_url || '/brand-image-walrus.png'}
             alt={event.event_title}
             fill
-            className='object-cover bg-blue-500'
+            className='object-cover'
           />
         </div>
         <div className='p-6'>
