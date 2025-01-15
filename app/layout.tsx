@@ -17,8 +17,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'photo booth',
-  description: 'photo booth',
+  title: 'Walrus Photo Booth',
+  description: 'Walrus Photo Booth',
 };
 
 export default function RootLayout({
