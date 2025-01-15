@@ -98,7 +98,13 @@ const EventSchema: ZodType<FormData> = z.object({
     .string({ required_error: 'Please enter an event name.' })
     .min(1, {
       message: 'Event name must be at least 1 character.',
-    }),
+    })
+    .regex(/^[a-zA-Z0-9\s&@.,_\-'"]+$/, {
+      message:
+        'Input must contain only letters, numbers, spaces, &, @, ., _, or -, single quotes, or double quotes',
+    })
+    .trim()
+    .toLowerCase(),
   eventDate: z.date({
     required_error: 'A date for this event is required.',
   }),
@@ -150,6 +156,27 @@ const AddEvent: React.FC = () => {
     fetchCurrentAdmin();
   }, [emailAddress]);
 
+  function convertToHtmlEntities(str: string): string {
+    return str
+      .replace(/ +/g, ' ')
+      .replace(/&/g, '&#38;')
+      .replace(/#/g, '&#35;')
+      .replace(/ /g, '&nbsp;')
+      .replace(/!/g, '&#33;')
+      .replace(/"/g, '&#34;')
+      .replace(/\$/g, '&#36;')
+      .replace(/'/g, '&#39;')
+      .replace(/\(/g, '&#40;')
+      .replace(/\)/g, '&#41;')
+      .replace(/,/g, '&#44;')
+      .replace(/-/g, '&#45;')
+      .replace(/\./g, '&#46;')
+      .replace(/\//g, '&#47;')
+      .replace(/:/g, '&#58;')
+      .replace(/@/g, '&#64;')
+      .replace(/_/g, '&#95;');
+  }
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof EventSchema>>({
     resolver: zodResolver(EventSchema),
@@ -168,7 +195,7 @@ const AddEvent: React.FC = () => {
 
     // setIsLoading(true);
 
-    console.log(formData.eventDate);
+    const formattedEventTitle = convertToHtmlEntities(formData.eventTitle);
 
     let hr;
 
@@ -189,16 +216,12 @@ const AddEvent: React.FC = () => {
 
     const formattedDate = `${day} ${month} ${dateNum} ${year} ${formattedTime} ${formData.eventTimezone}`;
 
-    console.log(new Date(formattedDate));
-
-    // return;
-
     const { data, error } = await supabase
       .from('events')
       .insert([
         {
           event_date: formattedDate,
-          event_title: formData.eventTitle,
+          event_title: formattedEventTitle,
           admin_id: currentAdminId,
         },
       ])
