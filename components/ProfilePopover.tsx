@@ -85,7 +85,7 @@ export default function ProfilePopover() {
         redirectToAuthUrl();
       }}
     >
-      Sign in with Google
+      Admin Sign In
     </Button>
   );
 }
