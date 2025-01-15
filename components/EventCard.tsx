@@ -30,13 +30,33 @@ interface EventCardProps {
   onDelete: (id: number) => void;
 }
 
+function convertFromHtmlEntities(str: string): string {
+  return str
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#38;/g, '&')
+    .replace(/&#35;/g, '#')
+    .replace(/&#33;/g, '!')
+    .replace(/&#34;/g, '"')
+    .replace(/&#36;/g, '$')
+    .replace(/&#39;/g, "'")
+    .replace(/&#40;/g, '(')
+    .replace(/&#41;/g, ')')
+    .replace(/&#44;/g, ',')
+    .replace(/&#45;/g, '-')
+    .replace(/&#46;/g, '.')
+    .replace(/&#47;/g, '/')
+    .replace(/&#58;/g, ':')
+    .replace(/&#64;/g, '@')
+    .replace(/&#95;/g, '_');
+}
+
 export const EventCard = ({
   event,
   isConnected,
   currentAdminId,
   onDelete,
 }: EventCardProps) => {
-  const eventTitle = event.event_title.replace(/\s+/g, '-').toLowerCase();
+  const eventTitle = convertFromHtmlEntities(event.event_title);
 
   return (
     <div className='rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl'>
@@ -50,7 +70,9 @@ export const EventCard = ({
           />
         </div>
         <div className='p-6'>
-          <h2 className='text-xl font-semibold mb-2'>{event.event_title}</h2>
+          <h2 className='text-xl font-semibold mb-2'>
+            {eventTitle.toUpperCase()}
+          </h2>
           <p className='text-gray-600 mb-2'>
             {new Date(event.event_date).toLocaleDateString('en-US', {
               month: 'long',
