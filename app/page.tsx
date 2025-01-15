@@ -114,7 +114,7 @@ const HomePage: React.FC = () => {
     <main className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-bold text-primary">Events</h1>
+          <h1 className="text-4xl font-bold text-primary">Walrus Photo Booth Events</h1>
           <p className="text-lg text-gray-600">
             Click on an event to view photos from the event
           </p>
