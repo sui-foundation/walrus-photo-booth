@@ -110,7 +110,7 @@ const PhotoBoothPage: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen w-full flex items-center justify-center ${selectedEvent ? 'bg-zinc-900' : ''}`}>
+    <div className={`min-h-screen w-full flex items-center justify-center ${selectedEvent ? 'bg-[url("/brand-image-walrus.png")] bg-cover' : ''}`}>
       <main className='container mx-auto px-4 py-8 flex flex-col w-full'>
         <div className='w-full flex items-center justify-center grow p-4'>
           {selectedEvent ? (
