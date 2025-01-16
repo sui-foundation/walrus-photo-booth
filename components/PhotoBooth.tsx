@@ -41,8 +41,7 @@ const PhotoBooth: React.FC<Props> = ({
   const [showModal, setShowModal] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
   const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL || '';
-  const eventUrl = `${baseUrl}/photos/${selectedEventSlug}`;
-
+  const eventUrl = `${baseUrl}/events/${selectedEventSlug}`;
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();

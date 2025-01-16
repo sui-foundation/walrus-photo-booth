@@ -39,7 +39,7 @@ export const EventCard = ({
 }: EventCardProps) => {
   return (
     <div className='rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl'>
-      <Link href={`/photos/${event.event_slug}`} className='block'>
+      <Link href={`/events/${event.event_slug}`} className='block'>
         <div className='relative aspect-[16/9] overflow-hidden rounded-t-lg'>
           <Image
             src={event.photo_url || '/brand-image-walrus.png'}
