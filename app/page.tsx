@@ -17,6 +17,7 @@ interface Event {
   id: number;
   created_at: string;
   event_title: string;
+  event_slug: string;
   admin_id: number;
   event_date: string;
 }
@@ -75,7 +76,7 @@ const HomePage: React.FC = () => {
 
   const handleDeleteEvent = async (id: number) => {
     setIsLoading(true);
-    
+
     try {
       // delete all photos associated with the event
       const { error: photosError } = await supabase
@@ -111,26 +112,28 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-bold text-primary">Walrus Photo Booth Events</h1>
-          <p className="text-lg text-gray-600">
+    <main className='container mx-auto px-4 py-8'>
+      <div className='flex items-center justify-between mb-8'>
+        <div className='flex flex-col gap-2'>
+          <h1 className='text-4xl font-bold text-primary'>
+            Walrus Photo Booth Events
+          </h1>
+          <p className='text-lg text-gray-600'>
             Click on an event to view photos from the event
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className='flex items-center gap-4'>
           {isConnected && currentAdminId && (
             <>
               <Link
-                href="/addEvent"
-                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+                href='/addEvent'
+                className='inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90'
               >
                 Create a new event
               </Link>
               <Link
-                href="/photo-booth"
-                className="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium hover:bg-secondary/90"
+                href='/photo-booth'
+                className='inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium hover:bg-secondary/90'
               >
                 Photo Booth
               </Link>
@@ -140,7 +143,7 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
         {events.map((event) => (
           <EventCard
             key={event.id}
