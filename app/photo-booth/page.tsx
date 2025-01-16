@@ -24,6 +24,7 @@ interface Event {
   id: number;
   created_at: string;
   event_title: string;
+  event_slug: string;
   event_date: string;
   admin_id: number;
 }
@@ -90,7 +91,7 @@ const PhotoBoothPage: React.FC = () => {
     localStorage.setItem('selectedEvent', JSON.stringify(foundEvent[0]));
     setSelectedEvent(foundEvent[0]);
   };
-  
+
   if (error) {
     return <div>Error loading events</div>;
   }
@@ -110,18 +111,23 @@ const PhotoBoothPage: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen w-full flex items-center justify-center ${selectedEvent ? 'bg-[url("/brand-image-walrus.png")] bg-cover' : ''}`}>
+    <div
+      className={`min-h-screen w-full flex items-center justify-center ${
+        selectedEvent ? 'bg-[url("/brand-image-walrus.png")] bg-cover' : ''
+      }`}
+    >
       <main className='container mx-auto px-4 py-8 flex flex-col w-full'>
         <div className='w-full flex items-center justify-center grow p-4'>
           {selectedEvent ? (
             <PhotoBooth
               selectedEventTitle={selectedEvent.event_title}
+              selectedEventSlug={selectedEvent.event_slug}
               selectedEventId={selectedEvent.id}
             />
           ) : (
             <>
               {currentAdminId && (
-                <div className="flex flex-col items-center justify-center w-full gap-4">
+                <div className='flex flex-col items-center justify-center w-full gap-4'>
                   <ProfilePopover />
                   <Select onValueChange={handleSelectEvent}>
                     <SelectTrigger className='w-[280px]'>
@@ -132,7 +138,15 @@ const PhotoBoothPage: React.FC = () => {
                         {currAdminsEvents &&
                           currAdminsEvents.map((el: Event, index) => (
                             <SelectItem key={index} value={el.id.toString()}>
-                              {el.event_title.toUpperCase()} / {el.event_date}
+                              {el.event_title.toUpperCase()}&nbsp;/&nbsp;
+                              {new Date(el.event_date).toLocaleDateString(
+                                'en-US',
+                                {
+                                  month: 'long',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                }
+                              )}
                             </SelectItem>
                           ))}
                       </SelectGroup>

@@ -86,6 +86,7 @@ const mins = ['00', '15', '30', '45'] as const;
 
 type FormData = {
   eventTitle: string;
+  eventSlug: string;
   eventDate: Date;
   eventTimeHour: string;
   eventTimeMin: string;
@@ -98,7 +99,23 @@ const EventSchema: ZodType<FormData> = z.object({
     .string({ required_error: 'Please enter an event name.' })
     .min(1, {
       message: 'Event name must be at least 1 character.',
-    }),
+    })
+    .regex(/^[a-zA-Z0-9\s&@.,_\-'"]+$/, {
+      message:
+        'Input must contain only letters, numbers, spaces, &, @, ., _, or -, single quotes, or double quotes',
+    })
+    .trim()
+    .toLowerCase(),
+  eventSlug: z
+    .string({ required_error: 'Please enter slug for the event url.' })
+    .min(1, {
+      message: 'Event slug must be at least 1 character.',
+    })
+    .regex(/^[a-zA-Z0-9\-]+$/, {
+      message: 'Input must contain only letters, numbers, or -',
+    })
+    .trim()
+    .toLowerCase(),
   eventDate: z.date({
     required_error: 'A date for this event is required.',
   }),
@@ -123,6 +140,7 @@ const AddEvent: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
@@ -155,6 +173,7 @@ const AddEvent: React.FC = () => {
     resolver: zodResolver(EventSchema),
     defaultValues: {
       eventTitle: '',
+      eventSlug: '',
       eventTimeHour: '',
       eventTimeMin: '',
       eventTimeAMPM: '',
@@ -167,8 +186,6 @@ const AddEvent: React.FC = () => {
     // ✅ This will be type-safe and validated.
 
     // setIsLoading(true);
-
-    console.log(formData.eventDate);
 
     let hr;
 
@@ -189,34 +206,36 @@ const AddEvent: React.FC = () => {
 
     const formattedDate = `${day} ${month} ${dateNum} ${year} ${formattedTime} ${formData.eventTimezone}`;
 
-    console.log(new Date(formattedDate));
-
-    // return;
+    setError(null);
+    setErrorMessage(null);
 
     const { data, error } = await supabase
       .from('events')
       .insert([
         {
-          event_date: formattedDate,
           event_title: formData.eventTitle,
           admin_id: currentAdminId,
+          event_date: formattedDate,
+          event_slug: formData.eventSlug,
         },
       ])
       .select();
 
     if (error) {
       setError(error);
-      console.error('Error saving to database:', error);
-      throw new Error('Failed to save to database');
+      // console.error('Error saving to database:', error);
+      if (error.code === '23505') {
+        setErrorMessage('Slug already taken, please enter a new slug.');
+      } else {
+        setErrorMessage(
+          'There was an error saving your event, please reload the page and try again!'
+        );
+      }
     }
 
     if (data) {
       router.push('/');
     }
-  }
-
-  if (error) {
-    return <div>Error creating event</div>;
   }
 
   if (isLoading) {
@@ -252,6 +271,7 @@ const AddEvent: React.FC = () => {
       </div>
 
       <div className='w-96 m-auto mb-10'>
+        {error && <p>{errorMessage}</p>}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -267,6 +287,23 @@ const AddEvent: React.FC = () => {
                     <Input
                       type='text'
                       placeholder='Happy Birthday Sui'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='eventSlug'
+              render={({ field }) => (
+                <FormItem className='flex flex-col'>
+                  <FormLabel>Event Slug</FormLabel>
+                  <FormControl>
+                    <Input
+                      type='text'
+                      placeholder='happy-birthday-sui'
                       {...field}
                     />
                   </FormControl>

@@ -3,12 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import {
-  Camera,
-  Upload,
-  Check,
-  Loader2,
-} from 'lucide-react';
+import { Camera, Upload, Check, Loader2 } from 'lucide-react';
 import JSConfetti from 'js-confetti';
 import { createClient } from '@supabase/supabase-js';
 import {
@@ -16,7 +11,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/ui/dialog';
 import QRCode from 'react-qr-code';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -27,10 +22,12 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 interface Props {
   selectedEventId: number;
   selectedEventTitle: string;
+  selectedEventSlug: string;
 }
 
 const PhotoBooth: React.FC<Props> = ({
   selectedEventTitle,
+  selectedEventSlug,
   selectedEventId,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -44,7 +41,8 @@ const PhotoBooth: React.FC<Props> = ({
   const [showModal, setShowModal] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
   const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL || '';
-  const eventUrl = `${baseUrl}/events/${selectedEventId}`; // TODO: use the slug instead of selectedEventId
+  const eventUrl = `${baseUrl}/photos/${selectedEventSlug}`;
+
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -68,7 +66,7 @@ const PhotoBooth: React.FC<Props> = ({
     setIsUploading(false);
 
     const newPhotos: string[] = [];
-  
+
     // take four photos
     for (let i = 0; i < 4; ++i) {
       // count down for each photo
@@ -76,29 +74,29 @@ const PhotoBooth: React.FC<Props> = ({
         setCountdown(count);
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
-  
+
       if (videoRef.current && canvasRef.current) {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
         const videoElement = videoRef.current;
-  
+
         if (context) {
           const { videoWidth, videoHeight } = videoElement;
-  
+
           canvas.width = videoWidth;
           canvas.height = videoHeight;
-  
+
           context.drawImage(videoElement, 0, 0, videoWidth, videoHeight);
           const photoData = canvas.toDataURL('image/png');
           newPhotos.push(photoData);
         }
       }
-  
+
       if (i < 3) {
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
-  
+
     // generate final photo strip
     if (canvasRef.current) {
       const canvas = canvasRef.current;
@@ -109,14 +107,14 @@ const PhotoBooth: React.FC<Props> = ({
         const singleHeight = videoHeight;
         const padding = 20;
         const borderWidth = 40;
-  
+
         canvas.width = singleWidth + borderWidth * 2;
         canvas.height = singleHeight * 4 + padding * 3 + borderWidth * 2;
-  
+
         // fill with white background
         context.fillStyle = 'white';
         context.fillRect(0, 0, canvas.width, canvas.height);
-  
+
         // load and draw images
         const images = await Promise.all(
           newPhotos.map(
@@ -130,30 +128,34 @@ const PhotoBooth: React.FC<Props> = ({
               })
           )
         );
-  
+
         images.forEach((img, index) => {
           const x = borderWidth;
           const y = borderWidth + index * (singleHeight + padding);
           context.drawImage(img, x, y, singleWidth, singleHeight);
         });
-  
+
         // add text
         context.font = '20px';
         context.fillStyle = 'black';
         context.textAlign = 'center';
         context.fillText(selectedEventTitle, canvas.width / 2, 25);
-  
-        context.fillText("Reliably Yours 💜 Walrus", canvas.width / 2, canvas.height - 20);
-  
+
+        context.fillText(
+          'Reliably Yours 💜 Walrus',
+          canvas.width / 2,
+          canvas.height - 20
+        );
+
         const finalPhotoURL = canvas.toDataURL('image/png');
         setPhotoURL(finalPhotoURL);
         setShowModal(true);
       }
     }
-  
+
     setIsCapturing(false);
     setCountdown(null);
-  
+
     if (jsConfettiRef.current) {
       jsConfettiRef.current.addConfetti({
         emojis: ['📷'],
@@ -247,7 +249,9 @@ const PhotoBooth: React.FC<Props> = ({
             />
             {!isCameraOn && (
               <div className='absolute inset-0 flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm'>
-                <span className='text-zinc-400 text-xl font-medium'>Camera Preview</span>
+                <span className='text-zinc-400 text-xl font-medium'>
+                  Camera Preview
+                </span>
               </div>
             )}
             {countdown !== null && (
@@ -272,7 +276,7 @@ const PhotoBooth: React.FC<Props> = ({
               Your Photo Strip
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className='flex-1 flex flex-col justify-between min-h-0'>
             {photoURL && (
               <div className='flex-1 min-h-0 relative w-full rounded-lg overflow-hidden border border-zinc-700 bg-black/40 mb-4'>
@@ -287,7 +291,7 @@ const PhotoBooth: React.FC<Props> = ({
                 </div>
               </div>
             )}
-            
+
             <div className='mt-auto border-t border-zinc-700/50 pt-4'>
               <div className='flex flex-col sm:flex-row items-center justify-center gap-6 p-4'>
                 <div className='flex flex-col items-center gap-2'>
@@ -295,14 +299,20 @@ const PhotoBooth: React.FC<Props> = ({
                     <QRCode
                       value={eventUrl}
                       size={120}
-                      style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                      style={{
+                        height: 'auto',
+                        maxWidth: '100%',
+                        width: '100%',
+                      }}
                       viewBox={`0 0 256 256`}
-                      className="rounded"
+                      className='rounded'
                     />
                   </div>
-                  <span className='text-zinc-400 text-sm'>Scan to view event</span>
+                  <span className='text-zinc-400 text-sm'>
+                    Scan to view event
+                  </span>
                 </div>
-                
+
                 <Button
                   onClick={uploadPhoto}
                   variant='outline'
@@ -316,7 +326,11 @@ const PhotoBooth: React.FC<Props> = ({
                   ) : (
                     <Upload className='mr-2 h-5 w-5' />
                   )}
-                  {isUploaded ? 'Uploaded!' : isUploading ? 'Uploading...' : 'Upload Photo'}
+                  {isUploaded
+                    ? 'Uploaded!'
+                    : isUploading
+                    ? 'Uploading...'
+                    : 'Upload Photo'}
                 </Button>
               </div>
             </div>

@@ -45,6 +45,7 @@ interface Event {
   id: number;
   created_at: string;
   event_title: string;
+  event_slug: string;
   event_date: string;
   admin_id: number;
 }
@@ -67,11 +68,7 @@ const fadeInAnimation = `
   }
 `;
 
-const PhotosPage = ({
-  params,
-}: {
-  params: Promise<{ eventTitle: string }>;
-}) => {
+const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
   const resolvedParams = use(params);
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [eventDetails, setEventDetails] = useState<Event | null>(null);
@@ -80,8 +77,6 @@ const PhotosPage = ({
 
   const { isConnected, emailAddress } = useCustomWallet();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const eventTitle = resolvedParams.eventTitle.replace(/-/g, ' ');
 
   useEffect(() => {
     const fetchPhotos = async () => {
@@ -112,7 +107,7 @@ const PhotosPage = ({
       const { data: events, error } = await supabase
         .from('events')
         .select('*')
-        .eq('event_title', eventTitle);
+        .eq('event_slug', resolvedParams.eventSlug);
 
       if (error) {
         setError(error);
@@ -142,7 +137,7 @@ const PhotosPage = ({
     };
 
     fetchEventDetails();
-  }, [eventTitle]);
+  }, [resolvedParams.eventSlug]);
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
@@ -225,7 +220,7 @@ const PhotosPage = ({
                   href='/photo-booth'
                   className='flex items-center justify-center rounded-lg text-sm font-medium text-gray-900 bg-gray-100 hover:bg-gray-200 transition-colors py-2.5 px-6'
                 >
-                  Booth
+                  Photo Booth
                 </Link>
               </>
             )}

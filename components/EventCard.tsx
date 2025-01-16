@@ -20,6 +20,7 @@ interface Event {
   event_title: string;
   admin_id: number;
   event_date: string;
+  event_slug: string;
   photo_url?: string;
 }
 
@@ -36,11 +37,9 @@ export const EventCard = ({
   currentAdminId,
   onDelete,
 }: EventCardProps) => {
-  const eventTitle = event.event_title.replace(/\s+/g, '-').toLowerCase();
-
   return (
     <div className='rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl'>
-      <Link href={`/photos/${eventTitle}`} className='block'>
+      <Link href={`/photos/${event.event_slug}`} className='block'>
         <div className='relative aspect-[16/9] overflow-hidden rounded-t-lg'>
           <Image
             src={event.photo_url || '/brand-image-walrus.png'}
@@ -50,7 +49,9 @@ export const EventCard = ({
           />
         </div>
         <div className='p-6'>
-          <h2 className='text-xl font-semibold mb-2'>{event.event_title}</h2>
+          <h2 className='text-xl font-semibold mb-2'>
+            {event.event_title.toUpperCase()}
+          </h2>
           <p className='text-gray-600 mb-2'>
             {new Date(event.event_date).toLocaleDateString('en-US', {
               month: 'long',
