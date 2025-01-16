@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect, useMemo } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,10 +43,8 @@ const PhotoBooth: React.FC<Props> = ({
   const [countdown, setCountdown] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
-  const eventUrl = useMemo(() => 
-    `${window.location.origin}/events/${selectedEventId}`,
-    [selectedEventId]
-  );
+  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL || '';
+  const eventUrl = `${baseUrl}/events/${selectedEventId}`; // TODO: use the slug instead of selectedEventId
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
