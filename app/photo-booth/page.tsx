@@ -24,6 +24,7 @@ interface Event {
   id: number;
   created_at: string;
   event_title: string;
+  event_slug: string;
   event_date: string;
   admin_id: number;
 }
@@ -120,6 +121,7 @@ const PhotoBoothPage: React.FC = () => {
           {selectedEvent ? (
             <PhotoBooth
               selectedEventTitle={selectedEvent.event_title}
+              selectedEventSlug={selectedEvent.event_slug}
               selectedEventId={selectedEvent.id}
             />
           ) : (
