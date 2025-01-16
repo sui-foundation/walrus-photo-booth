@@ -263,7 +263,7 @@ const PhotoBooth: React.FC<Props> = ({
           <canvas ref={canvasRef} className='hidden' />
         </div>
         <div className='bg-black/80 backdrop-blur-sm text-white text-center py-3 text-base font-medium tracking-wider border-t border-zinc-700'>
-          Walrus Photo Booth
+          Sui Presents Walrus
         </div>
       </div>
 
