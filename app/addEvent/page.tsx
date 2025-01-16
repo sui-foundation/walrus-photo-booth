@@ -86,6 +86,7 @@ const mins = ['00', '15', '30', '45'] as const;
 
 type FormData = {
   eventTitle: string;
+  eventSlug: string;
   eventDate: Date;
   eventTimeHour: string;
   eventTimeMin: string;
@@ -102,6 +103,16 @@ const EventSchema: ZodType<FormData> = z.object({
     .regex(/^[a-zA-Z0-9\s&@.,_\-'"]+$/, {
       message:
         'Input must contain only letters, numbers, spaces, &, @, ., _, or -, single quotes, or double quotes',
+    })
+    .trim()
+    .toLowerCase(),
+  eventSlug: z
+    .string({ required_error: 'Please enter slug for the event url.' })
+    .min(1, {
+      message: 'Event slug must be at least 1 character.',
+    })
+    .regex(/^[a-zA-Z0-9\-]+$/, {
+      message: 'Input must contain only letters, numbers, or -',
     })
     .trim()
     .toLowerCase(),
@@ -129,6 +140,7 @@ const AddEvent: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
@@ -156,32 +168,12 @@ const AddEvent: React.FC = () => {
     fetchCurrentAdmin();
   }, [emailAddress]);
 
-  function convertToHtmlEntities(str: string): string {
-    return str
-      .replace(/ +/g, ' ')
-      .replace(/&/g, '&#38;')
-      .replace(/#/g, '&#35;')
-      .replace(/ /g, '&nbsp;')
-      .replace(/!/g, '&#33;')
-      .replace(/"/g, '&#34;')
-      .replace(/\$/g, '&#36;')
-      .replace(/'/g, '&#39;')
-      .replace(/\(/g, '&#40;')
-      .replace(/\)/g, '&#41;')
-      .replace(/,/g, '&#44;')
-      .replace(/-/g, '&#45;')
-      .replace(/\./g, '&#46;')
-      .replace(/\//g, '&#47;')
-      .replace(/:/g, '&#58;')
-      .replace(/@/g, '&#64;')
-      .replace(/_/g, '&#95;');
-  }
-
   // 1. Define your form.
   const form = useForm<z.infer<typeof EventSchema>>({
     resolver: zodResolver(EventSchema),
     defaultValues: {
       eventTitle: '',
+      eventSlug: '',
       eventTimeHour: '',
       eventTimeMin: '',
       eventTimeAMPM: '',
@@ -194,8 +186,6 @@ const AddEvent: React.FC = () => {
     // ✅ This will be type-safe and validated.
 
     // setIsLoading(true);
-
-    const formattedEventTitle = convertToHtmlEntities(formData.eventTitle);
 
     let hr;
 
@@ -216,30 +206,36 @@ const AddEvent: React.FC = () => {
 
     const formattedDate = `${day} ${month} ${dateNum} ${year} ${formattedTime} ${formData.eventTimezone}`;
 
+    setError(null);
+    setErrorMessage(null);
+
     const { data, error } = await supabase
       .from('events')
       .insert([
         {
-          event_date: formattedDate,
-          event_title: formattedEventTitle,
+          event_title: formData.eventTitle,
           admin_id: currentAdminId,
+          event_date: formattedDate,
+          event_slug: formData.eventSlug,
         },
       ])
       .select();
 
     if (error) {
       setError(error);
-      console.error('Error saving to database:', error);
-      throw new Error('Failed to save to database');
+      // console.error('Error saving to database:', error);
+      if (error.code === '23505') {
+        setErrorMessage('Slug already taken, please enter a new slug.');
+      } else {
+        setErrorMessage(
+          'There was an error saving your event, please reload the page and try again!'
+        );
+      }
     }
 
     if (data) {
       router.push('/');
     }
-  }
-
-  if (error) {
-    return <div>Error creating event</div>;
   }
 
   if (isLoading) {
@@ -275,6 +271,7 @@ const AddEvent: React.FC = () => {
       </div>
 
       <div className='w-96 m-auto mb-10'>
+        {error && <p>{errorMessage}</p>}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -290,6 +287,23 @@ const AddEvent: React.FC = () => {
                     <Input
                       type='text'
                       placeholder='Happy Birthday Sui'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='eventSlug'
+              render={({ field }) => (
+                <FormItem className='flex flex-col'>
+                  <FormLabel>Event Slug</FormLabel>
+                  <FormControl>
+                    <Input
+                      type='text'
+                      placeholder='happy-birthday-sui'
                       {...field}
                     />
                   </FormControl>
