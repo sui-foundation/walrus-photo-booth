@@ -134,8 +134,13 @@ const PhotoBooth: React.FC<Props> = ({
           context.drawImage(img, x, y, singleWidth, singleHeight);
         });
 
+        // get the font family from CSS variable
+        const fontFamily = getComputedStyle(document.documentElement)
+          .getPropertyValue('--font-mondwest-reg')
+          .trim();
+
         // add text
-        context.font = '20px';
+        context.font = `20px ${fontFamily}`;
         context.fillStyle = 'black';
         context.textAlign = 'center';
         context.fillText(selectedEventTitle, canvas.width / 2, 25);
