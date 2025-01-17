@@ -18,12 +18,12 @@ const geistMono = localFont({
 const mondwest = localFont({
   src: [
     {
-      path: '../public/fonts/PPMondwest-Regular.woff',
+      path: './PPMondwest-Regular.woff',
       weight: '400',
       style: 'normal',
     },
     {
-      path: '../public/fonts/PPMondwest-bold.woff',
+      path: './PPMondwest-bold.woff',
       weight: '700',
       style: 'normal',
     },
