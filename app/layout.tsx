@@ -15,6 +15,21 @@ const geistMono = localFont({
   variable: '--font-geist-mono',
   weight: '100 900',
 });
+const mondwest = localFont({
+  src: [
+    {
+      path: '../public/fonts/PPMondwest-Regular.woff',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../public/fonts/PPMondwest-bold.woff',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
+  variable: '--font-mondwest',
+});
 
 export const metadata: Metadata = {
   title: 'Walrus Photo Booth',
@@ -29,8 +44,8 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >        
+        className={`${geistSans.variable} ${geistMono.variable} ${mondwest.variable} antialiased`}
+      >
         <ProvidersAndLayout>{children}</ProvidersAndLayout>
         <Analytics />
       </body>
