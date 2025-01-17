@@ -136,7 +136,7 @@ const PhotoBooth: React.FC<Props> = ({
 
         // get the font family from CSS variable
         const fontFamily = getComputedStyle(document.documentElement)
-          .getPropertyValue('--font-mondwest')
+          .getPropertyValue('--font-mondwest-reg')
           .trim();
 
         // add text

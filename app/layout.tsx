@@ -15,20 +15,21 @@ const geistMono = localFont({
   variable: '--font-geist-mono',
   weight: '100 900',
 });
+
 const mondwest = localFont({
   src: [
     {
-      path: './PPMondwest-Regular.woff',
+      path: '../public/fonts/PPMondwest-Regular.woff',
       weight: '400',
       style: 'normal',
     },
     {
-      path: './PPMondwest-bold.woff',
+      path: '../public/fonts/PPMondwest-Bold.woff',
       weight: '700',
       style: 'normal',
     },
   ],
-  variable: '--font-mondwest',
+  variable: '--font-mondwest-reg',
 });
 
 export const metadata: Metadata = {

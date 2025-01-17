@@ -7,7 +7,7 @@ body {
 }
 
 .site-title {
-  font-family: var(--font-mondwest);
+  font-family: var(--font-mondwest-reg);
 }
 
 @layer base {
