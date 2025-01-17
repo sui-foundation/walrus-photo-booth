@@ -26,6 +26,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+const AGGREGATOR_URL = process.env.NEXT_PUBLIC_AGGREGATOR_URL || 'https://aggregator.walrus-testnet.walrus.space';
+
 interface Photo {
   id: number;
   created_at: string;
@@ -247,7 +249,7 @@ const PhotoPage = ({ params }: { params: Promise<{ photoId: string }> }) => {
             >
               <div className='relative w-[80%] h-full cursor-pointer z-10'>
                 <Image
-                  src={`https://aggregator.walrus-testnet.walrus.space/v1/${photoId}`}
+                  src={`${AGGREGATOR_URL}/v1/${photoId}`}
                   alt={`Photo ${photoId}`}
                   className='rounded-md transition-all duration-300 object-contain'
                   fill

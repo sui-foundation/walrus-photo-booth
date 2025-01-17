@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const PUBLISHER_URL = 'https://publisher.walrus-testnet.walrus.space';
+const PUBLISHER_URL = process.env.NEXT_PUBLIC_PUBLISHER_URL || 'https://publisher.walrus-testnet.walrus.space';
 
 export async function POST(request: Request) {
   try {
