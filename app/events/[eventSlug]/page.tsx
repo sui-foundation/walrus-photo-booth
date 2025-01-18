@@ -260,7 +260,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                     <DialogTrigger asChild>
                       <div className='relative w-[80%] h-full cursor-pointer z-10'>
                         <Image
-                          src={`${AGGREGATOR_URL}/v1/${photo.blob_id}`}
+                          src={`${AGGREGATOR_URL}/v1/blobs/${photo.blob_id}`}
                           alt={`Photo ${photo.blob_id}`}
                           className='rounded-md transition-all duration-300 object-contain'
                           fill
@@ -296,7 +296,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                           </span>
                         </DialogClose>
                         <Image
-                          src={`${AGGREGATOR_URL}/v1/${photo.blob_id}`}
+                          src={`${AGGREGATOR_URL}/v1/blobs/${photo.blob_id}`}
                           alt={`Photo ${photo.blob_id}`}
                           className='object-contain transition-opacity duration-300'
                           fill

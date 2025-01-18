@@ -249,7 +249,7 @@ const PhotoPage = ({ params }: { params: Promise<{ photoId: string }> }) => {
             >
               <div className='relative w-[80%] h-full cursor-pointer z-10'>
                 <Image
-                  src={`${AGGREGATOR_URL}/v1/${photoId}`}
+                  src={`${AGGREGATOR_URL}/v1/blobs/${photoId}`}
                   alt={`Photo ${photoId}`}
                   className='rounded-md transition-all duration-300 object-contain'
                   fill
