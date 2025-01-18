@@ -68,21 +68,8 @@ const timezones = [
   { value: '-03:00', name: '(GMT -3:00) Brazil, Buenos Aires, Georgetown' },
 ];
 // Then use this array to populate your select element
-const hours = [
-  '1',
-  '2',
-  '3',
-  '4',
-  '5',
-  '6',
-  '7',
-  '8',
-  '9',
-  '10',
-  '11',
-  '12',
-] as const;
-const mins = ['00', '15', '30', '45'] as const;
+const hours = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'] as const;
+const mins = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')) as [string, ...string[]];
 
 type FormData = {
   eventTitle: string;
@@ -168,15 +155,35 @@ const AddEvent: React.FC = () => {
     fetchCurrentAdmin();
   }, [emailAddress]);
 
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  
+  let hourIn12 = currentHour % 12;
+  hourIn12 = hourIn12 === 0 ? 12 : hourIn12;
+  const ampm = currentHour >= 12 ? 'PM' : 'AM';
+  
+  const minuteString = currentMinute.toString().padStart(2, '0');
+
+  const getTimezoneOffset = () => {
+    const offsetInMinutes = new Date().getTimezoneOffset();
+    const offsetHours = Math.abs(offsetInMinutes / 60);
+    const formattedOffset = `${offsetInMinutes <= 0 ? '+' : '-'}${Math.floor(offsetHours)
+      .toString()
+      .padStart(2, '0')}:00`;
+    return formattedOffset;
+  };
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof EventSchema>>({
     resolver: zodResolver(EventSchema),
     defaultValues: {
       eventTitle: '',
       eventSlug: '',
-      eventTimeHour: '',
-      eventTimeMin: '',
-      eventTimeAMPM: '',
+      eventTimeHour: hourIn12.toString(),
+      eventTimeMin: minuteString,
+      eventTimeAMPM: ampm,
+      eventTimezone: getTimezoneOffset(),
     },
   });
 
