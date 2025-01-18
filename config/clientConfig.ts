@@ -12,9 +12,7 @@ const clientConfigSchema = z.object({
   SUI_NETWORK: z.string(),
   SUI_NETWORK_NAME: z.enum(["mainnet", "testnet"]),
   ENOKI_API_KEY: z.string(),
-  GOOGLE_CLIENT_ID: z.string(),
-  PACKAGE_ID: z.string(),
-  GLOBAL_COUNTER_ID: z.string(),
+  GOOGLE_CLIENT_ID: z.string()
 });
 
 const clientConfig = clientConfigSchema.parse({
@@ -23,9 +21,7 @@ const clientConfig = clientConfigSchema.parse({
     | "mainnet"
     | "testnet",
   ENOKI_API_KEY: process.env.NEXT_PUBLIC_ENOKI_API_KEY!,
-  GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-  PACKAGE_ID: process.env.NEXT_PUBLIC_PACKAGE_ID!,
-  GLOBAL_COUNTER_ID: process.env.NEXT_PUBLIC_GLOBAL_COUNTER_ID!,
+  GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!
 });
 
 export default clientConfig;
