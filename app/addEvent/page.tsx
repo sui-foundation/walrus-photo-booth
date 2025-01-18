@@ -314,6 +314,11 @@ const AddEvent: React.FC = () => {
                       type='text'
                       placeholder='happy-birthday-sui'
                       {...field}
+                      onKeyDown={(e) => {
+                        if (e.key === ' ') {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                   </FormControl>
                   <p className="text-[10px] text-muted-foreground mt-1">
