@@ -110,6 +110,23 @@ const PhotoBoothPage: React.FC = () => {
     );
   }
 
+  if (currentAdminId && currAdminsEvents.length === 0) {
+    return (
+      <main className='container mx-auto'>
+        <div className='min-h-screen w-full flex flex-col items-center justify-center p-4 gap-4'>
+          <h2 className='text-xl font-semibold'>No Events Found</h2>
+          <p>You haven&apos;t created any events yet.</p>
+          <a 
+            href="/addEvent" 
+            className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
+          >
+            Create Your First Event
+          </a>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <div
       className={`min-h-screen w-full flex items-center justify-center ${
