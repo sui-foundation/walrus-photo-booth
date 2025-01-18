@@ -245,6 +245,8 @@ const AddEvent: React.FC = () => {
     }
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL || '';
+
   if (isLoading) {
     return <Loading />;
   }
@@ -314,6 +316,9 @@ const AddEvent: React.FC = () => {
                       {...field}
                     />
                   </FormControl>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    {form.getValues('eventSlug') ? `${baseUrl}/events/${form.getValues('eventSlug')}` : 'Enter a slug to see your event URL'}
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
