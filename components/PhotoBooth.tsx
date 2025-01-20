@@ -298,24 +298,26 @@ const PhotoBooth: React.FC<Props> = ({
 
             <div className='mt-auto border-t border-zinc-700/50 pt-4'>
               <div className='flex flex-col sm:flex-row items-center justify-center gap-6 p-4'>
-                <div className='flex flex-col items-center gap-2'>
-                  <div className='bg-white p-3 rounded-lg shadow-lg'>
-                    <QRCode
-                      value={eventUrl}
-                      size={120}
-                      style={{
-                        height: 'auto',
-                        maxWidth: '100%',
-                        width: '100%',
-                      }}
-                      viewBox={`0 0 256 256`}
-                      className='rounded'
-                    />
+                {isUploaded && (
+                  <div className='flex flex-col items-center gap-2'>
+                    <div className='bg-white p-3 rounded-lg shadow-lg'>
+                      <QRCode
+                        value={eventUrl}
+                        size={120}
+                        style={{
+                          height: 'auto',
+                          maxWidth: '100%',
+                          width: '100%',
+                        }}
+                        viewBox={`0 0 256 256`}
+                        className='rounded'
+                      />
+                    </div>
+                    <span className='text-zinc-400 text-sm'>
+                      Scan to view event
+                    </span>
                   </div>
-                  <span className='text-zinc-400 text-sm'>
-                    Scan to view event
-                  </span>
-                </div>
+                )}
 
                 <Button
                   onClick={uploadPhoto}
