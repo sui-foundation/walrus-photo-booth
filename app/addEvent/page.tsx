@@ -291,7 +291,7 @@ const AddEvent: React.FC = () => {
               name='eventTitle'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
-                  <FormLabel>Event Title</FormLabel>
+                  <FormLabel>Event Title <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Input
                       type='text'
@@ -308,7 +308,7 @@ const AddEvent: React.FC = () => {
               name='eventSlug'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
-                  <FormLabel>Event Slug</FormLabel>
+                  <FormLabel>Event Slug <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Input
                       type='text'
@@ -333,7 +333,7 @@ const AddEvent: React.FC = () => {
               name='eventDate'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
-                  <FormLabel>Event Date</FormLabel>
+                  <FormLabel>Event Date <span className="text-red-500">*</span></FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -372,7 +372,7 @@ const AddEvent: React.FC = () => {
                 name='eventTimeHour'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Hour</FormLabel>
+                    <FormLabel>Hour <span className="text-red-500">*</span></FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -390,7 +390,6 @@ const AddEvent: React.FC = () => {
                         ))}
                       </SelectContent>
                     </Select>
-
                     <FormMessage />
                   </FormItem>
                 )}
@@ -400,7 +399,7 @@ const AddEvent: React.FC = () => {
                 name='eventTimeMin'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Minute</FormLabel>
+                    <FormLabel>Minute <span className="text-red-500">*</span></FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -418,7 +417,6 @@ const AddEvent: React.FC = () => {
                         ))}
                       </SelectContent>
                     </Select>
-
                     <FormMessage />
                   </FormItem>
                 )}
@@ -428,7 +426,7 @@ const AddEvent: React.FC = () => {
                 name='eventTimeAMPM'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>AM/PM</FormLabel>
+                    <FormLabel>AM/PM <span className="text-red-500">*</span></FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -458,7 +456,7 @@ const AddEvent: React.FC = () => {
               name='eventTimezone'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Timezone</FormLabel>
+                  <FormLabel>Timezone <span className="text-red-500">*</span></FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
