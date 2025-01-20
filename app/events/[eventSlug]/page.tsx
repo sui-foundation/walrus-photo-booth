@@ -275,13 +275,13 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                       </div>
                     </DialogTrigger>
                     <DialogContent
-                      className='max-w-[95vw] max-h-[95vh] p-0 !bg-black/80 border-none 
+                      className='max-w-[80vw] max-h-[80vh] p-0 !bg-black/80 border-none 
                                              data-[state=open]:!bg-black/80 dark:!bg-black/80'
                     >
                       <DialogTitle className='sr-only'>
                         Photo from {eventDetails?.event_title}
                       </DialogTitle>
-                      <div className='relative w-full h-[95vh] !bg-black/80'>
+                      <div className='relative w-full h-[80vh] !bg-black/80'>
                         <DialogClose
                           className='absolute top-4 right-4 z-50 
                                                 bg-black/60 hover:bg-black/80
@@ -300,7 +300,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                           alt={`Photo ${photo.blob_id}`}
                           className='object-contain transition-opacity duration-300'
                           fill
-                          sizes='95vw'
+                          sizes='80vw'
                           priority
                         />
                         <div className='absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm'>
