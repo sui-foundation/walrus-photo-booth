@@ -116,7 +116,7 @@ const HomePage: React.FC = () => {
       <div className='flex items-center justify-between mb-8'>
         <div className='flex flex-col gap-2'>
           <h1 className='text-4xl font-bold text-primary'>
-            <span className='site-title'>Walrus Photo Booth</span> Events
+            <span className='site-title'>Walrus Photo Booth</span>
           </h1>
           <p className='text-lg text-gray-600'>
             Click on an event to view photos from the event
