@@ -263,8 +263,8 @@ const AddEvent: React.FC = () => {
 
   return (
     <main className='container mx-auto px-4 py-8'>
-      <div className='w-full flex items-center justify-between relative mb-10'>
-        <h1 className='text-3xl font-bold'>Add New Event</h1>
+      <div className='w-full flex flex-col md:flex-row items-center justify-between relative mb-10'>
+        <h1 className='text-3xl font-bold mb-4 md:mb-0'>Add New Event</h1>
         <div className='flex items-center gap-4'>
           {isConnected && (
             <Link
@@ -274,24 +274,23 @@ const AddEvent: React.FC = () => {
               Return Home
             </Link>
           )}
-
           <ProfilePopover />
         </div>
       </div>
 
-      <div className='w-96 m-auto mb-10'>
-        {error && <p>{errorMessage}</p>}
+      <div className='w-full max-w-md m-auto mb-10'>
+        {error && <p className='text-red-500'>{errorMessage}</p>}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className='space-y-8 m-auto'
+            className='space-y-8'
           >
             <FormField
               control={form.control}
               name='eventTitle'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
-                  <FormLabel>Event Title</FormLabel>
+                  <FormLabel>Event Title <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Input
                       type='text'
@@ -308,7 +307,7 @@ const AddEvent: React.FC = () => {
               name='eventSlug'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
-                  <FormLabel>Event Slug</FormLabel>
+                  <FormLabel>Event Slug <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Input
                       type='text'
@@ -333,14 +332,14 @@ const AddEvent: React.FC = () => {
               name='eventDate'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
-                  <FormLabel>Event Date</FormLabel>
+                  <FormLabel>Event Date <span className="text-red-500">*</span></FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
                           variant={'outline'}
                           className={cn(
-                            'w-[240px] pl-3 text-left font-normal',
+                            'w-full pl-3 text-left font-normal',
                             !field.value && 'text-muted-foreground'
                           )}
                         >
@@ -366,99 +365,97 @@ const AddEvent: React.FC = () => {
                 </FormItem>
               )}
             />
-            <div className='flex gap-4'>
-              <FormField
-                control={form.control}
-                name='eventTimeHour'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hour</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Hour' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {hours.map((hr) => (
-                          <SelectItem key={hr} value={hr}>
-                            {hr}
+            <FormItem>
+              <FormLabel>Event Time <span className="text-red-500">*</span></FormLabel>
+              <div className='flex flex-col md:flex-row gap-2 border p-2 rounded-md'>
+                <FormField
+                  control={form.control}
+                  name='eventTimeHour'
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Hour' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {hours.map((hr) => (
+                            <SelectItem key={hr} value={hr}>
+                              {hr}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='eventTimeMin'
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Minute' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {mins.map((m) => (
+                            <SelectItem key={m} value={m}>
+                              {m}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='eventTimeAMPM'
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='AM/PM' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem key='am' value='AM'>
+                            AM
                           </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='eventTimeMin'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Minute</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Minute' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {mins.map((m) => (
-                          <SelectItem key={m} value={m}>
-                            {m}
+                          <SelectItem key='pm' value='PM'>
+                            PM
                           </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='eventTimeAMPM'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>AM/PM</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='AM/PM' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem key='am' value='AM'>
-                          AM
-                        </SelectItem>
-                        <SelectItem key='pm' value='PM'>
-                          PM
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </FormItem>
 
             <FormField
               control={form.control}
               name='eventTimezone'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Timezone</FormLabel>
+                  <FormLabel>Timezone <span className="text-red-500">*</span></FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -481,7 +478,7 @@ const AddEvent: React.FC = () => {
               )}
             />
 
-            <Button type='submit'>Create Event</Button>
+            <Button type='submit' className='w-full'>Create Event</Button>
           </form>
         </Form>
       </div>
