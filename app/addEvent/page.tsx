@@ -366,90 +366,90 @@ const AddEvent: React.FC = () => {
                 </FormItem>
               )}
             />
-            <div className='flex gap-4'>
-              <FormField
-                control={form.control}
-                name='eventTimeHour'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hour <span className="text-red-500">*</span></FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Hour' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {hours.map((hr) => (
-                          <SelectItem key={hr} value={hr}>
-                            {hr}
+            <FormItem>
+              <FormLabel>Event Time <span className="text-red-500">*</span></FormLabel>
+              <div className='flex gap-4 border p-4 rounded-md'>
+                <FormField
+                  control={form.control}
+                  name='eventTimeHour'
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Hour' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {hours.map((hr) => (
+                            <SelectItem key={hr} value={hr}>
+                              {hr}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='eventTimeMin'
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Minute' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {mins.map((m) => (
+                            <SelectItem key={m} value={m}>
+                              {m}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='eventTimeAMPM'
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='AM/PM' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem key='am' value='AM'>
+                            AM
                           </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='eventTimeMin'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Minute <span className="text-red-500">*</span></FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Minute' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {mins.map((m) => (
-                          <SelectItem key={m} value={m}>
-                            {m}
+                          <SelectItem key='pm' value='PM'>
+                            PM
                           </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='eventTimeAMPM'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>AM/PM <span className="text-red-500">*</span></FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='AM/PM' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem key='am' value='AM'>
-                          AM
-                        </SelectItem>
-                        <SelectItem key='pm' value='PM'>
-                          PM
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </FormItem>
 
             <FormField
               control={form.control}
