@@ -305,7 +305,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                         />
                         <div className='absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm'>
                           <span className=''>
-                            Click and hold image to download (on mobile)
+                            Tap and hold image to download
                           </span>
                         </div>
                       </div>
