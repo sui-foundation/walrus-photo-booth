@@ -263,8 +263,8 @@ const AddEvent: React.FC = () => {
 
   return (
     <main className='container mx-auto px-4 py-8'>
-      <div className='w-full flex items-center justify-between relative mb-10'>
-        <h1 className='text-3xl font-bold'>Add New Event</h1>
+      <div className='w-full flex flex-col md:flex-row items-center justify-between relative mb-10'>
+        <h1 className='text-3xl font-bold mb-4 md:mb-0'>Add New Event</h1>
         <div className='flex items-center gap-4'>
           {isConnected && (
             <Link
@@ -274,17 +274,16 @@ const AddEvent: React.FC = () => {
               Return Home
             </Link>
           )}
-
           <ProfilePopover />
         </div>
       </div>
 
-      <div className='w-96 m-auto mb-10'>
-        {error && <p>{errorMessage}</p>}
+      <div className='w-full max-w-md m-auto mb-10'>
+        {error && <p className='text-red-500'>{errorMessage}</p>}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className='space-y-8 m-auto'
+            className='space-y-8'
           >
             <FormField
               control={form.control}
@@ -340,7 +339,7 @@ const AddEvent: React.FC = () => {
                         <Button
                           variant={'outline'}
                           className={cn(
-                            'w-[240px] pl-3 text-left font-normal',
+                            'w-full pl-3 text-left font-normal',
                             !field.value && 'text-muted-foreground'
                           )}
                         >
@@ -368,7 +367,7 @@ const AddEvent: React.FC = () => {
             />
             <FormItem>
               <FormLabel>Event Time <span className="text-red-500">*</span></FormLabel>
-              <div className='flex gap-4 border p-4 rounded-md'>
+              <div className='flex flex-col md:flex-row gap-2 border p-2 rounded-md'>
                 <FormField
                   control={form.control}
                   name='eventTimeHour'
@@ -479,7 +478,7 @@ const AddEvent: React.FC = () => {
               )}
             />
 
-            <Button type='submit'>Create Event</Button>
+            <Button type='submit' className='w-full'>Create Event</Button>
           </form>
         </Form>
       </div>
