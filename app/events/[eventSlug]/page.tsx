@@ -288,7 +288,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                                                 w-8 h-8
                                                 flex items-center justify-center
                                                 shadow-lg transition-all 
-                                                hover:scale-110'
+                                                hover:scale-110 focus:outline-none'
                           aria-label='Close dialog'
                         >
                           <span className='text-white text-xl leading-none font-semibold'>
