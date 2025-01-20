@@ -81,6 +81,7 @@ export default function ProfilePopover() {
 
   return (
     <Button
+      variant={'secondary'}
       onClick={() => {
         redirectToAuthUrl();
       }}
