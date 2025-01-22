@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Camera, Upload, Check, Loader2 } from 'lucide-react';
+import { Camera, Check, Loader2 } from 'lucide-react';
 import JSConfetti from 'js-confetti';
 import { createClient } from '@supabase/supabase-js';
 import {
@@ -154,6 +154,7 @@ const PhotoBooth: React.FC<Props> = ({
         const finalPhotoURL = canvas.toDataURL('image/png');
         setPhotoURL(finalPhotoURL);
         setShowModal(true);
+        await uploadPhoto();
       }
     }
 
@@ -170,7 +171,7 @@ const PhotoBooth: React.FC<Props> = ({
   };
 
   const uploadPhoto = async () => {
-    if (!canvasRef.current || isUploaded) return;
+    if (!canvasRef.current) return;
     setIsUploading(true);
 
     try {
@@ -297,9 +298,19 @@ const PhotoBooth: React.FC<Props> = ({
             )}
 
             <div className='mt-auto border-t border-zinc-700/50 pt-4'>
-              <div className='flex flex-col sm:flex-row items-center justify-center gap-6 p-4'>
+              <div className='flex flex-col items-center justify-center gap-6 p-4'>
+                {isUploading && (
+                  <div className='flex items-center gap-2'>
+                    <Loader2 className='animate-spin h-5 w-5 text-white' />
+                    <span className='text-white'>Uploading...</span>
+                  </div>
+                )}
                 {isUploaded && (
                   <div className='flex flex-col items-center gap-2'>
+                    <div className='flex items-center gap-2'>
+                      <Check className='h-5 w-5 text-green-500' />
+                      <span className='text-white'>Upload Complete</span>
+                    </div>
                     <div className='bg-white p-3 rounded-lg shadow-lg'>
                       <QRCode
                         value={eventUrl}
@@ -318,26 +329,6 @@ const PhotoBooth: React.FC<Props> = ({
                     </span>
                   </div>
                 )}
-
-                <Button
-                  onClick={uploadPhoto}
-                  variant='outline'
-                  className='h-12 px-8 transition-all duration-200 hover:scale-105 bg-white/10 hover:bg-white/20 text-white border-zinc-700'
-                  disabled={isUploading || isUploaded}
-                >
-                  {isUploaded ? (
-                    <Check className='mr-2 h-5 w-5 text-green-500' />
-                  ) : isUploading ? (
-                    <Loader2 className='mr-2 h-5 w-5 animate-spin' />
-                  ) : (
-                    <Upload className='mr-2 h-5 w-5' />
-                  )}
-                  {isUploaded
-                    ? 'Uploaded!'
-                    : isUploading
-                    ? 'Uploading...'
-                    : 'Upload Photo'}
-                </Button>
               </div>
             </div>
           </div>
