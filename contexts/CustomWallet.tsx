@@ -113,9 +113,6 @@ export default function CustomWalletProvider({children}: {children: React.ReactN
   ]);
 
   useEffect(() => {
-    console.log('isWalletConnected', isWalletConnected)
-    console.log('isConnected', isConnected)
-    console.log('zkLoginSession', zkLoginSession)
     if (isConnected && zkLoginSession && zkLoginSession.jwt) {
       const token = zkLoginSession.jwt;
       const decoded = jwtDecode(token);
