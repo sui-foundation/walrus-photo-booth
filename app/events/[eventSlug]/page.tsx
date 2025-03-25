@@ -265,9 +265,12 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                                 transition-all duration-300 rounded-lg'
                   />
 
-                  <Dialog open={selectedPhotoId === photo.blob_id} onOpenChange={() => setSelectedPhotoId(null)}>
+                  <Dialog open={selectedPhotoId === photo.blob_id} onOpenChange={(isOpen) => setSelectedPhotoId(isOpen ? photo.blob_id : null)}>
                     <DialogTrigger asChild>
-                      <div className='relative w-[80%] h-full cursor-pointer z-10'>
+                      <div 
+                        className='relative w-[80%] h-full cursor-pointer z-10'
+                        onClick={() => setSelectedPhotoId(photo.blob_id)}
+                      >
                         <Image
                           src={`${AGGREGATOR_URL}/v1/blobs/${photo.blob_id}`}
                           alt={`Photo ${photo.blob_id}`}
