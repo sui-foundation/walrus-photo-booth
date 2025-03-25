@@ -236,6 +236,8 @@ const PhotoBooth: React.FC<Props> = ({
     }
   };
 
+  const qrCodeValue = photoId ? `${baseUrl}/events/${selectedEventSlug}?photoId=${photoId}` : eventUrl;
+
   return (
     <>
       <div className='max-w-4xl w-full bg-black/80 rounded-xl shadow-2xl overflow-hidden'>
@@ -329,7 +331,7 @@ const PhotoBooth: React.FC<Props> = ({
                     </div>
                     <div className='bg-white p-3 rounded-lg shadow-lg'>
                       <QRCode
-                        value={photoId ? `${baseUrl}/photos/${photoId}` : eventUrl}
+                        value={qrCodeValue}
                         size={120}
                         style={{
                           height: 'auto',

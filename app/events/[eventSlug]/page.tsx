@@ -76,9 +76,18 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
   const [eventDetails, setEventDetails] = useState<Event | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [error, setError] = useState<Error | null>(null);
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
 
   const { isConnected, emailAddress } = useCustomWallet();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const photoId = urlParams.get('photoId');
+    if (photoId) {
+      setSelectedPhotoId(photoId);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchPhotos = async () => {
@@ -256,7 +265,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                                 transition-all duration-300 rounded-lg'
                   />
 
-                  <Dialog>
+                  <Dialog open={selectedPhotoId === photo.blob_id} onOpenChange={() => setSelectedPhotoId(null)}>
                     <DialogTrigger asChild>
                       <div className='relative w-[80%] h-full cursor-pointer z-10'>
                         <Image
