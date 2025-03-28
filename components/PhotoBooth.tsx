@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogClose,
 } from '@/components/ui/dialog';
 import QRCode from 'react-qr-code';
 
@@ -298,6 +299,19 @@ const PhotoBooth: React.FC<Props> = ({
             <DialogTitle className='text-center text-2xl font-semibold mb-2 text-white'>
               Your Photo Strip
             </DialogTitle>
+            <DialogClose
+              className='absolute top-4 right-4 z-50 
+                        bg-black/60 hover:bg-black/80
+                        w-8 h-8
+                        flex items-center justify-center
+                        shadow-lg transition-all 
+                        hover:scale-110 focus:outline-none'
+              aria-label='Close dialog'
+            >
+              <span className='text-white text-xl leading-none font-semibold'>
+                ×
+              </span>
+            </DialogClose>
           </DialogHeader>
 
           <div className='flex-1 flex flex-col justify-between min-h-0'>
