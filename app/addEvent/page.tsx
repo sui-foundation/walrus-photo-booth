@@ -197,12 +197,12 @@ const AddEvent: React.FC = () => {
     let hr;
 
     if (formData.eventTimeAMPM === 'PM') {
-      hr = parseInt(formData.eventTimeHour) + 12;
+      hr = parseInt(formData.eventTimeHour) === 12 ? 12 : parseInt(formData.eventTimeHour) + 12;
     } else {
-      hr = formData.eventTimeHour;
+      hr = parseInt(formData.eventTimeHour) === 12 ? 0 : parseInt(formData.eventTimeHour);
     }
 
-    const formattedTime = `${hr}:${formData.eventTimeMin}:00`;
+    const formattedTime = `${hr.toString().padStart(2, '0')}:${formData.eventTimeMin}:00`;
 
     const date = new Date(formData.eventDate);
 
@@ -230,7 +230,7 @@ const AddEvent: React.FC = () => {
 
     if (error) {
       setError(error);
-      // console.error('Error saving to database:', error);
+      console.error('Error saving to database:', error);
       if (error.code === '23505') {
         setErrorMessage('Slug already taken, please enter a new slug.');
       } else {
