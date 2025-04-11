@@ -10,7 +10,6 @@ import {
   WalletProvider,
 } from '@mysten/dapp-kit';
 import { getFullnodeUrl } from '@mysten/sui/client';
-import { registerStashedWallet } from '@mysten/zksend';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import clientConfig from '@/config/clientConfig';
 import '@mysten/dapp-kit/dist/index.css';
@@ -35,8 +34,6 @@ const sessionStorageAdapter: StorageAdapter = {
     sessionStorage.removeItem(key);
   },
 };
-
-registerStashedWallet('Breaking the Ice - Community Vote', {});
 
 export const ProvidersAndLayout = ({ children }: ChildrenProps) => {
   const { networkConfig } = createNetworkConfig({

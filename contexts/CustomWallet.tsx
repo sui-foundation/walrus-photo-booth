@@ -25,9 +25,6 @@ interface CustomWalletContextProps {
   jwt?: string;
   emailAddress: string | null;
   getAddressSeed: () => Promise<string>;
-  executeTransactionBlockWithoutSponsorship: (
-    props: ExecuteTransactionBlockWithoutSponsorshipProps
-  ) => Promise<SuiTransactionBlockResponse | void>;
   logout: () => void;
   redirectToAuthUrl: () => void;
 }
@@ -44,7 +41,6 @@ export const CustomWalletContext = createContext<CustomWalletContextProps>({
   jwt: undefined,
   emailAddress: null,
   getAddressSeed: async () => "",
-  executeTransactionBlockWithoutSponsorship: async () => {},
   logout: () => {},
   redirectToAuthUrl: () => {},
 });
@@ -140,39 +136,6 @@ export default function CustomWalletProvider({children}: {children: React.ReactN
         console.error(err);
       });
   };
-
-  const signTransaction = async (bytes: Uint8Array): Promise<string> => {
-    if (isUsingEnoki) {
-      const signer = await enokiFlow.getKeypair({
-        network: clientConfig.SUI_NETWORK_NAME,
-      });
-      const signature = await signer.signTransaction(bytes);
-      return signature.signature;
-    }
-    const txBlock = Transaction.from(bytes);
-    return signTransactionBlock({
-      transaction: txBlock,
-      chain: `sui:${clientConfig.SUI_NETWORK_NAME}`,
-    }).then((resp) => resp.signature);
-  };
-
-  const executeTransactionBlockWithoutSponsorship = async ({
-    tx,
-    options,
-  }: ExecuteTransactionBlockWithoutSponsorshipProps): Promise<SuiTransactionBlockResponse | void> => {
-    if (!isConnected) {
-      return;
-    }
-    tx.setSender(address!);
-    const txBytes = await tx.build({ client: suiClient });
-    const signature = await signTransaction(txBytes);
-    return suiClient.executeTransactionBlock({
-      transactionBlock: txBytes,
-      signature: signature!,
-      requestType: "WaitForLocalExecution",
-      options,
-    });
-  };
   
   
   return (
@@ -183,7 +146,6 @@ export default function CustomWalletProvider({children}: {children: React.ReactN
         address,
         jwt: zkLoginSession?.jwt,
         emailAddress,
-        executeTransactionBlockWithoutSponsorship,
         logout,
         redirectToAuthUrl,
         getAddressSeed,
