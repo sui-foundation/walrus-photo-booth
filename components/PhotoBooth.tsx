@@ -83,9 +83,9 @@ const PhotoBooth: React.FC<Props> = ({
     // take four photos
     for (let i = 0; i < 4; ++i) {
       // count down for each photo
-      for (let count = 1; count >= 0; --count) {
+      for (let count = 3; count >= 0; --count) {
         setCountdown(count);
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
       if (videoRef.current && canvasRef.current) {
