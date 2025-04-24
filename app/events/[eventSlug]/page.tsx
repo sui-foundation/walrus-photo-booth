@@ -41,6 +41,7 @@ interface Photo {
   object_id: string;
   event_id: number;
   user: string | null;
+  tusky_id: string;
 }
 
 interface Event {
@@ -50,6 +51,7 @@ interface Event {
   event_slug: string;
   event_date: string;
   admin_id: number;
+  tusky_id: string;
 }
 
 interface DateTimeFormatOptions {
@@ -90,13 +92,56 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
   }, []);
 
   useEffect(() => {
+    // Function to get blob_id from Tusky API for photos without blob_id
+    const fetchTuskyPhotos = async () => {
+      if (!eventDetails?.id) return;
+
+      // Find photos that have tusky_id but no blob_id
+      const photosToUpdate = photos.filter(photo => !photo.blob_id && photo.tusky_id);
+
+      for (const photo of photosToUpdate) {
+        if (!photo.tusky_id) continue;
+        try {
+          const response = await fetch(`/api/files/${photo.tusky_id}`,
+            {
+              method: 'GET'
+            }
+          );
+          if (!response.ok) {
+            console.error(`Failed to fetch Tusky file for ${photo.tusky_id}: ${response.statusText}`);
+            continue;
+          }
+
+          const data = await response.json();
+          if (data && data.blob_id != "unknown") {
+            // Update photo in the state with the new blob_id
+            setPhotos(prevPhotos =>
+              prevPhotos.map(p =>
+                p.tusky_id === photo.tusky_id
+                  ? { ...p, blob_id: data.blob_id }
+                  : p
+              )
+            );
+
+            // Optionally update in database
+            await supabase
+              .from('photos')
+              .update({ blob_id: data.blob_id })
+              .eq('tusky_id', photo.tusky_id);
+          }
+        } catch (error) {
+          console.error(`Error fetching Tusky data for ${photo.tusky_id}:`, error);
+        }
+      }
+    };
+
     const fetchPhotos = async () => {
       if (!eventDetails?.id) return;
 
       setIsLoading(true);
       const { data, error } = await supabase
         .from('photos')
-        .select('blob_id, object_id, event_id, created_at')
+        .select('blob_id, object_id, event_id, created_at, tusky_id')
         .eq('event_id', eventDetails?.id)
         .order('created_at', { ascending: false });
 
@@ -107,9 +152,11 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
         setPhotos((data as Photo[]) || []);
       }
       setIsLoading(false);
+      fetchTuskyPhotos();
     };
 
     fetchPhotos();
+
   }, [eventDetails?.id]);
 
   useEffect(() => {
@@ -176,7 +223,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
     const { error } = await supabase
       .from('photos')
       .delete()
-      .eq('blob_id', blob_id);
+      .eq('tusky_id', blob_id);
 
     if (error) {
       setError(error);
@@ -251,7 +298,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 p-3'>
               {photos.map((photo, index) => (
                 <div
-                  key={photo.blob_id}
+                  key={photo.tusky_id}
                   style={{
                     animation: `fadeIn 0.6s ease-out ${index * 0.1}s both`,
                   }}
@@ -265,14 +312,15 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                                 transition-all duration-300 rounded-lg'
                   />
 
-                  <Dialog open={selectedPhotoId === photo.blob_id} onOpenChange={(isOpen) => setSelectedPhotoId(isOpen ? photo.blob_id : null)}>
+                  <Dialog open={selectedPhotoId === photo.tusky_id} onOpenChange={(isOpen) => setSelectedPhotoId(isOpen ? photo.tusky_id : null)}>
                     <DialogTrigger asChild>
-                      <div 
+                      <div
                         className='relative w-[80%] h-full cursor-pointer z-10'
-                        onClick={() => setSelectedPhotoId(photo.blob_id)}
+                        onClick={() => setSelectedPhotoId(photo.tusky_id)}
                       >
                         <Image
-                          src={`${AGGREGATOR_URL}/v1/blobs/${photo.blob_id}`}
+                          // src={`${AGGREGATOR_URL}/v1/blobs/${photo.blob_id}`}
+                          src={photo?.blob_id && photo?.blob_id !== 'unknown' ? `${AGGREGATOR_URL}/v1/blobs/${photo?.blob_id}` : `https://cdn.tusky.io/${photo?.tusky_id}`}
                           alt={`Photo ${photo.blob_id}`}
                           className='rounded-md transition-all duration-300 object-contain'
                           fill
@@ -308,7 +356,8 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                           </span>
                         </DialogClose>
                         <Image
-                          src={`${AGGREGATOR_URL}/v1/blobs/${photo.blob_id}`}
+                          // src={`${AGGREGATOR_URL}/v1/blobs/${photo.blob_id}`}
+                          src={photo?.blob_id && photo?.blob_id !== 'unknown' ? `${AGGREGATOR_URL}/v1/blobs/${photo?.blob_id}` : `https://cdn.tusky.io/${photo?.tusky_id}`}
                           alt={`Photo ${photo.blob_id}`}
                           className='object-contain transition-opacity duration-300'
                           fill
@@ -339,7 +388,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                               Are you sure?
                             </AlertDialogTitle>
                             <AlertDialogDescription className='text-gray-600 dark:text-gray-400'>
-                              Delete photo {photo.blob_id}? This action cannot
+                              Delete photo {photo.tusky_id}? This action cannot
                               be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
@@ -348,7 +397,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                               Cancel
                             </AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleDeletePhoto(photo.blob_id)}
+                              onClick={() => handleDeletePhoto(photo.tusky_id)}
                               className='bg-red-600 hover:bg-red-700 text-white'
                             >
                               Delete

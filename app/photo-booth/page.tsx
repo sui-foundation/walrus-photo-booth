@@ -28,6 +28,7 @@ interface Event {
   event_slug: string;
   event_date: string;
   admin_id: number;
+  tusky_id: string | null;
 }
 
 const PhotoBoothPage: React.FC = () => {
@@ -141,6 +142,7 @@ const PhotoBoothPage: React.FC = () => {
               selectedEventTitle={selectedEvent.event_title}
               selectedEventSlug={selectedEvent.event_slug}
               selectedEventId={selectedEvent.id}
+              selectedTuskyId={selectedEvent.tusky_id}
             />
           ) : (
             <>

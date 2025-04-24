@@ -43,6 +43,8 @@ import {
 
 import Loading from '@/components/Loading';
 
+const tuskyVaultID = process.env.NEXT_PUBLIC_TUSKY_VAULT_ID || '';
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -158,11 +160,11 @@ const AddEvent: React.FC = () => {
   const now = new Date();
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
-  
+
   let hourIn12 = currentHour % 12;
   hourIn12 = hourIn12 === 0 ? 12 : hourIn12;
   const ampm = currentHour >= 12 ? 'PM' : 'AM';
-  
+
   const minuteString = currentMinute.toString().padStart(2, '0');
 
   const getTimezoneOffset = () => {
@@ -216,6 +218,42 @@ const AddEvent: React.FC = () => {
     setError(null);
     setErrorMessage(null);
 
+    // Create a unique event ID by combining title, date and admin ID
+    const sanitizedTitle = formData.eventTitle
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '')
+      .substring(0, 20);
+
+    // Format date to YYYYMMDD
+    const dateForId = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+
+    // Create event ID with random suffix for uniqueness
+    const eventId = `${sanitizedTitle}-${dateForId}-${currentAdminId}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+
+    // Create folder in Tusky with this ID
+    const tuskyResponse = await fetch('/api/folders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: eventId,
+        vaultId: tuskyVaultID,
+      })
+    });
+
+    if (!tuskyResponse.ok) {
+      const errorData = await tuskyResponse.json();
+      console.error('Error creating Tusky folder:', errorData);
+      setError(new Error('Failed to create folder in Tusky'));
+      setErrorMessage('There was an error creating the event folder. Please try again.');
+      return;
+    }
+
+    const tuskyFolder = await tuskyResponse.json();
+
+    const tuskyFolderId = tuskyFolder.data.id;
+
     const { data, error } = await supabase
       .from('events')
       .insert([
@@ -224,6 +262,7 @@ const AddEvent: React.FC = () => {
           admin_id: currentAdminId,
           event_date: formattedDate,
           event_slug: formData.eventSlug,
+          tusky_id: tuskyFolderId
         },
       ])
       .select();

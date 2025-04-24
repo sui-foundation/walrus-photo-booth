@@ -5,8 +5,12 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'aggregator.walrus-testnet.walrus.space',
+        hostname: 'aggregator.walrus-mainnet.walrus.space',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.tusky.io',
+      }
     ],
   },
 };

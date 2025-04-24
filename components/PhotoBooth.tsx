@@ -24,12 +24,14 @@ interface Props {
   selectedEventId: number;
   selectedEventTitle: string;
   selectedEventSlug: string;
+  selectedTuskyId: string | null;
 }
 
 const PhotoBooth: React.FC<Props> = ({
   selectedEventTitle,
   selectedEventSlug,
   selectedEventId,
+  selectedTuskyId,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -42,8 +44,8 @@ const PhotoBooth: React.FC<Props> = ({
   const [showModal, setShowModal] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
   const [photoId, setPhotoId] = useState<string | null>(null);
-  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL || '';
-  const eventUrl = `${baseUrl}/events/${selectedEventSlug}`;
+  const baseUrl = 'https://cdn.tusky.io/';
+  // const eventUrl = `${baseUrl}/events/${selectedEventSlug}`;
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -81,7 +83,7 @@ const PhotoBooth: React.FC<Props> = ({
     // take four photos
     for (let i = 0; i < 4; ++i) {
       // count down for each photo
-      for (let count = 3; count >= 0; --count) {
+      for (let count = 1; count >= 0; --count) {
         setCountdown(count);
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
@@ -194,6 +196,7 @@ const PhotoBooth: React.FC<Props> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/octet-stream',
+          'TuskyID': selectedTuskyId ? selectedTuskyId.toString() : '',
         },
         body: blob,
       });
@@ -205,14 +208,15 @@ const PhotoBooth: React.FC<Props> = ({
 
       const result = await response.json();
 
-      if (result?.data?.newlyCreated?.blobObject) {
+      if (result?.data.uploadId) {
         // save to supabase
         const { data, error } = await supabase.from('photos').insert([
           {
-            blob_id: result.data.newlyCreated.blobObject.blobId,
-            object_id: result.data.newlyCreated.blobObject.id,
+            // blob_id: blobId,
+            // object_id: objectId,
             created_at: new Date().toISOString(),
             event_id: selectedEventId,
+            tusky_id: result.data.uploadId,
           },
         ]).select();
 
@@ -220,11 +224,11 @@ const PhotoBooth: React.FC<Props> = ({
           console.error('Error saving to Supabase:', error);
           throw new Error('Failed to save to database');
         }
-        
+
         if (data && data.length > 0) {
-          setPhotoId(data[0].blob_id);
+          setPhotoId(data[0].tusky_id);
         }
-        
+
         setIsUploaded(true);
       } else {
         console.error('Unexpected response structure:', result);
@@ -237,7 +241,9 @@ const PhotoBooth: React.FC<Props> = ({
     }
   };
 
-  const qrCodeValue = photoId ? `${baseUrl}/events/${selectedEventSlug}?photoId=${photoId}` : eventUrl;
+  const qrCodeValue = photoId
+    ? `${baseUrl}${photoId}`
+    : photoURL || '';
 
   return (
     <>

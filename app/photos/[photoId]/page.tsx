@@ -35,6 +35,7 @@ interface Photo {
   object_id: string;
   event_id: number;
   user: string | null;
+  tusky_id: string | null;
 }
 
 interface Event {
@@ -44,6 +45,7 @@ interface Event {
   event_slug: string;
   event_date: string;
   admin_id: number;
+  tusky_id: string | null;
 }
 
 interface DateTimeFormatOptions {
@@ -84,7 +86,7 @@ const PhotoPage = ({ params }: { params: Promise<{ photoId: string }> }) => {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('photos')
-        .select('blob_id, object_id, event_id, created_at')
+        .select('blob_id, object_id, event_id, created_at, tusky_id')
         .eq('blob_id', resolvedParams.photoId)
         .order('created_at', { ascending: false });
 
@@ -249,7 +251,7 @@ const PhotoPage = ({ params }: { params: Promise<{ photoId: string }> }) => {
             >
               <div className='relative w-[80%] h-full cursor-pointer z-10'>
                 <Image
-                  src={`${AGGREGATOR_URL}/v1/blobs/${photoId}`}
+                  src={photo?.blob_id && photo?.blob_id !== 'unknown' ? `${AGGREGATOR_URL}/v1/blobs/${photoId}` : `https://cdn.tusky.io/${photo?.tusky_id}`}
                   alt={`Photo ${photoId}`}
                   className='rounded-md transition-all duration-300 object-contain'
                   fill
