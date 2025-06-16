@@ -7,6 +7,7 @@ import ProfilePopover from '@/components/ProfilePopover';
 import Loading from '@/components/Loading';
 import Link from 'next/link';
 import { EventCard } from '@/components/EventCard';
+import UnifiedHeader from '@/components/UnifiedHeader';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -112,38 +113,10 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <main className='container mx-auto px-4 py-8'>
-      <div className='flex items-center justify-between mb-8'>
-        <div className='flex flex-col gap-2'>
-          <h1 className='text-4xl font-bold text-primary'>
-            <span className='site-title'>Walrus Photo Booth</span>
-          </h1>
-          <p className='text-lg text-gray-600'>
-            Click on an event to view photos from the event
-          </p>
-        </div>
-        <div className='flex items-center gap-4'>
-          {isConnected && currentAdminId && (
-            <>
-              <Link
-                href='/addEvent'
-                className='inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90'
-              >
-                Create your own event
-              </Link>
-              <Link
-                href='/photo-booth'
-                className='inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium hover:bg-secondary/90'
-              >
-                Photo Booth
-              </Link>
-            </>
-          )}
-          <ProfilePopover />
-        </div>
-      </div>
+    <main className="min-h-screen bg-white text-black pb-6">
+      <UnifiedHeader variant="main" enableMenuFunctionality={true} />
 
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto pt-[20px] px-4'>
         {events.map((event) => (
           <EventCard
             key={event.id}
@@ -151,6 +124,7 @@ const HomePage: React.FC = () => {
             isConnected={isConnected}
             currentAdminId={currentAdminId}
             onDelete={handleDeleteEvent}
+            isSuperAdmin={false}
           />
         ))}
       </div>

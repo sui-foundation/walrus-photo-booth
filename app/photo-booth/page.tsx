@@ -5,7 +5,6 @@ import { useCustomWallet } from '@/contexts/CustomWallet';
 import { createClient } from '@supabase/supabase-js';
 import PhotoBooth from '@/components/PhotoBooth';
 import Loading from '@/components/Loading';
-import ProfilePopover from '@/components/ProfilePopover';
 import {
   Select,
   SelectContent,
@@ -14,7 +13,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import Link from 'next/link'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -28,7 +36,6 @@ interface Event {
   event_slug: string;
   event_date: string;
   admin_id: number;
-  tusky_id: string | null;
 }
 
 const PhotoBoothPage: React.FC = () => {
@@ -38,13 +45,12 @@ const PhotoBoothPage: React.FC = () => {
   const [error, setError] = useState<Error | null>(null);
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [currAdminsEvents, setCurrAdminsEvents] = useState<Event[]>([]);
-
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [showEventSelectedModal, setShowEventSelectedModal] = useState(false);
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
       setIsLoading(true);
-
       const { data: admins, error } = await supabase
         .from('admins')
         .select('id')
@@ -64,34 +70,33 @@ const PhotoBoothPage: React.FC = () => {
   }, [emailAddress]);
 
   useEffect(() => {
-    const fetchCurrentAdminsEvents = async () => {
+    const fetchAllEvents = async () => {
       setIsLoading(true);
 
-      if (currentAdminId) {
-        const { data: events, error } = await supabase
-          .from('events')
-          .select('*')
-          .eq('admin_id', currentAdminId);
+      const { data: events, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('event_date', { ascending: false });
 
-        if (error) {
-          setError(error);
-          console.error("Error fetching current admin's events:", error);
-        } else {
-          setCurrAdminsEvents((events as Event[]) || []);
-        }
+      if (error) {
+        setError(error);
+        console.error('Error fetching all events:', error);
+      } else {
+        setCurrAdminsEvents((events as Event[]) || []);
       }
 
       setIsLoading(false);
     };
 
-    fetchCurrentAdminsEvents();
-  }, [currentAdminId]);
+    fetchAllEvents();
+  }, []);
 
   const handleSelectEvent = (e: string) => {
     const eNum = parseInt(e);
     const foundEvent = currAdminsEvents.filter((e) => e.id === eNum);
     localStorage.setItem('selectedEvent', JSON.stringify(foundEvent[0]));
     setSelectedEvent(foundEvent[0]);
+    setShowEventSelectedModal(true); // Show modal after selection
   };
 
   if (error) {
@@ -106,7 +111,6 @@ const PhotoBoothPage: React.FC = () => {
     return (
       <main className='container mx-auto'>
         <div className='min-h-screen w-full flex items-center justify-center p-4 relative'>
-          <ProfilePopover />
         </div>
       </main>
     );
@@ -116,7 +120,7 @@ const PhotoBoothPage: React.FC = () => {
     return (
       <main className='container mx-auto'>
         <div className='min-h-screen w-full flex flex-col items-center justify-center p-4 gap-4'>
-          <h2 className='text-xl font-semibold'>No Events Found</h2>
+          <h2 className='text-xl font-neuebit'>No Events Found</h2>
           <p>You haven&apos;t created any events yet.</p>
           <a 
             href="/addEvent" 
@@ -130,65 +134,98 @@ const PhotoBoothPage: React.FC = () => {
   }
 
   return (
-    <div
-      className={`min-h-screen w-full flex flex-col ${
-        selectedEvent ? 'bg-[url("/brand-image-walrus.png")] bg-cover' : ''
-      }`}
-    >
-      <main className='container mx-auto px-4 py-8 flex-grow flex flex-col w-full'>
-        <div className='w-full flex items-center justify-center grow p-4'>
-          {selectedEvent ? (
+    <main className="min-h-screen bg-white text-black flex flex-col">
+      {/* Header */}
+      <div className="w-full bg-black text-white flex flex-col border-b border-white/10">
+        <div className="flex items-center px-2 py-2 gap-2">
+          <button onClick={() => window.history.back()} className="p-2 rounded hover:bg-white/10 flex items-center">
+            <span className="ml-1 text-base">Back</span>
+          </button>
+          <div className="flex-1 flex justify-center">
+            <span className="text-4xl font-neuebit tracking-widest" style={{ letterSpacing: 2 }}>PHOTO BOOTH</span>
+          </div>
+          <div className="flex items-center gap-3 min-w-[48px]">
+            <img src="/on.png" alt="Logo" width={40} height={40} className="rounded-full hover:opacity-80 transition cursor-pointer ml-2" />
+          </div>
+        </div>
+      </div>
+      {/* Main content */}
+      <div className="flex-1 flex flex-col justify-start items-stretch px-0 pt-6 pb-32 bg-white">
+        <div className="w-full max-w-lg mx-auto">
+          {error && <p className='text-red-500 font-neuemontreal'>{String(error)}</p>}
+          {/* Modal after event selection */}
+          {selectedEvent && showEventSelectedModal && (
+            <Dialog open={showEventSelectedModal} onOpenChange={setShowEventSelectedModal}>
+              <DialogContent className="font-neuemontreal text-black text-center">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-neuebit mb-2">Event Selected</DialogTitle>
+                  <DialogDescription className="font-mono text-lg mb-4">
+                    <span className="block font-semibold">{selectedEvent.event_title.toUpperCase()}</span>
+                    <span className="block text-base mt-1">{new Date(selectedEvent.event_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <button
+                    className="mt-4 px-6 py-2 bg-black text-white rounded font-mono text-lg hover:bg-gray-800 transition"
+                    onClick={() => setShowEventSelectedModal(false)}
+                  >
+                    Continue
+                  </button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+          {/* Main PhotoBooth UI only after modal is closed */}
+          {selectedEvent && !showEventSelectedModal ? (
             <PhotoBooth
               selectedEventTitle={selectedEvent.event_title}
               selectedEventSlug={selectedEvent.event_slug}
               selectedEventId={selectedEvent.id}
-              selectedTuskyId={selectedEvent.tusky_id}
+              selectedTuskyId={null}
             />
           ) : (
-            <>
-              {currentAdminId && (
-                <div className='flex flex-col items-center justify-center w-full gap-4'>
-                  <ProfilePopover />
-                  <Select onValueChange={handleSelectEvent}>
-                    <SelectTrigger className='w-[280px]'>
-                      <SelectValue placeholder='Select an Event' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {currAdminsEvents &&
-                          currAdminsEvents.map((el: Event, index) => (
-                            <SelectItem key={index} value={el.id.toString()}>
-                              {el.event_title.toUpperCase()}&nbsp;/&nbsp;
-                              {new Date(el.event_date).toLocaleDateString(
-                                'en-US',
-                                {
-                                  month: 'long',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                }
-                              )}
-                            </SelectItem>
-                          ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </>
+            currAdminsEvents.length > 0 && !selectedEvent && (
+              <div className="flex flex-col gap-6 mt-4">
+                <div className="text-lg font-mono font-semibold text-center">Select an Event</div>
+                <Select onValueChange={handleSelectEvent}>
+                  <SelectTrigger className="w-full bg-white text-black border border-gray-300 rounded font-mono text-lg">
+                    <SelectValue placeholder="Select an Event" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white text-black font-mono text-lg">
+                    <SelectGroup>
+                      {currAdminsEvents.map((el: Event, index) => (
+                        <SelectItem
+                          key={index}
+                          value={el.id.toString()}
+                          className="hover:bg-gray-100 font-mono text-lg"
+                        >
+                          {el.event_title.toUpperCase()} /{' '}
+                          {new Date(el.event_date).toLocaleDateString('en-US', {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            )
           )}
         </div>
-      </main>
-      <footer className='w-full py-4 text-center'>
-        <Link 
-          href="/terms-of-use" 
-          className='text-blue-600 hover:underline'
-          target="_blank" 
+      </div>
+      <footer className="w-full py-4 text-center text-sm text-gray-400 font-mono">
+        <Link
+          href="/terms-of-use"
+          className="text-blue-400 hover:underline"
+          target="_blank"
           rel="noopener noreferrer"
         >
           Terms of Use
         </Link>
       </footer>
-    </div>
+    </main>
   );
 };
 

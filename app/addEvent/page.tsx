@@ -1,15 +1,14 @@
 'use client';
 
+import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { createClient } from '@supabase/supabase-js';
-import ProfilePopover from '@/components/ProfilePopover';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z, ZodType } from 'zod';
 
@@ -50,6 +49,8 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const timezones = [
+  { value: '-12:00', name: '(GMT -12:00) International Date Line West' },
+  { value: '-11:00', name: '(GMT -11:00) Midway Island, Samoa' },
   { value: '-10:00', name: '(GMT -10:00) Hawaii' },
   { value: '-09:00', name: '(GMT -9:00) Alaska' },
   { value: '-08:00', name: '(GMT -8:00) Pacific Time (US & Canada)' },
@@ -68,6 +69,27 @@ const timezones = [
   },
   { value: '-03:30', name: '(GMT -3:30) Newfoundland' },
   { value: '-03:00', name: '(GMT -3:00) Brazil, Buenos Aires, Georgetown' },
+  { value: '-02:00', name: '(GMT -2:00) Mid-Atlantic' },
+  { value: '-01:00', name: '(GMT -1:00) Azores, Cape Verde Islands' },
+  { value: '+00:00', name: '(GMT) Western Europe Time, London, Lisbon, Casablanca' },
+  { value: '+01:00', name: '(GMT +1:00) Brussels, Copenhagen, Madrid, Paris' },
+  { value: '+02:00', name: '(GMT +2:00) Kaliningrad, South Africa' },
+  { value: '+03:00', name: '(GMT +3:00) Baghdad, Riyadh, Moscow, St. Petersburg' },
+  { value: '+03:30', name: '(GMT +3:30) Tehran' },
+  { value: '+04:00', name: '(GMT +4:00) Abu Dhabi, Muscat, Baku, Tbilisi' },
+  { value: '+04:30', name: '(GMT +4:30) Kabul' },
+  { value: '+05:00', name: '(GMT +5:00) Ekaterinburg, Islamabad, Karachi, Tashkent' },
+  { value: '+05:30', name: '(GMT +5:30) Bombay, Calcutta, Madras, New Delhi' },
+  { value: '+05:45', name: '(GMT +5:45) Kathmandu' },
+  { value: '+06:00', name: '(GMT +6:00) Almaty, Dhaka, Colombo' },
+  { value: '+06:30', name: '(GMT +6:30) Yangon, Cocos Islands' },
+  { value: '+07:00', name: '(GMT +7:00) Bangkok, Hanoi, Jakarta' },
+  { value: '+08:00', name: '(GMT +8:00) Beijing, Perth, Singapore, Hong Kong' },
+  { value: '+09:00', name: '(GMT +9:00) Tokyo, Seoul, Osaka, Sapporo, Yakutsk' },
+  { value: '+09:30', name: '(GMT +9:30) Adelaide, Darwin' },
+  { value: '+10:00', name: '(GMT +10:00) Eastern Australia, Guam, Vladivostok' },
+  { value: '+11:00', name: '(GMT +11:00) Magadan, Solomon Islands, New Caledonia' },
+  { value: '+12:00', name: '(GMT +12:00) Auckland, Wellington, Fiji, Kamchatka' },
 ];
 // Then use this array to populate your select element
 const hours = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'] as const;
@@ -130,6 +152,7 @@ const AddEvent: React.FC = () => {
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
@@ -191,6 +214,8 @@ const AddEvent: React.FC = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(formData: z.infer<typeof EventSchema>) {
+    setIsSubmitting(true);
+
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
 
@@ -282,6 +307,7 @@ const AddEvent: React.FC = () => {
     if (data) {
       router.push('/');
     }
+    setIsSubmitting(false);
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL || '';
@@ -294,232 +320,202 @@ const AddEvent: React.FC = () => {
     return (
       <main className='container mx-auto'>
         <div className='min-h-screen w-full flex items-center justify-center p-4 relative'>
-          <ProfilePopover />
         </div>
       </main>
     );
   }
 
   return (
-    <main className='container mx-auto px-4 py-8'>
-      <div className='w-full flex flex-col md:flex-row items-center justify-between relative mb-10'>
-        <h1 className='text-3xl font-bold mb-4 md:mb-0'>Add New Event</h1>
-        <div className='flex items-center gap-4'>
-          {isConnected && (
-            <Link
-              href='/'
-              className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 py-2 px-6'
-            >
-              Return Home
-            </Link>
-          )}
-          <ProfilePopover />
+    <main className="min-h-screen bg-white text-black flex flex-col">
+      {/* Header */}
+      <div className="w-full bg-black text-white flex flex-col border-b border-white/10">
+        <div className="flex items-center px-2 py-2 gap-2">
+          <button onClick={() => router.back()} className="p-2 rounded hover:bg-white/10 flex items-center">
+            <ArrowLeft className="w-6 h-6" />
+            <span className="ml-1 text-base">Back</span>
+          </button>
+          <div className="flex-1 flex justify-center">
+            <span className="text-4xl font-neuebit tracking-widest" style={{ letterSpacing: 2 }}>ADD NEW EVENT</span>
+          </div>
+          <div className="flex items-center gap-3 min-w-[48px]">
+           <img src="/on.png" alt="Logo" width={40} height={40} className="rounded-full hover:opacity-80 transition cursor-pointer ml-2" />
+          </div>
         </div>
       </div>
 
-      <div className='w-full max-w-md m-auto mb-10'>
-        {error && <p className='text-red-500'>{errorMessage}</p>}
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className='space-y-8'
-          >
-            <FormField
-              control={form.control}
-              name='eventTitle'
-              render={({ field }) => (
-                <FormItem className='flex flex-col'>
-                  <FormLabel>Event Title <span className="text-red-500">*</span></FormLabel>
-                  <FormControl>
-                    <Input
-                      type='text'
-                      placeholder='Happy Birthday Sui'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='eventSlug'
-              render={({ field }) => (
-                <FormItem className='flex flex-col'>
-                  <FormLabel>Event Slug <span className="text-red-500">*</span></FormLabel>
-                  <FormControl>
-                    <Input
-                      type='text'
-                      placeholder='happy-birthday-sui'
-                      {...field}
-                      onKeyDown={(e) => {
-                        if (e.key === ' ') {
-                          e.preventDefault();
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <p className="text-[10px] text-muted-foreground mt-1">
-                    {form.getValues('eventSlug') ? `${baseUrl}/events/${form.getValues('eventSlug')}` : 'Enter a slug to see your event URL'}
-                  </p>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='eventDate'
-              render={({ field }) => (
-                <FormItem className='flex flex-col'>
-                  <FormLabel>Event Date <span className="text-red-500">*</span></FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-full pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, 'PPP')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0' align='start'>
-                      <Calendar
-                        mode='single'
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        initialFocus
+      {/* Form */}
+      <div className="flex-1 flex flex-col justify-start items-stretch px-0 pt-6 pb-32">
+        <div className="w-full max-w-lg mx-auto">
+          {error && <p className='text-red-500'>{errorMessage}</p>}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name='eventTitle'
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="text-lg font-neuebit mb-2">Event Title <span className="text-red-500">*</span></FormLabel>
+                    <FormControl>
+                      <Input
+                        type='text'
+                        placeholder='Happy Birthday Sui'
+                        className="text-lg px-2 border border-gray-300 rounded bg-white shadow-sm focus:ring-2 focus:ring-teal-200 focus:outline-none font-neuemontreal"
+                        style={{fontFamily: 'monospace'}}
+                        {...field}
                       />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormItem>
-              <FormLabel>Event Time <span className="text-red-500">*</span></FormLabel>
-              <div className='flex flex-col md:flex-row gap-2 border p-2 rounded-md'>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='eventSlug'
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="text-lg font-neuebit mb-2">Event Slug <span className="text-red-500">*</span></FormLabel>
+                    <FormControl>
+                      <Input
+                        type='text'
+                        placeholder='happy-birthday-sui'
+                        className="text-lg px-2 border border-gray-300 rounded bg-white shadow-sm focus:ring-2 focus:ring-teal-200 focus:outline-none font-neuemontreal"
+                        style={{fontFamily: 'monospace'}}
+                        {...field}
+                        onKeyDown={(e) => { if (e.key === ' ') e.preventDefault(); }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='eventDate'
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="text-lg font-neuebit mb-2">Date & Time <span className="text-red-500">*</span></FormLabel>
+                    <FormControl>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal text-lg px-2 border border-gray-300 rounded bg-white shadow-sm focus:ring-2 focus:ring-teal-200 focus:outline-none font-mono",
+                              !field.value && "text-muted-foreground"
+                            )}
+                            style={{fontFamily: 'monospace'}}
+                          >
+                            {field.value ? format(field.value, 'M/d/yyyy') : <span>Select date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex gap-4">
                 <FormField
                   control={form.control}
-                  name='eventTimeHour'
+                  name="eventTimeHour"
                   render={({ field }) => (
                     <FormItem>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Hour' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {hours.map((hr) => (
-                            <SelectItem key={hr} value={hr}>
-                              {hr}
-                            </SelectItem>
+                      <FormLabel style={{fontFamily: 'monospace'}}>Hour</FormLabel>
+                      <FormControl>
+                        <select {...field} className="border rounded px-2 py-1 text-lg font-mono bg-white" style={{fontFamily: 'monospace'}}>
+                          {hours.map((h) => (
+                            <option key={h} value={h}>{h}</option>
                           ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
+                        </select>
+                      </FormControl>
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name='eventTimeMin'
+                  name="eventTimeMin"
                   render={({ field }) => (
                     <FormItem>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Minute' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
+                      <FormLabel style={{fontFamily: 'monospace'}}>Minute</FormLabel>
+                      <FormControl>
+                        <select {...field} className="border rounded px-2 py-1 text-lg font-mono bg-white" style={{fontFamily: 'monospace'}}>
                           {mins.map((m) => (
-                            <SelectItem key={m} value={m}>
-                              {m}
-                            </SelectItem>
+                            <option key={m} value={m}>{m}</option>
                           ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
+                        </select>
+                      </FormControl>
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name='eventTimeAMPM'
+                  name="eventTimeAMPM"
                   render={({ field }) => (
                     <FormItem>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='AM/PM' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem key='am' value='AM'>
-                            AM
-                          </SelectItem>
-                          <SelectItem key='pm' value='PM'>
-                            PM
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
+                      <FormLabel style={{fontFamily: 'monospace'}}>AM/PM</FormLabel>
+                      <FormControl>
+                        <select {...field} className="border rounded px-2 py-1 text-lg font-mono bg-white" style={{fontFamily: 'monospace'}}>
+                          <option value="AM">AM</option>
+                          <option value="PM">PM</option>
+                        </select>
+                      </FormControl>
                     </FormItem>
                   )}
                 />
               </div>
-            </FormItem>
-
-            <FormField
-              control={form.control}
-              name='eventTimezone'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Timezone <span className="text-red-500">*</span></FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+              <FormField
+                control={form.control}
+                name='eventTimezone'
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="text-lg font-neuebit mb-2">Time Zone <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder='Timezone' />
-                      </SelectTrigger>
+                      <select
+                        {...field}
+                        className="text-lg px-2 border rounded bg-white shadow-sm focus:ring-2 focus:ring-teal-200 focus:outline-none font-neuemontreal py-2"
+                        style={{fontFamily: 'monospace'}}
+                      >
+                        {timezones.map((tz) => (
+                          <option key={tz.value} value={tz.value}>{tz.name}</option>
+                        ))}
+                      </select>
                     </FormControl>
-                    <SelectContent>
-                      {timezones.map((tz) => (
-                        <SelectItem key={tz.name} value={tz.value}>
-                          {tz.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button type='submit' className='w-full'>Create Event</Button>
-          </form>
-        </Form>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="h-32" /> {/* Spacer for fixed button */}
+            </form>
+          </Form>
+        </div>
+      </div>
+      {/* Fixed bottom button */}
+      {isSubmitting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg px-8 py-6 flex flex-col items-center gap-3">
+            <span className="text-lg font-mono font-semibold">Creating event...</span>
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-400" />
+          </div>
+        </div>
+      )}
+      <div className="fixed bottom-0 left-0 right-0 bg-teal-200" style={{ zIndex: 50 }}>
+        <button
+          type="submit"
+          onClick={() => form.handleSubmit(onSubmit)()}
+          className="w-full py-5 text-lg font-semibold tracking-wider text-black bg-teal-200 hover:bg-teal-300 transition rounded-none font-mono"
+          style={{fontFamily: 'monospace'}}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Processing...' : 'CREATE NEW EVENT'}
+        </button>
       </div>
     </main>
   );

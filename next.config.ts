@@ -10,7 +10,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'cdn.tusky.io',
-      }
+      },
+      {
+        protocol: 'https',
+        hostname: 'xsvuwjxzzwlmjsvsjzns.supabase.co', // Thêm hostname của Supabase
+      },
     ],
   },
 };
