@@ -179,7 +179,7 @@ const UnifiedHeader: React.FC<HeaderProps> = ({
             {showNavigation && <NavigationSection />}
           </div>
           <div className="text-center py-6">
-            <h1 className="text-2xl font-neuebit tracking-wide uppercase">EVENT ALBUMS</h1>
+            <h1 className="text-5xl font-neuebit tracking-wide uppercase">EVENT ALBUMS</h1>
             <p className="text-sm mt-1 text-white/70 font-neuemontreal">
               The latest updates, direct from your favorite mammal
             </p>

@@ -253,7 +253,7 @@ const ManageUsersPage = () => {
             const response = await fetch(photoUrl);
             if (!response.ok) continue;
             const blob = await response.blob();
-            const fileName = `photo_${String(i + 1).padStart(3, '0')}_${photo.user_email || 'unknown'}.jpg`;
+            const fileName = `photo_${String(i + 1).padStart(3, '0')}.jpg`;
             zip.file(fileName, blob);
             successCount++;
           } catch (err) {
