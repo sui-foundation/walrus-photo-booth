@@ -39,6 +39,7 @@ const PhotoBoothPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
+  const [adminRole, setAdminRole] = useState<string | null>(null);
   const [currAdminsEvents, setCurrAdminsEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showEventSelectedModal, setShowEventSelectedModal] = useState(false);
@@ -48,43 +49,41 @@ const PhotoBoothPage: React.FC = () => {
       setIsLoading(true);
       const { data: admins, error } = await supabase
         .from('admins')
-        .select('id')
-        .eq('email', emailAddress);
-
+        .select('id, role')
+        .eq('email', emailAddress)
+        .single();
       if (error) {
         setError(error);
         console.error('Error fetching admin info:', error);
       } else {
-        if (admins.length > 0) setCurrentAdminId(admins[0].id);
+        if (admins) {
+          setCurrentAdminId(admins.id);
+          setAdminRole(admins.role);
+        }
       }
-
       setIsLoading(false);
     };
-
-    fetchCurrentAdmin();
+    if (emailAddress) fetchCurrentAdmin();
   }, [emailAddress]);
 
   useEffect(() => {
     const fetchAllEvents = async () => {
       setIsLoading(true);
-
-      const { data: events, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('event_date', { ascending: false });
-
+      let query = supabase.from('events').select('*').order('event_date', { ascending: false });
+      if (adminRole !== 'super_admin' && currentAdminId) {
+        query = query.eq('admin_id', currentAdminId);
+      }
+      const { data: events, error } = await query;
       if (error) {
         setError(error);
-        console.error('Error fetching all events:', error);
+        console.error('Error fetching events:', error);
       } else {
         setCurrAdminsEvents((events as Event[]) || []);
       }
-
       setIsLoading(false);
     };
-
-    fetchAllEvents();
-  }, []);
+    if (adminRole && (adminRole === 'super_admin' || currentAdminId)) fetchAllEvents();
+  }, [adminRole, currentAdminId]);
 
   const handleSelectEvent = (e: string) => {
     const eNum = parseInt(e);
