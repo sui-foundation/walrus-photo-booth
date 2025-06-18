@@ -64,10 +64,10 @@ const PhotoBooth: React.FC<Props> = ({
   }, [showModal]);
 
   const startCamera = async () => {
-    setIsCameraOn(true); // Chỉ set state, không gọi getUserMedia ở đây
+    setIsCameraOn(true); // Only set state, do not call getUserMedia here
   };
 
-  // Khi isCameraOn=true và videoRef đã mount, mới gọi getUserMedia
+  // When isCameraOn=true and videoRef has mounted, then call getUserMedia
   useEffect(() => {
     if (isCameraOn && videoRef.current) {
       navigator.mediaDevices.getUserMedia({ video: true })
@@ -272,7 +272,7 @@ const PhotoBooth: React.FC<Props> = ({
       </div>
       {/* Main content */}
       <div className="flex-1 flex flex-col justify-center items-center bg-[#232323] relative py-2">
-        {/* Nếu chưa bật camera, hiển thị dòng chờ */}
+        {/* If camera is not turned on, show waiting message */}
         {!isCameraOn && (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-white text-2xl font-neuemontreal">
@@ -280,7 +280,7 @@ const PhotoBooth: React.FC<Props> = ({
             </span>
           </div>
         )}
-        {/* Nếu đã bật camera, hiển thị video và nút chụp */}
+        {/* If camera is on, show video and capture button */}
         {isCameraOn && (
           <>
             <div className="w-full max-w-2xl flex flex-col items-center justify-center">

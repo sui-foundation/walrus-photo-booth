@@ -61,7 +61,7 @@ export const EventCard = ({
       }
 
       if (data && data.length > 0) {
-        // Lấy 1 ảnh random
+        // Get 1 random photo
         const randomIndex = Math.floor(Math.random() * data.length);
         const selectedPhoto = data[randomIndex];
 
@@ -79,7 +79,7 @@ export const EventCard = ({
     fetchRandomPhoto();
   }, [event.id]);
 
-  // Format ngày giống hình
+  // Format date similar to image
   const formattedDate = new Date(event.event_date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -217,7 +217,8 @@ export const EventCard = ({
       </Link>
       <div className="mb-2 text-gray-400 text-sm">{formattedDate}</div>
       <div className="mb-6 text-xl font-semibold tracking-wide">{event.event_title.toUpperCase()}</div>
-      {isConnected && currentAdminId === event.admin_id && (
+      {/* Hiển thị nút xóa cho super admin hoặc chủ event */}
+      {isConnected && (isSuperAdmin || currentAdminId === event.admin_id) && (
         <div className="flex gap-4">
           <AlertDialog>
             <AlertDialogTrigger asChild>

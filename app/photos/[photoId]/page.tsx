@@ -111,7 +111,7 @@ const PhotoPage = ({ params }: { params: Promise<{ photoId: string }> }) => {
     setIsLoading(true);
 
     try {
-      // Kiểm tra quyền sở hữu ảnh
+      // Check photo ownership
       if (emailAddress !== photo?.user_email) {
         setError(new Error('You do not have permission to delete this photo.'));
         setIsLoading(false);
@@ -203,7 +203,7 @@ const PhotoPage = ({ params }: { params: Promise<{ photoId: string }> }) => {
                 <Image
                   src={photo?.blob_id && photo?.blob_id !== 'unknown' ? `${AGGREGATOR_URL}/v1/blobs/${photoId}` : `https://cdn.tusky.io/${photo?.tusky_id}`}
                   alt={`Photo ${photoId}`}
-                  className='rounded-md transition-all duration-300 object-contain' // Sử dụng object-contain để hiển thị nguyên vẹn ảnh
+                  className='rounded-md transition-all duration-300 object-contain' // Use object-contain to display the image intact
                   width={800} 
                   height={600} 
                 />

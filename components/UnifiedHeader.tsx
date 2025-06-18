@@ -8,6 +8,7 @@ import ProfilePopover from '@/components/ProfilePopover';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { useAuthentication } from '@/contexts/Authentication';
 import { ReactNode, useState, useRef, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 interface HeaderProps {
   variant?: 'main' | 'page' | 'minimal';
@@ -38,12 +39,25 @@ const UnifiedHeader: React.FC<HeaderProps> = ({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Get admin role from session storage
+  // Get admin role from Supabase
   const [adminRole, setAdminRole] = useState<string | null>(null);
   
   useEffect(() => {
-    setAdminRole(sessionStorage.getItem('userRole'));
-  }, []);
+    const fetchAdminRole = async () => {
+      if (!emailAddress) return;
+      const { data, error } = await supabase
+        .from('admins')
+        .select('role')
+        .eq('email', emailAddress)
+        .single();
+      if (!error && data?.role) {
+        setAdminRole(data.role);
+      } else {
+        setAdminRole(null);
+      }
+    };
+    fetchAdminRole();
+  }, [emailAddress]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -117,8 +131,8 @@ const UnifiedHeader: React.FC<HeaderProps> = ({
         className="rounded-sm group-hover:opacity-80 transition"
       />
       <div>
-        <div className="text-2xl font-bold leading-tight font-neuebit">WALRUS</div>
-        <div className="text-xl font-neuemontreal text-white/60 leading-tight" style={{letterSpacing: 1}}>
+        <div className="text-3xl font-bold leading-tight font-neuebit">WALRUS</div>
+        <div className="text-l font-neuemontreal text-white/60 leading-tight" style={{letterSpacing: 0}}>
           PHOTOBOOTH
         </div>
       </div>
@@ -192,12 +206,14 @@ const UnifiedHeader: React.FC<HeaderProps> = ({
               </div>
             </div>
             <div className="pt-3 flex flex-col gap-3">
-              <Link
-                href="/manage/users"
-                className="text-center rounded-lg border border-indigo-600 text-indigo-600 py-2 font-semibold hover:bg-indigo-50 transition duration-200"
-              >
-                Go to Admin Panel
-              </Link>
+              {adminRole === 'super admin' && (
+                <Link
+                  href="/manage/users"
+                  className="text-center rounded-lg border border-indigo-600 text-indigo-600 py-2 font-semibold hover:bg-indigo-50 transition duration-200"
+                >
+                  Go to Admin Panel
+                </Link>
+              )}
               <button
                 onClick={handleLogout}
                 disabled={isLoggingOut}

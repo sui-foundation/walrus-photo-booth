@@ -30,6 +30,7 @@ const HomePage: React.FC = () => {
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [error, setError] = useState<Error | null>(null);
+  const [adminRole, setAdminRole] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -75,6 +76,24 @@ const HomePage: React.FC = () => {
     fetchCurrentAdmin();
   }, [emailAddress]);
 
+  useEffect(() => {
+    const fetchAdminRole = async () => {
+      if (!emailAddress) return;
+      const { data, error } = await supabase
+        .from('admins')
+        .select('role')
+        .eq('email', emailAddress)
+        .single();
+      if (!error && data?.role) {
+        setAdminRole(data.role);
+      } else {
+        setAdminRole(null);
+      }
+    };
+
+    fetchAdminRole();
+  }, [emailAddress]);
+
   const handleDeleteEvent = async (id: number) => {
     setIsLoading(true);
 
@@ -112,10 +131,10 @@ const HomePage: React.FC = () => {
     return <Loading />;
   }
 
+  // Pass isSuperAdmin to EventCard
   return (
     <main className="min-h-screen bg-white text-black pb-6">
       <UnifiedHeader variant="main" enableMenuFunctionality={true} />
-
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto pt-[20px] px-4'>
         {events.map((event) => (
           <EventCard
@@ -124,7 +143,7 @@ const HomePage: React.FC = () => {
             isConnected={isConnected}
             currentAdminId={currentAdminId}
             onDelete={handleDeleteEvent}
-            isSuperAdmin={false}
+            isSuperAdmin={adminRole === 'super admin'}
           />
         ))}
       </div>

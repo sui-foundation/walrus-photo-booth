@@ -25,6 +25,7 @@ const ManageEventsPage = () => {
   const [showLogoPopover, setShowLogoPopover] = useState(false);
   const logoPopoverRef = useRef<HTMLDivElement>(null);
   const adminRole = user?.role || 'admin';
+  const isSuperAdmin = user?.role === 'super_admin';
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -61,7 +62,11 @@ const ManageEventsPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleDeleteEvent = async (id: string) => {
+  const handleDeleteEvent = async (id: string, ownerEmail: string) => {
+    if (!isSuperAdmin && user?.email !== ownerEmail) {
+      alert('You do not have permission to delete this event.');
+      return;
+    }
     if (!confirm('Delete this event?')) return;
     const { error } = await supabase.from('events').delete().eq('id', id);
     if (!error) setEvents(prev => prev.filter(e => e.id !== id));
@@ -152,9 +157,10 @@ const ManageEventsPage = () => {
                       <button
                         className="flex w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100"
                         onClick={() => {
-                          handleDeleteEvent(event.id);
+                          handleDeleteEvent(event.id, event.owner_email);
                           setEvents(prev => prev.map(e => ({ ...e, showMenu: false })));
                         }}
+                        disabled={!isSuperAdmin && user?.email !== event.owner_email}
                       >
                         🗑 DELETE EVENT
                       </button>
