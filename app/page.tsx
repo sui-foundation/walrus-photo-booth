@@ -138,7 +138,7 @@ const HomePage: React.FC = () => {
             isConnected={isConnected}
             currentAdminId={currentAdminId}
             onDelete={handleDeleteEvent}
-            isSuperAdmin={adminRole === 'super admin'}
+            isSuperAdmin={adminRole === 'super_admin'}
           />
         ))}
       </div>

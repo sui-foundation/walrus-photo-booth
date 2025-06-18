@@ -325,7 +325,7 @@ const ManageUsersPage = () => {
                     />
                     <div>
                       <div className="font-medium text-base">{admin.email}</div>
-                      <div className="text-xs text-gray-500">{admin.role === 'super admin' ? 'Super Admin' : admin.role === 'admin' ? 'Admin' : admin.role}</div>
+                      <div className="text-xs text-gray-500">{admin.role === 'super_admin' ? 'Super Admin' : admin.role === 'admin' ? 'Admin' : admin.role}</div>
                     </div>
                   </div>
                   <div className="relative">
@@ -489,8 +489,7 @@ const ManageUsersPage = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-gray-900 border border-gray-700 rounded-lg">
                   <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="editor">Editor</SelectItem>
-                  <SelectItem value="viewer">Viewer</SelectItem>
+                  <SelectItem value="super_admin">Super Admin</SelectItem>
                 </SelectContent>
               </Select>
             </div>

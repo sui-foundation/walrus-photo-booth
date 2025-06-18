@@ -206,7 +206,7 @@ const UnifiedHeader: React.FC<HeaderProps> = ({
               </div>
             </div>
             <div className="pt-3 flex flex-col gap-3">
-              {adminRole === 'super admin' && (
+              {adminRole === 'super_admin' && (
                 <Link
                   href="/manage/users"
                   className="text-center rounded-lg border border-indigo-600 text-indigo-600 py-2 font-semibold hover:bg-indigo-50 transition duration-200"
