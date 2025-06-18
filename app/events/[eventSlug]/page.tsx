@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import ProfilePopover from '@/components/ProfilePopover';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { Button } from '@/components/ui/button';
@@ -28,10 +28,6 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import UnifiedHeader from '@/components/UnifiedHeader';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 const AGGREGATOR_URL = process.env.NEXT_PUBLIC_AGGREGATOR_URL || 'https://aggregator.walrus-testnet.walrus.space';
 

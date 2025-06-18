@@ -3,7 +3,7 @@
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -43,10 +43,6 @@ import {
 import Loading from '@/components/Loading';
 
 const tuskyVaultID = process.env.NEXT_PUBLIC_TUSKY_VAULT_ID || '';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 const timezones = [
   { value: '-12:00', name: '(GMT -12:00) International Date Line West' },

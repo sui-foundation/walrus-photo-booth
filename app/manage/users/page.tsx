@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuthentication } from '@/contexts/Authentication';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Loading from '@/components/Loading';
 import Image from 'next/image';
@@ -34,10 +34,6 @@ import { Button } from '@/components/ui/button';
 import UnifiedHeader from '@/components/UnifiedHeader';
 import { useToast } from "@/hooks/use-toast";
 import JSZip from 'jszip';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 const ManageUsersPage = () => {
   const { user } = useAuthentication();

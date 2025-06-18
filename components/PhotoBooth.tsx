@@ -13,11 +13,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import QRCode from 'react-qr-code';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabase } from '@/lib/supabaseClient';
 
 interface Props {
   selectedEventId: number;

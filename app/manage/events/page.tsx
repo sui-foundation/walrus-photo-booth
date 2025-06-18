@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuthentication } from '@/contexts/Authentication';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Loading from '@/components/Loading';
 import Image from 'next/image';
@@ -10,10 +10,6 @@ import Link from 'next/link';
 import { Menu } from 'lucide-react';
 import { format } from 'date-fns';
 import UnifiedHeader from '@/components/UnifiedHeader';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 const ManageEventsPage = () => {
   const { user } = useAuthentication();

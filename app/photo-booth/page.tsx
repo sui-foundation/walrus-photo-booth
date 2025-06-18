@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import PhotoBooth from '@/components/PhotoBooth';
 import Loading from '@/components/Loading';
 import {
@@ -23,11 +23,6 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
-
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface Event {
   id: number;

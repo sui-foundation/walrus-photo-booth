@@ -1,11 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-// Create Supabase client with Service Role Key (only used on the server)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_KEY! // SERVICE ROLE KEY - never expose on the client!
-);
+import { supabase } from "@/lib/supabaseClient";
 
 export async function GET() {
   try {

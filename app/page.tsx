@@ -2,17 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import ProfilePopover from '@/components/ProfilePopover';
 import Loading from '@/components/Loading';
 import Link from 'next/link';
 import { EventCard } from '@/components/EventCard';
 import UnifiedHeader from '@/components/UnifiedHeader';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
-
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface Event {
   id: number;
