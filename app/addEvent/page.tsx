@@ -215,7 +215,8 @@ const AddEvent: React.FC = () => {
   useEffect(() => {
     const subscription = form.watch((values, { name }) => {
       if (name === 'eventTitle' && !eventSlugManuallyEdited) {
-        const slug = values.eventTitle
+        const eventTitle = values.eventTitle ?? '';
+        const slug = eventTitle
           .toLowerCase()
           .trim()
           .replace(/[^a-z0-9\s-]/g, '')
