@@ -149,6 +149,8 @@ const AddEvent: React.FC = () => {
   const [error, setError] = useState<Error | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [eventSlugManuallyEdited, setEventSlugManuallyEdited] = useState(false);
+  const [hideDateTime, setHideDateTime] = useState(true); // always true for now
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
@@ -201,12 +203,29 @@ const AddEvent: React.FC = () => {
     defaultValues: {
       eventTitle: '',
       eventSlug: '',
+      eventDate: now, // set to current date
       eventTimeHour: hourIn12.toString(),
       eventTimeMin: minuteString,
       eventTimeAMPM: ampm,
-      eventTimezone: getTimezoneOffset(),
+      eventTimezone: getTimezoneOffset(), // set to current timezone
     },
   });
+
+  // Auto-generate slug from title unless user edits slug manually
+  useEffect(() => {
+    const subscription = form.watch((values, { name }) => {
+      if (name === 'eventTitle' && !eventSlugManuallyEdited) {
+        const slug = values.eventTitle
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-');
+        form.setValue('eventSlug', slug, { shouldValidate: true });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, eventSlugManuallyEdited]);
 
   // 2. Define a submit handler.
   async function onSubmit(formData: z.infer<typeof EventSchema>) {
@@ -358,6 +377,10 @@ const AddEvent: React.FC = () => {
                         className="text-lg px-2 border border-gray-300 rounded bg-white shadow-sm focus:ring-2 focus:ring-teal-200 focus:outline-none font-neuemontreal"
                         style={{fontFamily: 'monospace'}}
                         {...field}
+                        onChange={e => {
+                          field.onChange(e);
+                          setEventSlugManuallyEdited(false);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -378,116 +401,27 @@ const AddEvent: React.FC = () => {
                         style={{fontFamily: 'monospace'}}
                         {...field}
                         onKeyDown={(e) => { if (e.key === ' ') e.preventDefault(); }}
+                        onChange={e => {
+                          field.onChange(e);
+                          setEventSlugManuallyEdited(true);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name='eventDate'
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel className="text-lg font-neuebit mb-2">Date & Time <span className="text-red-500">*</span></FormLabel>
-                    <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal text-lg px-2 border border-gray-300 rounded bg-white shadow-sm focus:ring-2 focus:ring-teal-200 focus:outline-none font-mono",
-                              !field.value && "text-muted-foreground"
-                            )}
-                            style={{fontFamily: 'monospace'}}
-                          >
-                            {field.value ? format(field.value, 'M/d/yyyy') : <span>Select date</span>}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex gap-4">
-                <FormField
-                  control={form.control}
-                  name="eventTimeHour"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel style={{fontFamily: 'monospace'}}>Hour</FormLabel>
-                      <FormControl>
-                        <select {...field} className="border rounded px-2 py-1 text-lg font-mono bg-white" style={{fontFamily: 'monospace'}}>
-                          {hours.map((h) => (
-                            <option key={h} value={h}>{h}</option>
-                          ))}
-                        </select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="eventTimeMin"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel style={{fontFamily: 'monospace'}}>Minute</FormLabel>
-                      <FormControl>
-                        <select {...field} className="border rounded px-2 py-1 text-lg font-mono bg-white" style={{fontFamily: 'monospace'}}>
-                          {mins.map((m) => (
-                            <option key={m} value={m}>{m}</option>
-                          ))}
-                        </select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="eventTimeAMPM"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel style={{fontFamily: 'monospace'}}>AM/PM</FormLabel>
-                      <FormControl>
-                        <select {...field} className="border rounded px-2 py-1 text-lg font-mono bg-white" style={{fontFamily: 'monospace'}}>
-                          <option value="AM">AM</option>
-                          <option value="PM">PM</option>
-                        </select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+              {/* Hide Date & Time and Time Zone fields */}
+              {/* <FormField name='eventDate' ... /> */}
+              {/* <div className="flex gap-4"> ... </div> */}
+              {/* <FormField name='eventTimezone' ... /> */}
+              {/* Show current date, time, and timezone as info */}
+              <div className="flex flex-col gap-2">
+                <div className="text-base font-mono text-gray-700">
+                  <span>Event date & time: </span>
+                  <span>{format(now, 'EEE MMM d yyyy HH:mm')} (GMT{getTimezoneOffset()})</span>
+                </div>
               </div>
-              <FormField
-                control={form.control}
-                name='eventTimezone'
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel className="text-lg font-neuebit mb-2">Time Zone <span className="text-red-500">*</span></FormLabel>
-                    <FormControl>
-                      <select
-                        {...field}
-                        className="text-lg px-2 border rounded bg-white shadow-sm focus:ring-2 focus:ring-teal-200 focus:outline-none font-neuemontreal py-2"
-                        style={{fontFamily: 'monospace'}}
-                      >
-                        {timezones.map((tz) => (
-                          <option key={tz.value} value={tz.value}>{tz.name}</option>
-                        ))}
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <div className="h-32" /> {/* Spacer for fixed button */}
             </form>
           </Form>

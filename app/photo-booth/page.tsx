@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { supabase } from '@/lib/supabaseClient';
 import PhotoBooth from '@/components/PhotoBooth';
@@ -43,6 +43,7 @@ const PhotoBoothPage: React.FC = () => {
   const [currAdminsEvents, setCurrAdminsEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showEventSelectedModal, setShowEventSelectedModal] = useState(false);
+  const photoBoothRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
@@ -92,6 +93,12 @@ const PhotoBoothPage: React.FC = () => {
     setSelectedEvent(foundEvent[0]);
     setShowEventSelectedModal(true); // Show modal after selection
   };
+
+  useEffect(() => {
+    if (selectedEvent && !showEventSelectedModal && photoBoothRef.current) {
+      photoBoothRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [selectedEvent, showEventSelectedModal]);
 
   if (error) {
     return <div>Error loading events</div>;
@@ -145,69 +152,69 @@ const PhotoBoothPage: React.FC = () => {
       </div>
       {/* Main content */}
       <div className="flex-1 flex flex-col justify-start items-stretch px-0 pt-6 pb-32 bg-white">
-        <div className="w-full max-w-lg mx-auto">
-          {error && <p className='text-red-500 font-neuemontreal'>{String(error)}</p>}
-          {/* Modal after event selection */}
-          {selectedEvent && showEventSelectedModal && (
-            <Dialog open={showEventSelectedModal} onOpenChange={setShowEventSelectedModal}>
-              <DialogContent className="font-neuemontreal text-black text-center">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-neuebit mb-2">Event Selected</DialogTitle>
-                  <DialogDescription className="font-mono text-lg mb-4">
-                    <span className="block font-semibold">{selectedEvent.event_title.toUpperCase()}</span>
-                    <span className="block text-base mt-1">{new Date(selectedEvent.event_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <button
-                    className="mt-4 px-6 py-2 bg-black text-white rounded font-mono text-lg hover:bg-gray-800 transition"
-                    onClick={() => setShowEventSelectedModal(false)}
-                  >
-                    Continue
-                  </button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-          {/* Main PhotoBooth UI only after modal is closed */}
-          {selectedEvent && !showEventSelectedModal ? (
+        {error && <p className='text-red-500 font-neuemontreal'>{String(error)}</p>}
+        {/* Modal after event selection */}
+        {selectedEvent && showEventSelectedModal && (
+          <Dialog open={showEventSelectedModal} onOpenChange={setShowEventSelectedModal}>
+            <DialogContent className="font-neuemontreal text-black text-center">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-neuebit mb-2">Event Selected</DialogTitle>
+                <DialogDescription className="font-mono text-lg mb-4">
+                  <span className="block font-semibold">{selectedEvent.event_title.toUpperCase()}</span>
+                  <span className="block text-base mt-1">{new Date(selectedEvent.event_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <button
+                  className="mt-4 px-6 py-2 bg-black text-white rounded font-mono text-lg hover:bg-gray-800 transition"
+                  onClick={() => setShowEventSelectedModal(false)}
+                >
+                  Continue
+                </button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+        {/* Main PhotoBooth UI only after modal is closed */}
+        {selectedEvent && !showEventSelectedModal ? (
+          <div ref={photoBoothRef}>
             <PhotoBooth
               selectedEventTitle={selectedEvent.event_title}
               selectedEventSlug={selectedEvent.event_slug}
               selectedEventId={selectedEvent.id}
               selectedTuskyId={null}
             />
-          ) : (
-            currAdminsEvents.length > 0 && !selectedEvent && (
-              <div className="flex flex-col gap-6 mt-4">
-                <div className="text-lg font-mono font-semibold text-center">Select an Event</div>
-                <Select onValueChange={handleSelectEvent}>
-                  <SelectTrigger className="w-full bg-white text-black border border-gray-300 rounded font-mono text-lg">
-                    <SelectValue placeholder="Select an Event" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white text-black font-mono text-lg">
-                    <SelectGroup>
-                      {currAdminsEvents.map((el: Event, index) => (
-                        <SelectItem
-                          key={index}
-                          value={el.id.toString()}
-                          className="hover:bg-gray-100 font-mono text-lg"
-                        >
-                          {el.event_title.toUpperCase()} /{' '}
-                          {new Date(el.event_date).toLocaleDateString('en-US', {
-                            month: 'long',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            )
-          )}
-        </div>
+          </div>
+        ) : (
+          currAdminsEvents.length > 0 && !selectedEvent && (
+            <div className="flex flex-col gap-6 mt-4 max-w-lg mx-auto">
+              <div className="text-lg font-mono font-semibold text-center">Select an Event</div>
+              <Select onValueChange={handleSelectEvent}>
+                <SelectTrigger className="w-full bg-white text-black border border-gray-300 rounded font-mono text-lg">
+                  <SelectValue placeholder="Select an Event" />
+                </SelectTrigger>
+                <SelectContent className="bg-white text-black font-mono text-lg">
+                  <SelectGroup>
+                    {currAdminsEvents.map((el: Event, index) => (
+                      <SelectItem
+                        key={index}
+                        value={el.id.toString()}
+                        className="hover:bg-gray-100 font-mono text-lg"
+                      >
+                        {el.event_title.toUpperCase()} /{' '}
+                        {new Date(el.event_date).toLocaleDateString('en-US', {
+                          month: 'long',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          )
+        )}
       </div>
       <footer className="w-full py-4 text-center text-sm text-gray-400 font-mono">
         <Link

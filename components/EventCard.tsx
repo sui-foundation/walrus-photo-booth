@@ -164,7 +164,7 @@ export const EventCard = ({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      alert(`Successfully exported ${successCount} photos`);
+      // alert(`Successfully exported ${successCount} photos`);
       
       if (onExport) {
         onExport(event.id);
@@ -178,8 +178,21 @@ export const EventCard = ({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-[#F2F2F2] p-6 max-w-xl w-full mx-auto">
-      <Link href={`/events/${event.event_slug}`} className="block">
+    <Link href={`/events/${event.event_slug}`} className="block" passHref legacyBehavior>
+      <div
+        className="bg-white rounded-xl border border-[#F2F2F2] p-6 max-w-xl w-full mx-auto hover:shadow-md transition-shadow cursor-pointer"
+        onClick={(e) => {
+          // Prevent navigation if a button or its child is clicked
+          const target = e.target as HTMLElement;
+          if (
+            target.closest('button') ||
+            target.closest('[role="button"]')
+          ) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
+      >
         <div className="grid grid-cols-2 grid-rows-2 gap-4 mb-6">
           {randomPhoto
             ? Array.from({ length: 4 }).map((_, idx) => (
@@ -214,50 +227,50 @@ export const EventCard = ({
                 </div>
               ))}
         </div>
-      </Link>
-      <div className="mb-2 text-gray-400 text-sm">{formattedDate}</div>
-      <div className="mb-6 text-xl font-semibold tracking-wide">{event.event_title.toUpperCase()}</div>
-      {isConnected && (isSuperAdmin || currentAdminId === event.admin_id) && (
-        <div className="flex gap-4">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="lg"
-                className="flex-1 border border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium py-3 px-0 rounded transition-colors flex items-center justify-center gap-2"
-              >
-                DELETE
-                <TrashIcon className="h-5 w-5" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the
-                  event and all associated photos.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDelete(event.id)}>
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <Button
-            variant="outline"
-            size="lg"
-            className="flex-1 border border-gray-200 text-black hover:bg-gray-50 font-medium py-3 px-0 rounded transition-colors flex items-center justify-center gap-2"
-            onClick={handleExport}
-            disabled={isExporting}
-          >
-            {isExporting ? 'EXPORTING...' : 'EXPORT'}
-            <DownloadIcon className="h-5 w-5" />
-          </Button>
-        </div>
-      )}
-    </div>
+        <div className="mb-2 text-gray-400 text-sm">{formattedDate}</div>
+        <div className="mb-6 text-xl font-semibold tracking-wide">{event.event_title.toUpperCase()}</div>
+        {isConnected && (isSuperAdmin || currentAdminId === event.admin_id) && (
+          <div className="flex gap-4">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="flex-1 border border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium py-3 px-0 rounded transition-colors flex items-center justify-center gap-2"
+                >
+                  DELETE
+                  <TrashIcon className="h-5 w-5" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the
+                    event and all associated photos.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onDelete(event.id)}>
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <Button
+              variant="outline"
+              size="lg"
+              className="flex-1 border border-gray-200 text-black hover:bg-gray-50 font-medium py-3 px-0 rounded transition-colors flex items-center justify-center gap-2"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              {isExporting ? 'EXPORTING...' : 'EXPORT'}
+              <DownloadIcon className="h-5 w-5" />
+            </Button>
+          </div>
+        )}
+      </div>
+    </Link>
   );
 };

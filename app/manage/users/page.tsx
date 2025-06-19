@@ -484,12 +484,12 @@ const ManageUsersPage = () => {
             </div>
             <div className="mt-4">
               <Select value={addUserRole} onValueChange={setAddUserRole}>
-                <SelectTrigger className="w-full p-3 text-base rounded-lg bg-gray-800 border border-gray-700">
+                <SelectTrigger className="w-full p-3 text-base rounded-lg bg-gray-800 border border-gray-700 text-white">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-900 border border-gray-700 rounded-lg">
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="super_admin">Super Admin</SelectItem>
+                <SelectContent className="bg-gray-900 border border-gray-700 rounded-lg text-white">
+                  <SelectItem value="admin" className="text-white">Admin</SelectItem>
+                  <SelectItem value="super_admin" className="text-white">Super Admin</SelectItem>
                 </SelectContent>
               </Select>
             </div>

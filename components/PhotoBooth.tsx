@@ -253,7 +253,7 @@ const PhotoBooth: React.FC<Props> = ({
     : photoURL || '';
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-black relative overflow-hidden">
+    <div className="w-screen h-screen min-h-screen min-w-screen flex flex-col bg-black relative overflow-hidden">
       {/* Header */}
       <div className="w-full bg-black text-white px-8 pt-4 pb-1 border-b border-white/10">
         <div className="text-lg font-neuemontreal font-normal opacity-80">
@@ -267,10 +267,10 @@ const PhotoBooth: React.FC<Props> = ({
         </div>
       </div>
       {/* Main content */}
-      <div className="flex-1 flex flex-col justify-center items-center bg-[#232323] relative py-2">
+      <div className="flex-1 flex flex-col justify-center items-center bg-[#232323] relative py-2 w-full h-full min-h-0 min-w-0">
         {/* If camera is not turned on, show waiting message */}
         {!isCameraOn && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center w-full h-full">
             <span className="text-white text-2xl font-neuemontreal">
               Awaiting Camera Activation
             </span>
@@ -279,8 +279,8 @@ const PhotoBooth: React.FC<Props> = ({
         {/* If camera is on, show video and capture button */}
         {isCameraOn && (
           <>
-            <div className="w-full max-w-2xl flex flex-col items-center justify-center">
-              <div className="relative aspect-video bg-black rounded-lg overflow-hidden w-full shadow-xl border border-zinc-700">
+            <div className="w-full h-full flex flex-col items-center justify-center">
+              <div className="relative w-full h-full bg-black rounded-lg overflow-hidden shadow-xl border border-zinc-700 flex items-center justify-center">
                 <video
                   ref={videoRef}
                   autoPlay
@@ -322,7 +322,7 @@ const PhotoBooth: React.FC<Props> = ({
       </div>
       {/* Modal giữ nguyên */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className='max-w-md bg-black/90 border-zinc-700 h-[90vh] flex flex-col items-center justify-start p-4'>
+        <DialogContent className='w-screen h-screen max-w-none max-h-none bg-black/90 border-zinc-700 flex flex-col items-center justify-start p-4'>
           <DialogHeader className='w-full'>
             <DialogTitle className='text-center text-2xl font-semibold mb-2 text-white w-full'>
               Your Photo Strip

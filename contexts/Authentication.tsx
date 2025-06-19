@@ -65,16 +65,6 @@ export const AuthenticationProvider = ({ children }: ChildrenProps) => {
       sessionStorage.setItem('userRole', updatedUser.role);
 
       setIsSuperAdmin(updatedUser.role === 'super_admin');
-
-      if (pathname === '/' || pathname === '/auth') {
-        if (updatedUser.role === 'anonymous' || !updatedUser.role) {
-          router.push('/');
-        } else if (updatedUser.role === 'super_admin') {
-          router.push('/admin-management');
-        } else {
-          router.push('/');
-        }
-      }
     },
     [router, pathname]
   );
