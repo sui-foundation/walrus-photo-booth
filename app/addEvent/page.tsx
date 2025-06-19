@@ -217,11 +217,13 @@ const AddEvent: React.FC = () => {
       if (name === 'eventTitle' && !eventSlugManuallyEdited) {
         const eventTitle = values.eventTitle ?? '';
         const slug = eventTitle
+          .normalize('NFD') // chuyển về dạng có thể loại bỏ dấu
+          .replace(/[\u0300-\u036f]/g, '') // loại bỏ dấu
           .toLowerCase()
           .trim()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-');
+          .replace(/[^a-z0-9\s-]/g, '') // chỉ giữ lại ký tự a-z, 0-9, khoảng trắng, gạch ngang
+          .replace(/\s+/g, '-') // thay khoảng trắng bằng gạch ngang
+          .replace(/-+/g, '-'); // loại bỏ gạch ngang thừa
         form.setValue('eventSlug', slug, { shouldValidate: true });
       }
     });
