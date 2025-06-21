@@ -428,7 +428,7 @@ const AddEvent: React.FC = () => {
                           const eventTitle = e.target.value ?? '';
                           const slug = eventTitle
                             .normalize('NFD')
-                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/[/\u0300-\u036f]/g, '')
                             .trim()
                             .toLowerCase()
                             .replace(/[^a-z0-9\s-]/g, '')
@@ -460,6 +460,8 @@ const AddEvent: React.FC = () => {
                         tabIndex={-1}
                       />
                     </FormControl>
+                    {slugChecking && <span className="text-xs text-gray-500">Checking slug...</span>}
+                    {slugExists && <span className="text-xs text-red-500">Slug already exists, please choose another.</span>}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -495,7 +497,7 @@ const AddEvent: React.FC = () => {
           onClick={() => form.handleSubmit(onSubmit)()}
           className="w-full py-5 text-lg font-semibold tracking-wider text-black bg-teal-200 hover:bg-teal-300 transition rounded-none font-mono"
           style={{fontFamily: 'monospace'}}
-          disabled={isSubmitting}
+          disabled={isSubmitting || slugExists}
         >
           {isSubmitting ? 'Processing...' : 'CREATE NEW EVENT'}
         </button>
