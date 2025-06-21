@@ -149,7 +149,6 @@ const AddEvent: React.FC = () => {
   const [error, setError] = useState<Error | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [eventSlugManuallyEdited, setEventSlugManuallyEdited] = useState(false);
   const [hideDateTime, setHideDateTime] = useState(true); // always true for now
   const [slugChecking, setSlugChecking] = useState(false);
   const [slugExists, setSlugExists] = useState(false);
@@ -213,24 +212,24 @@ const AddEvent: React.FC = () => {
     },
   });
 
-  // Auto-generate slug from title unless user edits slug manually
+  // Auto-generate slug từ title, KHÔNG cho chỉnh tay
   useEffect(() => {
     const subscription = form.watch((values, { name }) => {
-      if (name === 'eventTitle' && !eventSlugManuallyEdited) {
+      if (name === 'eventTitle') {
         const eventTitle = values.eventTitle ?? '';
         const slug = eventTitle
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
-          .trim() // Đưa trim lên trước
+          .trim()
           .toLowerCase()
           .replace(/[^a-z0-9\s-]/g, '')
           .replace(/\s+/g, '-')
-          .replace(/-+/g, '-'); // loại bỏ gạch ngang thừa
+          .replace(/-+/g, '-');
         form.setValue('eventSlug', slug, { shouldValidate: true });
       }
     });
     return () => subscription.unsubscribe();
-  }, [form, eventSlugManuallyEdited]);
+  }, [form]);
 
   // Hàm kiểm tra slug tồn tại
   const checkSlugExists = useCallback(async (slug: string) => {
@@ -424,16 +423,13 @@ const AddEvent: React.FC = () => {
                         className="text-lg px-2 border border-gray-300 rounded bg-white shadow-sm focus:ring-2 focus:ring-teal-200 focus:outline-none font-neuemontreal"
                         style={{fontFamily: 'monospace'}}
                         {...field}
-                        onChange={e => {
-                          field.onChange(e);
-                          setEventSlugManuallyEdited(false);
-                        }}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              {/* EventSlug chỉ hiển thị, không cho nhập tay */}
               <FormField
                 control={form.control}
                 name='eventSlug'
@@ -444,28 +440,13 @@ const AddEvent: React.FC = () => {
                       <Input
                         type='text'
                         placeholder='happy-birthday-sui'
-                        className="text-lg px-2 border border-gray-300 rounded bg-white shadow-sm focus:ring-2 focus:ring-teal-200 focus:outline-none font-neuemontreal"
+                        className="text-lg px-2 border border-gray-300 rounded bg-white shadow-sm focus:ring-2 focus:ring-teal-200 focus:outline-none font-neuemontreal bg-gray-100"
                         style={{fontFamily: 'monospace'}}
                         {...field}
-                        onKeyDown={(e) => { if (e.key === ' ') e.preventDefault(); }}
-                        onChange={e => {
-                          field.onChange(e);
-                          setEventSlugManuallyEdited(true);
-                        }}
-                        onBlur={async (e) => {
-                          const slug = e.target.value;
-                          if (slug) {
-                            const exists = await checkSlugExists(slug);
-                            if (exists) {
-                              form.setError('eventSlug', { type: 'manual', message: 'Slug already exists, please choose another.' });
-                            } else {
-                              form.clearErrors('eventSlug');
-                            }
-                          }
-                        }}
+                        readOnly
+                        tabIndex={-1}
                       />
                     </FormControl>
-                    {slugChecking && <span className="text-xs text-gray-500">Checking slug...</span>}
                     <FormMessage />
                   </FormItem>
                 )}
