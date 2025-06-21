@@ -262,11 +262,6 @@ const AddEvent: React.FC = () => {
         const slug = values.eventSlug;
         if (slug) {
           const exists = await checkSlugExists(slug);
-          if (exists) {
-            form.setError('eventSlug', { type: 'manual', message: 'Slug already exists, please choose another.' });
-          } else {
-            form.clearErrors('eventSlug');
-          }
         }
       }
     });
