@@ -51,6 +51,7 @@ const ManageUsersPage = () => {
   const [confirmDelete, setConfirmDelete] = useState<{ email: string, type: 'user' | 'events' | null }>({ email: '', type: null });
   const [showTab, setShowTab] = useState<'users' | 'events'>('users');
   const [redirecting, setRedirecting] = useState(false);
+  const [freshRole, setFreshRole] = useState<string | null>(null);
   const logoPopoverRef = useRef<HTMLDivElement>(null);
   const emailAddress = user?.email || '';
   const adminRole = user?.role || 'admin';
@@ -277,14 +278,40 @@ const ManageUsersPage = () => {
     }
   };
 
+  // Fetch role mới nhất từ database
   useEffect(() => {
-    if (user && user.role !== 'super_admin') {
-      setRedirecting(true);
-      setTimeout(() => {
-        router.replace('/');
-      }, 1500);
-    }
-  }, [user, router]);
+    console.log('Current user:', user);
+    const fetchRole = async () => {
+      if (!user?.email) {
+        setRedirecting(true);
+        setTimeout(() => {
+          router.replace('/');
+        }, 1500);
+      }
+      const { data, error } = await supabase
+        .from('admins')
+        .select('role')
+        .eq('email', user.email)
+        .single();
+      if (!error && data?.role) {
+        console.log('Fetched role:', data.role);
+        setFreshRole(data.role);
+        if (data.role !== 'super_admin') {
+          setRedirecting(true);
+          setTimeout(() => {
+            router.replace('/');
+          }, 1500);
+        }
+      } else {
+        console.error('Error fetching role:', error);
+        setRedirecting(true);
+        setTimeout(() => {
+          router.replace('/');
+        }, 1500);
+      }
+    };
+    fetchRole();
+  }, [user?.email]);
 
   if (redirecting) {
     return (
