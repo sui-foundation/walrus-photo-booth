@@ -423,6 +423,19 @@ const AddEvent: React.FC = () => {
                         className="text-lg px-2 border border-gray-300 rounded bg-white shadow-sm focus:ring-2 focus:ring-teal-200 focus:outline-none font-neuemontreal"
                         style={{fontFamily: 'monospace'}}
                         {...field}
+                        onChange={e => {
+                          field.onChange(e); // cập nhật eventTitle
+                          const eventTitle = e.target.value ?? '';
+                          const slug = eventTitle
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .trim()
+                            .toLowerCase()
+                            .replace(/[^a-z0-9\s-]/g, '')
+                            .replace(/\s+/g, '-')
+                            .replace(/-+/g, '-');
+                          form.setValue('eventSlug', slug, { shouldValidate: true });
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
