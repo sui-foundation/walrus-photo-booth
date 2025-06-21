@@ -212,24 +212,6 @@ const AddEvent: React.FC = () => {
     },
   });
 
-  // Auto-generate slug từ title, KHÔNG cho chỉnh tay
-  useEffect(() => {
-    const subscription = form.watch((values, { name }) => {
-      if (name === 'eventTitle') {
-        const eventTitle = values.eventTitle ?? '';
-        const slug = eventTitle
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .trim()
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-');
-        form.setValue('eventSlug', slug, { shouldValidate: true });
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form]);
 
   // Hàm kiểm tra slug tồn tại
   const checkSlugExists = useCallback(async (slug: string) => {
@@ -254,19 +236,6 @@ const AddEvent: React.FC = () => {
       return false;
     }
   }, []);
-
-  // Khi user thay đổi slug, kiểm tra unique
-  useEffect(() => {
-    const subscription = form.watch(async (values, { name }) => {
-      if (name === 'eventSlug') {
-        const slug = values.eventSlug;
-        if (slug) {
-          const exists = await checkSlugExists(slug);
-        }
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form, checkSlugExists]);
 
   // 2. Define a submit handler.
   async function onSubmit(formData: z.infer<typeof EventSchema>) {
@@ -430,6 +399,7 @@ const AddEvent: React.FC = () => {
                             .replace(/\s+/g, '-')
                             .replace(/-+/g, '-');
                           form.setValue('eventSlug', slug, { shouldValidate: true });
+                          checkSlugExists(slug);
                         }}
                       />
                     </FormControl>
@@ -490,7 +460,7 @@ const AddEvent: React.FC = () => {
         <button
           type="submit"
           onClick={() => form.handleSubmit(onSubmit)()}
-          className="w-full py-5 text-lg font-semibold tracking-wider text-black bg-teal-200 hover:bg-teal-300 transition rounded-none font-mono"
+          className={`w-full py-5 text-lg font-semibold tracking-wider text-black transition rounded-none font-mono ${isSubmitting || slugExists ? 'bg-gray-300 cursor-not-allowed' : 'bg-teal-200 hover:bg-teal-300'}`}
           style={{fontFamily: 'monospace'}}
           disabled={isSubmitting || slugExists}
         >
