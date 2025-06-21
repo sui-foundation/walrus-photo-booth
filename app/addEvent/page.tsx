@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowLeft } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
@@ -151,6 +151,8 @@ const AddEvent: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [eventSlugManuallyEdited, setEventSlugManuallyEdited] = useState(false);
   const [hideDateTime, setHideDateTime] = useState(true); // always true for now
+  const [slugChecking, setSlugChecking] = useState(false);
+  const [slugExists, setSlugExists] = useState(false);
 
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
@@ -229,6 +231,48 @@ const AddEvent: React.FC = () => {
     });
     return () => subscription.unsubscribe();
   }, [form, eventSlugManuallyEdited]);
+
+  // Hàm kiểm tra slug tồn tại
+  const checkSlugExists = useCallback(async (slug: string) => {
+    if (!slug) return false;
+    setSlugChecking(true);
+    setSlugExists(false);
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('event_slug')
+        .eq('event_slug', slug)
+        .limit(1);
+      if (error) {
+        setSlugChecking(false);
+        return false;
+      }
+      setSlugExists(!!(data && data.length > 0));
+      setSlugChecking(false);
+      return !!(data && data.length > 0);
+    } catch (e) {
+      setSlugChecking(false);
+      return false;
+    }
+  }, []);
+
+  // Khi user thay đổi slug, kiểm tra unique
+  useEffect(() => {
+    const subscription = form.watch(async (values, { name }) => {
+      if (name === 'eventSlug') {
+        const slug = values.eventSlug;
+        if (slug) {
+          const exists = await checkSlugExists(slug);
+          if (exists) {
+            form.setError('eventSlug', { type: 'manual', message: 'Slug already exists, please choose another.' });
+          } else {
+            form.clearErrors('eventSlug');
+          }
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, checkSlugExists]);
 
   // 2. Define a submit handler.
   async function onSubmit(formData: z.infer<typeof EventSchema>) {
@@ -408,8 +452,20 @@ const AddEvent: React.FC = () => {
                           field.onChange(e);
                           setEventSlugManuallyEdited(true);
                         }}
+                        onBlur={async (e) => {
+                          const slug = e.target.value;
+                          if (slug) {
+                            const exists = await checkSlugExists(slug);
+                            if (exists) {
+                              form.setError('eventSlug', { type: 'manual', message: 'Slug already exists, please choose another.' });
+                            } else {
+                              form.clearErrors('eventSlug');
+                            }
+                          }
+                        }}
                       />
                     </FormControl>
+                    {slugChecking && <span className="text-xs text-gray-500">Checking slug...</span>}
                     <FormMessage />
                   </FormItem>
                 )}

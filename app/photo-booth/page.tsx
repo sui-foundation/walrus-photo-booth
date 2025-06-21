@@ -134,6 +134,18 @@ const PhotoBoothPage: React.FC = () => {
     );
   }
 
+  if (selectedEvent && !showEventSelectedModal) {
+    // Hide everything except PhotoBooth
+    return (
+      <PhotoBooth
+        selectedEventTitle={selectedEvent.event_title}
+        selectedEventSlug={selectedEvent.event_slug}
+        selectedEventId={selectedEvent.id}
+        selectedTuskyId={null}
+      />
+    );
+  }
+
   return (
     <main className="min-h-screen bg-white text-black flex flex-col">
       {/* Header */}

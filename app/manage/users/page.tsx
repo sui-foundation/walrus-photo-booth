@@ -50,6 +50,7 @@ const ManageUsersPage = () => {
   const [addUserError, setAddUserError] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<{ email: string, type: 'user' | 'events' | null }>({ email: '', type: null });
   const [showTab, setShowTab] = useState<'users' | 'events'>('users');
+  const [redirecting, setRedirecting] = useState(false);
   const logoPopoverRef = useRef<HTMLDivElement>(null);
   const emailAddress = user?.email || '';
   const adminRole = user?.role || 'admin';
@@ -275,6 +276,23 @@ const ManageUsersPage = () => {
       toast({ title: 'Export failed', description: 'Failed to export photos. Please try again.', variant: 'destructive' });
     }
   };
+
+  useEffect(() => {
+    if (user && user.role !== 'super_admin') {
+      setRedirecting(true);
+      setTimeout(() => {
+        router.replace('/');
+      }, 1500);
+    }
+  }, [user, router]);
+
+  if (redirecting) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-white text-black">
+        <div className="text-xl font-semibold">Taking you back now…</div>
+      </main>
+    );
+  }
 
   if (isLoading) return <Loading />;
 

@@ -322,62 +322,64 @@ const PhotoBooth: React.FC<Props> = ({
       </div>
       {/* Modal giữ nguyên */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className='w-screen h-screen max-w-none max-h-none bg-black/90 border-zinc-700 flex flex-col items-center justify-start p-4'>
-          <DialogHeader className='w-full'>
-            <DialogTitle className='text-center text-2xl font-semibold mb-2 text-white w-full'>
-              Your Photo Strip
-            </DialogTitle>
-            <DialogClose
-              className='absolute top-4 right-4 z-50 
-                        bg-black/60 hover:bg-black/80
-                        w-8 h-8
-                        flex items-center justify-center
-                        shadow-lg transition-all 
-                        hover:scale-110 focus:outline-none'
-              aria-label='Close dialog'
-            >
-              <span className='text-white text-xl leading-none font-semibold'>
-                ×
-              </span>
-            </DialogClose>
-          </DialogHeader>
-          <div className='flex-1 w-full flex flex-col items-center justify-start min-h-0 mt-2'>
-            {photoURL && (
-              <div className='flex flex-col items-center w-full'>
-                <div className='relative bg-white rounded-lg border border-zinc-300 p-2 mx-auto' style={{ width: '260px', minHeight: '390px', maxWidth: '90vw', maxHeight: '50vh' }}>
-                  <Image
-                    src={photoURL}
-                    alt='Photo Strip'
-                    fill
-                    className='object-contain rounded-lg'
-                    priority
-                  />
+        <DialogContent className='w-screen h-screen max-w-none max-h-none bg-black/90 border-zinc-700 flex items-center justify-center p-4'>
+          <div className='flex flex-col items-center justify-center w-full max-w-md'>
+            <DialogHeader className='w-full'>
+              <DialogTitle className='text-center text-2xl font-semibold mb-2 text-white w-full'>
+                Your Photo Strip
+              </DialogTitle>
+              <DialogClose
+                className='absolute top-4 right-4 z-50 
+                          bg-black/60 hover:bg-black/80
+                          w-8 h-8
+                          flex items-center justify-center
+                          shadow-lg transition-all 
+                          hover:scale-110 focus:outline-none'
+                aria-label='Close dialog'
+              >
+                <span className='text-white text-xl leading-none font-semibold'>
+                  ×
+                </span>
+              </DialogClose>
+            </DialogHeader>
+            <div className='flex-1 w-full flex flex-col items-center justify-center min-h-0 mt-2'>
+              {photoURL && (
+                <div className='flex flex-col items-center w-full'>
+                  <div className='relative bg-white rounded-lg border border-zinc-300 p-2 mx-auto' style={{ width: '260px', minHeight: '390px', maxWidth: '90vw', maxHeight: '50vh' }}>
+                    <Image
+                      src={photoURL}
+                      alt='Photo Strip'
+                      fill
+                      className='object-contain rounded-lg'
+                      priority
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
-            {isUploading && (
-              <div className='w-full flex flex-col items-center justify-center mt-6'>
-                <span className='text-white text-base mb-4'>Uploading your photo strip...</span>
-                <div className='bg-zinc-800 rounded-lg flex items-center justify-center' style={{ width: 90, height: 90 }}>
-                  <Image src='/3_icon_walrus_white_RGB 1.png' alt='Uploading mascot' width={60} height={60} className='object-contain max-w-[60px] max-h-[60px]'/>
+              )}
+              {isUploading && (
+                <div className='w-full flex flex-col items-center justify-center mt-6'>
+                  <span className='text-white text-base mb-4'>Uploading your photo strip...</span>
+                  <div className='bg-zinc-800 rounded-lg flex items-center justify-center' style={{ width: 90, height: 90 }}>
+                    <Image src='/3_icon_walrus_white_RGB 1.png' alt='Uploading mascot' width={60} height={60} className='object-contain max-w-[60px] max-h-[60px]'/>
+                  </div>
                 </div>
-              </div>
-            )}
-            {isUploaded && (
-              <div className='flex flex-col items-center gap-2 mt-6 w-full'>
-                <span className='text-white text-lg font-semibold mb-1 text-center font-neuemontreal'>Scan QR code to view your photo</span>
-                <span className='text-cyan-200 text-xs mb-2 text-center font-neuemontreal'>Return to Take Photo Mode in 45 second(s)...</span>
-                <div className='bg-white p-2 rounded-lg shadow-lg flex items-center justify-center' style={{maxWidth: 120, maxHeight: 120}}>
-                  <QRCode
-                    value={qrCodeValue}
-                    size={100}
-                    style={{height: 'auto', maxWidth: '100px', width: '100%'}}
-                    viewBox={`0 0 256 256`}
-                    className='rounded'
-                  />
+              )}
+              {isUploaded && (
+                <div className='flex flex-col items-center gap-2 mt-6 w-full'>
+                  <span className='text-white text-lg font-semibold mb-1 text-center font-neuemontreal'>Scan QR code to view your photo</span>
+                  <span className='text-cyan-200 text-xs mb-2 text-center font-neuemontreal'>Return to Take Photo Mode in 45 second(s)...</span>
+                  <div className='bg-white p-2 rounded-lg shadow-lg flex items-center justify-center' style={{maxWidth: 120, maxHeight: 120}}>
+                    <QRCode
+                      value={qrCodeValue}
+                      size={100}
+                      style={{height: 'auto', maxWidth: '100px', width: '100%'}}
+                      viewBox={`0 0 256 256`}
+                      className='rounded'
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
