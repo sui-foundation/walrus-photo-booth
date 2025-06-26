@@ -1,6 +1,7 @@
-export type UserRole = "admin" | "moderator" | "member" | "anonymous";
+export type UserRole = "super_admin" | "admin" | "moderator" | "member" | "anonymous";
 
 export interface UserProps {
+  avatar_url: any;
   firstName: string;
   lastName: string;
   email: string;
@@ -14,4 +15,5 @@ export interface AuthenticationContextProps {
   setIsLoading: (isLoading: boolean) => void;
   handleLoginAs: (user: UserProps) => void;
   handleLogout: () => void;
+  isSuperAdmin: boolean;
 }

@@ -2,7 +2,6 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
 import { Camera, Check, Loader2 } from 'lucide-react';
 import JSConfetti from 'js-confetti';
 import { createClient } from '@supabase/supabase-js';
@@ -14,22 +13,20 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import QRCode from 'react-qr-code';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabase } from '@/lib/supabaseClient';
 
 interface Props {
   selectedEventId: number;
   selectedEventTitle: string;
   selectedEventSlug: string;
+  selectedTuskyId: string | null;
 }
 
 const PhotoBooth: React.FC<Props> = ({
   selectedEventTitle,
   selectedEventSlug,
   selectedEventId,
+  selectedTuskyId,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -42,8 +39,8 @@ const PhotoBooth: React.FC<Props> = ({
   const [showModal, setShowModal] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
   const [photoId, setPhotoId] = useState<string | null>(null);
-  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL || '';
-  const eventUrl = `${baseUrl}/events/${selectedEventSlug}`;
+  const baseUrl = 'https://cdn.tusky.io/';
+  // const eventUrl = `${baseUrl}/events/${selectedEventSlug}`;
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -63,12 +60,24 @@ const PhotoBooth: React.FC<Props> = ({
   }, [showModal]);
 
   const startCamera = async () => {
-    if (videoRef.current) {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      videoRef.current.srcObject = stream;
-      setIsCameraOn(true);
-    }
+    setIsCameraOn(true); // Only set state, do not call getUserMedia here
   };
+
+  // When isCameraOn=true and videoRef has mounted, then call getUserMedia
+  useEffect(() => {
+    if (isCameraOn && videoRef.current) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        })
+        .catch((err) => {
+          // Optionally: handle error, show message
+          console.error('Error accessing camera:', err);
+        });
+    }
+  }, [isCameraOn, videoRef.current]);
 
   const takePhotoSequence = async () => {
     setIsCapturing(true);
@@ -194,6 +203,7 @@ const PhotoBooth: React.FC<Props> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/octet-stream',
+          'TuskyID': selectedTuskyId ? selectedTuskyId.toString() : '',
         },
         body: blob,
       });
@@ -205,14 +215,15 @@ const PhotoBooth: React.FC<Props> = ({
 
       const result = await response.json();
 
-      if (result?.data?.newlyCreated?.blobObject) {
+      if (result?.data.uploadId) {
         // save to supabase
         const { data, error } = await supabase.from('photos').insert([
           {
-            blob_id: result.data.newlyCreated.blobObject.blobId,
-            object_id: result.data.newlyCreated.blobObject.id,
+            // blob_id: blobId,
+            // object_id: objectId,
             created_at: new Date().toISOString(),
             event_id: selectedEventId,
+            tusky_id: result.data.uploadId,
           },
         ]).select();
 
@@ -220,11 +231,11 @@ const PhotoBooth: React.FC<Props> = ({
           console.error('Error saving to Supabase:', error);
           throw new Error('Failed to save to database');
         }
-        
+
         if (data && data.length > 0) {
-          setPhotoId(data[0].blob_id);
+          setPhotoId(data[0].tusky_id);
         }
-        
+
         setIsUploaded(true);
       } else {
         console.error('Unexpected response structure:', result);
@@ -237,136 +248,142 @@ const PhotoBooth: React.FC<Props> = ({
     }
   };
 
-  const qrCodeValue = photoId ? `${baseUrl}/events/${selectedEventSlug}?photoId=${photoId}` : eventUrl;
+  const qrCodeValue = photoId
+    ? `${baseUrl}${photoId}`
+    : photoURL || '';
 
   return (
-    <>
-      <div className='max-w-4xl w-full bg-black/80 rounded-xl shadow-2xl overflow-hidden'>
-        <div className='p-6 space-y-6'>
-          <div className='flex space-x-3 justify-center'>
-            {!isCameraOn && (
-              <Button
-                onClick={startCamera}
-                variant='default'
-                className='min-w-[140px] transition-all duration-200 hover:scale-105'
-              >
-                <Camera className='mr-2 h-5 w-5' />
-                Start Camera
-              </Button>
-            )}
-            <Button
-              onClick={takePhotoSequence}
-              disabled={!isCameraOn || isCapturing}
-              variant='secondary'
-              className='min-w-[140px] transition-all duration-200 hover:scale-105'
-            >
-              <Camera className='mr-2 h-5 w-5' />
-              {isCapturing ? 'Capturing...' : 'Take Photos'}
-            </Button>
-          </div>
-          <div className='relative aspect-video bg-black rounded-lg overflow-hidden w-full shadow-xl border border-zinc-700'>
-            <video
-              ref={videoRef}
-              autoPlay
-              hidden={!isCameraOn}
-              className='w-full h-full object-contain'
-            />
-            {!isCameraOn && (
-              <div className='absolute inset-0 flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm'>
-                <span className='text-zinc-400 text-xl font-medium'>
-                  Camera Preview
-                </span>
-              </div>
-            )}
-            {countdown !== null && (
-              <div className='absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm'>
-                <span className='text-white text-8xl font-bold animate-pulse'>
-                  {countdown || 'Snap!'}
-                </span>
-              </div>
-            )}
-          </div>
-          <canvas ref={canvasRef} className='hidden' />
+    <div className="w-screen h-screen min-h-screen min-w-screen flex flex-col bg-black relative overflow-hidden">
+      {/* Header */}
+      <div className="w-full bg-black text-white px-8 pt-4 pb-1 border-b border-white/10">
+        <div className="text-lg font-neuemontreal font-normal opacity-80">
+          Walrus Photo Booth
         </div>
-        <div className='bg-black/80 backdrop-blur-sm text-white text-center py-3 text-base font-medium tracking-wider border-t border-zinc-700'>
-          Sui Presents Walrus
+        <div
+          className="text-5xl font-bold font-neuebit tracking-wider"
+          style={{ letterSpacing: 2 }}
+        >
+          {selectedEventTitle?.toUpperCase()}
         </div>
       </div>
-
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className='max-w-2xl bg-black/90 border-zinc-700 h-[90vh] flex flex-col'>
-          <DialogHeader>
-            <DialogTitle className='text-center text-2xl font-semibold mb-2 text-white'>
-              Your Photo Strip
-            </DialogTitle>
-            <DialogClose
-              className='absolute top-4 right-4 z-50 
-                        bg-black/60 hover:bg-black/80
-                        w-8 h-8
-                        flex items-center justify-center
-                        shadow-lg transition-all 
-                        hover:scale-110 focus:outline-none'
-              aria-label='Close dialog'
-            >
-              <span className='text-white text-xl leading-none font-semibold'>
-                ×
-              </span>
-            </DialogClose>
-          </DialogHeader>
-
-          <div className='flex-1 flex flex-col justify-between min-h-0'>
-            {photoURL && (
-              <div className='flex-1 min-h-0 relative w-full rounded-lg overflow-hidden border border-zinc-700 bg-black/40 mb-4'>
-                <div className='absolute inset-0'>
-                  <Image
-                    src={photoURL}
-                    alt='Photo Strip'
-                    fill
-                    className='object-contain'
-                    priority
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className='mt-auto border-t border-zinc-700/50 pt-4'>
-              <div className='flex flex-col items-center justify-center gap-6 p-4'>
-                {isUploading && (
-                  <div className='flex items-center gap-2'>
-                    <Loader2 className='animate-spin h-5 w-5 text-white' />
-                    <span className='text-white'>Uploading...</span>
-                  </div>
-                )}
-                {isUploaded && (
-                  <div className='flex flex-col items-center gap-2'>
-                    <div className='flex items-center gap-2'>
-                      <Check className='h-5 w-5 text-green-500' />
-                      <span className='text-white'>Upload Complete</span>
-                    </div>
-                    <div className='bg-white p-3 rounded-lg shadow-lg'>
-                      <QRCode
-                        value={qrCodeValue}
-                        size={120}
-                        style={{
-                          height: 'auto',
-                          maxWidth: '100%',
-                          width: '100%',
-                        }}
-                        viewBox={`0 0 256 256`}
-                        className='rounded'
-                      />
-                    </div>
-                    <span className='text-zinc-400 text-sm'>
-                      Scan to view your photo
+      {/* Main content */}
+      <div className="flex-1 flex flex-col justify-center items-center bg-[#232323] relative py-2 w-full h-full min-h-0 min-w-0">
+        {/* If camera is not turned on, show waiting message */}
+        {!isCameraOn && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center w-full h-full">
+            <span className="text-white text-2xl font-neuemontreal">
+              Awaiting Camera Activation
+            </span>
+          </div>
+        )}
+        {/* If camera is on, show video and capture button */}
+        {isCameraOn && (
+          <>
+            <div className="w-full h-full flex flex-col items-center justify-center">
+              <div className="relative w-full h-full bg-black rounded-lg overflow-hidden shadow-xl border border-zinc-700 flex items-center justify-center">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  className="w-full h-full object-contain"
+                />
+                {countdown !== null && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                    <span className="text-white text-8xl font-bold font-neuebit animate-pulse">
+                      {countdown || 'Snap!'}
                     </span>
                   </div>
                 )}
               </div>
+              <canvas ref={canvasRef} className="hidden" />
+            </div>
+          </>
+        )}
+      </div>
+      {/* Footer/Active Camera Bar */}
+      <div className="w-full border-t border-black">
+        {!isCameraOn ? (
+          <button
+            onClick={startCamera}
+            className="w-full py-4 text-xl font-mono font-bold bg-cyan-200 text-black tracking-widest focus:outline-none active:opacity-90 transition-all duration-200"
+            style={{ borderRadius: 0, border: 'none' }}
+          >
+            ACTIVATE CAMERA
+          </button>
+        ) : (
+          <button
+            onClick={takePhotoSequence}
+            disabled={isCapturing}
+            className={`w-full py-4 text-xl font-mono font-bold bg-cyan-200 text-black tracking-widest focus:outline-none active:opacity-90 transition-all duration-200${isCapturing ? ' opacity-60 cursor-not-allowed' : ''}`}
+            style={{ borderRadius: 0, border: 'none' }}
+          >
+            {isCapturing ? 'CAPTURING...' : 'TAKE PHOTOS'}
+          </button>
+        )}
+      </div>
+      {/* Modal giữ nguyên */}
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className='w-screen h-screen max-w-none max-h-none bg-black/90 border-zinc-700 flex items-center justify-center p-4'>
+          <div className='flex flex-col items-center justify-center w-full max-w-md'>
+            <DialogHeader className='w-full'>
+              <DialogTitle className='text-center text-2xl font-semibold mb-2 text-white w-full'>
+                Your Photo Strip
+              </DialogTitle>
+              <DialogClose
+                className='absolute top-4 right-4 z-50 
+                          bg-black/60 hover:bg-black/80
+                          w-8 h-8
+                          flex items-center justify-center
+                          shadow-lg transition-all 
+                          hover:scale-110 focus:outline-none'
+                aria-label='Close dialog'
+              >
+                <span className='text-white text-xl leading-none font-semibold'>
+                  ×
+                </span>
+              </DialogClose>
+            </DialogHeader>
+            <div className='flex-1 w-full flex flex-col items-center justify-center min-h-0 mt-2'>
+              {photoURL && (
+                <div className='flex flex-col items-center w-full'>
+                  <div className='relative bg-white rounded-lg border border-zinc-300 p-2 mx-auto' style={{ width: '260px', minHeight: '390px', maxWidth: '90vw', maxHeight: '50vh' }}>
+                    <Image
+                      src={photoURL}
+                      alt='Photo Strip'
+                      fill
+                      className='object-contain rounded-lg'
+                      priority
+                    />
+                  </div>
+                </div>
+              )}
+              {isUploading && (
+                <div className='w-full flex flex-col items-center justify-center mt-6'>
+                  <span className='text-white text-base mb-4'>Uploading your photo strip...</span>
+                  <div className='bg-zinc-800 rounded-lg flex items-center justify-center' style={{ width: 90, height: 90 }}>
+                    <Image src='/3_icon_walrus_white_RGB 1.png' alt='Uploading mascot' width={60} height={60} className='object-contain max-w-[60px] max-h-[60px]'/>
+                  </div>
+                </div>
+              )}
+              {isUploaded && (
+                <div className='flex flex-col items-center gap-2 mt-6 w-full'>
+                  <span className='text-white text-lg font-semibold mb-1 text-center font-neuemontreal'>Scan QR code to view your photo</span>
+                  <span className='text-cyan-200 text-xs mb-2 text-center font-neuemontreal'>Return to Take Photo Mode in 45 second(s)...</span>
+                  <div className='bg-white p-2 rounded-lg shadow-lg flex items-center justify-center' style={{maxWidth: 120, maxHeight: 120}}>
+                    <QRCode
+                      value={qrCodeValue}
+                      size={100}
+                      style={{height: 'auto', maxWidth: '100px', width: '100%'}}
+                      viewBox={`0 0 256 256`}
+                      className='rounded'
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 
