@@ -4,7 +4,6 @@ import { ArrowLeft } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { supabase } from '@/lib/supabaseClient';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,9 +11,6 @@ import { format } from 'date-fns';
 import { useForm } from 'react-hook-form';
 import { z, ZodType } from 'zod';
 
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Form,
   FormControl,
@@ -24,21 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
 import { Input } from '@/components/ui/input';
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 
 import Loading from '@/components/Loading';
 
@@ -149,7 +131,6 @@ const AddEvent: React.FC = () => {
   const [error, setError] = useState<Error | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hideDateTime, setHideDateTime] = useState(true); // always true for now
   const [slugChecking, setSlugChecking] = useState(false);
   const [slugExists, setSlugExists] = useState(false);
 
@@ -335,8 +316,6 @@ const AddEvent: React.FC = () => {
     setIsSubmitting(false);
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL || '';
-
   if (isLoading) {
     return <Loading />;
   }
@@ -387,7 +366,7 @@ const AddEvent: React.FC = () => {
                         className="text-lg px-2 border border-gray-300 rounded bg-white shadow-sm focus:ring-2 focus:ring-teal-200 focus:outline-none font-neuemontreal"
                         style={{fontFamily: 'monospace'}}
                         {...field}
-                        onChange={e => {
+                        onChange={(e) => {
                           field.onChange(e); // cập nhật eventTitle
                           const eventTitle = e.target.value ?? '';
                           const slug = eventTitle

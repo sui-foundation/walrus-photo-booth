@@ -1,14 +1,8 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import ProfilePopover from './ProfilePopover';
-import { useRouter } from 'next/navigation';
 
 const Header: React.FC = () => {
-  const router = useRouter();
-
   return (
     <header className="bg-neutral-900 text-white px-6 py-3 flex items-center justify-between">
       {}

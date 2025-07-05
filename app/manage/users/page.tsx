@@ -5,29 +5,7 @@ import { useAuthentication } from '@/contexts/Authentication';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Loading from '@/components/Loading';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Menu, ArrowLeft, Calendar, User as UserIcon, MoreVertical } from 'lucide-react';
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from '@/components/ui/alert-dialog';
+import { Calendar, User as UserIcon, MoreVertical } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -35,27 +13,37 @@ import UnifiedHeader from '@/components/UnifiedHeader';
 import { useToast } from "@/hooks/use-toast";
 import JSZip from 'jszip';
 
+interface Admin {
+  id: number;
+  email: string;
+  role: string;
+  avatar_url?: string;
+  showMenu?: boolean;
+}
+
+interface EventData {
+  id: string;
+  event_title: string;
+  event_date: string;
+  owner_email: string;
+  image_count: number;
+  showMenu?: boolean;
+}
+
 const ManageUsersPage = () => {
   const { user } = useAuthentication();
   const router = useRouter();
-  const [admins, setAdmins] = useState<any[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
+  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [events, setEvents] = useState<EventData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showMenuIdx, setShowMenuIdx] = useState<number | null>(null);
-  const [showLogoPopover, setShowLogoPopover] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
   const [addUserEmail, setAddUserEmail] = useState('');
   const [addUserRole, setAddUserRole] = useState('admin');
   const [addUserError, setAddUserError] = useState('');
-  const [confirmDelete, setConfirmDelete] = useState<{ email: string, type: 'user' | 'events' | null }>({ email: '', type: null });
   const [showTab, setShowTab] = useState<'users' | 'events'>('users');
   const [redirecting, setRedirecting] = useState(false);
-  const [freshRole, setFreshRole] = useState<string | null>(null);
-  const logoPopoverRef = useRef<HTMLDivElement>(null);
-  const emailAddress = user?.email || '';
-  const adminRole = user?.role || 'admin';
-  const isConnected = true;
   const { toast } = useToast();
 
   useEffect(() => {
@@ -78,13 +66,11 @@ const ManageUsersPage = () => {
       // Lấy event và đếm số lượng ảnh cho mỗi event
       const { data: eventsData, error: eventsError } = await supabase.from('events').select('*');
       if (!eventsError && eventsData) {
-        // Lấy danh sách event ids
-        const eventIds = eventsData.map(e => e.id);
         // Lấy số lượng ảnh cho từng event
         const { data: photosData, error: photosError } = await supabase
           .from('photos')
           .select('event_id', { count: 'exact', head: false });
-        let photoCountMap: Record<string, number> = {};
+        const photoCountMap: Record<string, number> = {};
         if (!photosError && photosData) {
           // Đếm số lượng ảnh theo event_id
           photosData.forEach(photo => {
@@ -106,23 +92,6 @@ const ManageUsersPage = () => {
       setIsLoading(false);
     };
     fetchEvents();
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        logoPopoverRef.current &&
-        !logoPopoverRef.current.contains(event.target as Node) &&
-        !(event.target as Element).closest('img')
-      ) {
-        setShowLogoPopover(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
   }, []);
 
   const handleDelete = async (email: string) => {
@@ -211,7 +180,7 @@ const ManageUsersPage = () => {
     if (error) {
       setAddUserError('Failed to add user');
     } else {
-      setAdmins(prev => [...prev, { email: addUserEmail, role: addUserRole, showMenu: false }]);
+      setAdmins(prev => [...prev, { id: Date.now(), email: addUserEmail, role: addUserRole, showMenu: false }]);
       setShowAddUser(false);
       setAddUserEmail('');
       setAddUserRole('admin');
@@ -219,7 +188,7 @@ const ManageUsersPage = () => {
   };
 
   // Thêm hàm export images cho event
-  const handleExportEventImages = async (event: any) => {
+  const handleExportEventImages = async (event: EventData) => {
     try {
       toast({ title: 'Exporting...', description: 'Preparing images for download', variant: 'default' });
       // Lấy danh sách photos của event
@@ -254,7 +223,7 @@ const ManageUsersPage = () => {
             const fileName = `photo_${String(i + 1).padStart(3, '0')}.jpg`;
             zip.file(fileName, blob);
             successCount++;
-          } catch (err) {
+          } catch {
             // Bỏ qua ảnh lỗi
           }
         }
@@ -273,7 +242,7 @@ const ManageUsersPage = () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       toast({ title: 'Exported', description: `Successfully exported ${successCount} photos.`, variant: 'default' });
-    } catch (err) {
+    } catch {
       toast({ title: 'Export failed', description: 'Failed to export photos. Please try again.', variant: 'destructive' });
     }
   };
@@ -287,6 +256,7 @@ const ManageUsersPage = () => {
         setTimeout(() => {
           router.replace('/');
         }, 1500);
+        return;
       }
       const { data, error } = await supabase
         .from('admins')
@@ -295,7 +265,6 @@ const ManageUsersPage = () => {
         .single();
       if (!error && data?.role) {
         console.log('Fetched role:', data.role);
-        setFreshRole(data.role);
         if (data.role !== 'super_admin') {
           setRedirecting(true);
           setTimeout(() => {
@@ -311,7 +280,7 @@ const ManageUsersPage = () => {
       }
     };
     fetchRole();
-  }, [user?.email]);
+  }, [user?.email, router]);
 
   if (redirecting) {
     return (
@@ -396,7 +365,7 @@ const ManageUsersPage = () => {
                           }}
                         >
                           <Calendar className="w-4 h-4 text-red-500" />
-                          DELETE USER'S EVENTS
+                          DELETE USER&apos;S EVENTS
                         </button>
                         <button
                           className="flex w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 items-center gap-2 font-semibold"
@@ -470,7 +439,7 @@ const ManageUsersPage = () => {
                             setShowMenuIdx(null);
                           }}
                         >
-                          <span className="text-red-500">🖼</span> DELETE EVENT’S IMAGES
+                          <span className="text-red-500">🖼</span> DELETE EVENT&apos;S IMAGES
                         </button>
                         <button
                           className="flex w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 items-center gap-2 font-semibold"
@@ -499,63 +468,56 @@ const ManageUsersPage = () => {
         </>
       )}
 
-      {/* Add New User Button + Dialog */}
-      {showTab === 'users' && (
-        <Dialog open={showAddUser} onOpenChange={setShowAddUser}>
-          <DialogTrigger asChild>
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-0">
-              <button
-                className="w-full bg-teal-200 text-black font-semibold uppercase py-4 text-lg tracking-wider hover:bg-teal-300 transition rounded-none"
-              >
-                ADD NEW USER
-              </button>
+      {/* Add User Modal */}
+      {showAddUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-bold mb-4">Add User</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Email</label>
+                <Input
+                  type="email"
+                  value={addUserEmail}
+                  onChange={(e) => setAddUserEmail(e.target.value)}
+                  placeholder="Enter email"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Role</label>
+                <Select value={addUserRole} onValueChange={setAddUserRole}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="super_admin">Super Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {addUserError && (
+                <p className="text-red-500 text-sm">{addUserError}</p>
+              )}
+              <div className="flex gap-2">
+                <Button onClick={handleAddUser} className="flex-1">
+                  Add User
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowAddUser(false);
+                    setAddUserEmail('');
+                    setAddUserRole('admin');
+                    setAddUserError('');
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
-          </DialogTrigger>
-          <DialogContent className="bg-black text-white max-w-sm w-full p-6 rounded-lg shadow-lg">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">Add New User</DialogTitle>
-              <DialogDescription className="text-sm text-gray-400">
-                Enter the email address of the new user you want to add.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="mt-4">
-              <Input
-                type="email"
-                placeholder="User email"
-                value={addUserEmail}
-                onChange={(e) => setAddUserEmail(e.target.value)}
-                className="w-full p-3 text-base rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-teal-500 focus:outline-none"
-              />
-            </div>
-            <div className="mt-4">
-              <Select value={addUserRole} onValueChange={setAddUserRole}>
-                <SelectTrigger className="w-full p-3 text-base rounded-lg bg-gray-800 border border-gray-700 text-white">
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-900 border border-gray-700 rounded-lg text-white">
-                  <SelectItem value="admin" className="text-white">Admin</SelectItem>
-                  <SelectItem value="super_admin" className="text-white">Super Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {addUserError && <div className="mt-4 text-sm text-red-500">{addUserError}</div>}
-            <DialogFooter className="mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setShowAddUser(false)}
-                className="w-full py-3 text-base rounded-lg bg-gray-800 border border-gray-700 hover:bg-gray-700 transition"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleAddUser}
-                className="w-full py-3 text-base rounded-lg bg-teal-600 hover:bg-teal-500 transition"
-              >
-                Add User
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          </div>
+        </div>
       )}
     </main>
   );

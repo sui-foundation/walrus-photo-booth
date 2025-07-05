@@ -22,10 +22,11 @@ Card.displayName = "Card"
 const CardImage = React.forwardRef<
   HTMLImageElement,
   React.ImgHTMLAttributes<HTMLImageElement>
->(({ className, ...props }, ref) => (
+>(({ className, alt = "", ...props }, ref) => (
   <img
     ref={ref}
     className={cn("rounded-t-xl w-full h-48 object-cover", className)}
+    alt={alt}
     {...props}
   />
 ))

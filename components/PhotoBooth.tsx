@@ -2,9 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Camera, Check, Loader2 } from 'lucide-react';
 import JSConfetti from 'js-confetti';
-import { createClient } from '@supabase/supabase-js';
 import {
   Dialog,
   DialogContent,
@@ -24,7 +22,6 @@ interface Props {
 
 const PhotoBooth: React.FC<Props> = ({
   selectedEventTitle,
-  selectedEventSlug,
   selectedEventId,
   selectedTuskyId,
 }) => {
@@ -40,7 +37,6 @@ const PhotoBooth: React.FC<Props> = ({
   const [isUploaded, setIsUploaded] = useState(false);
   const [photoId, setPhotoId] = useState<string | null>(null);
   const baseUrl = 'https://cdn.tusky.io/';
-  // const eventUrl = `${baseUrl}/events/${selectedEventSlug}`;
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -77,7 +73,7 @@ const PhotoBooth: React.FC<Props> = ({
           console.error('Error accessing camera:', err);
         });
     }
-  }, [isCameraOn, videoRef.current]);
+  }, [isCameraOn]);
 
   const takePhotoSequence = async () => {
     setIsCapturing(true);
