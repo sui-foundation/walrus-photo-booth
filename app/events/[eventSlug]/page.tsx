@@ -4,7 +4,6 @@ import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
-import ProfilePopover from '@/components/ProfilePopover';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { Button } from '@/components/ui/button';
 import { TrashIcon } from '@radix-ui/react-icons';
@@ -24,7 +23,6 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
-  DialogTitle,
   DialogClose,
 } from '@/components/ui/dialog';
 import UnifiedHeader from '@/components/UnifiedHeader';
