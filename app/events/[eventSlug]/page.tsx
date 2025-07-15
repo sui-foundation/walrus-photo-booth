@@ -4,7 +4,6 @@ import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
-import ProfilePopover from '@/components/ProfilePopover';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { Button } from '@/components/ui/button';
 import { TrashIcon } from '@radix-ui/react-icons';
@@ -24,7 +23,6 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
-  DialogTitle,
   DialogClose,
 } from '@/components/ui/dialog';
 import UnifiedHeader from '@/components/UnifiedHeader';
@@ -291,7 +289,6 @@ const EventPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
             <style>{fadeInAnimation}</style>
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 p-3'>
               {photos.map((photo, index) => {
-                // Tạo 4 segment cover cho mỗi ảnh
                 const photoUrl = photo?.blob_id && photo?.blob_id !== 'unknown'
                   ? `${AGGREGATOR_URL}/v1/blobs/${photo?.blob_id}`
                   : `https://cdn.tusky.io/${photo?.tusky_id}`;

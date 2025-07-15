@@ -26,6 +26,7 @@ const CardImage = React.forwardRef<
   <img
     ref={ref}
     className={cn("rounded-t-xl w-full h-48 object-cover", className)}
+    alt=""
     {...props}
   />
 ))

@@ -49,7 +49,6 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${mondwest.variable} antialiased`}
       >
-        {/* ✅ Bọc TooltipProvider quanh nội dung */}
         <TooltipProvider>
           <ProvidersAndLayout>{children}</ProvidersAndLayout>
         </TooltipProvider>

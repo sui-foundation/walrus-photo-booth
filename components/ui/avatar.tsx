@@ -5,7 +5,6 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
 
-// Các kích thước avatar hỗ trợ
 type AvatarProps = React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
   size?: "sm" | "md" | "lg"
 }

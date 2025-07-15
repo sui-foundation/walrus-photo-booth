@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthentication } from '@/contexts/Authentication';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Loading from '@/components/Loading';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Menu, ArrowLeft, Calendar, User as UserIcon, MoreVertical } from 'lucide-react';
+import { Calendar, User as UserIcon, MoreVertical } from 'lucide-react';
 import {
   Dialog,
   DialogTrigger,
@@ -16,18 +14,7 @@ import {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-  DialogClose,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from '@/components/ui/alert-dialog';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -38,24 +25,17 @@ import JSZip from 'jszip';
 const ManageUsersPage = () => {
   const { user } = useAuthentication();
   const router = useRouter();
-  const [admins, setAdmins] = useState<any[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
+  const [admins, setAdmins] = useState<Array<{ email: string; role: string; showMenu: boolean; avatar_url?: string }>>([]);
+  const [events, setEvents] = useState<Array<{ id: string; event_title: string; event_slug: string; event_date: string; image_count: number; showMenu: boolean; owner_email?: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showMenuIdx, setShowMenuIdx] = useState<number | null>(null);
-  const [showLogoPopover, setShowLogoPopover] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
   const [addUserEmail, setAddUserEmail] = useState('');
   const [addUserRole, setAddUserRole] = useState('admin');
   const [addUserError, setAddUserError] = useState('');
-  const [confirmDelete, setConfirmDelete] = useState<{ email: string, type: 'user' | 'events' | null }>({ email: '', type: null });
   const [showTab, setShowTab] = useState<'users' | 'events'>('users');
   const [redirecting, setRedirecting] = useState(false);
-  const [freshRole, setFreshRole] = useState<string | null>(null);
-  const logoPopoverRef = useRef<HTMLDivElement>(null);
-  const emailAddress = user?.email || '';
-  const adminRole = user?.role || 'admin';
-  const isConnected = true;
   const { toast } = useToast();
 
   useEffect(() => {
@@ -75,18 +55,13 @@ const ManageUsersPage = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       setIsLoading(true);
-      // Lấy event và đếm số lượng ảnh cho mỗi event
       const { data: eventsData, error: eventsError } = await supabase.from('events').select('*');
       if (!eventsError && eventsData) {
-        // Lấy danh sách event ids
-        const eventIds = eventsData.map(e => e.id);
-        // Lấy số lượng ảnh cho từng event
         const { data: photosData, error: photosError } = await supabase
           .from('photos')
           .select('event_id', { count: 'exact', head: false });
-        let photoCountMap: Record<string, number> = {};
+        const photoCountMap: Record<string, number> = {};
         if (!photosError && photosData) {
-          // Đếm số lượng ảnh theo event_id
           photosData.forEach(photo => {
             if (photo.event_id) {
               photoCountMap[photo.event_id] = (photoCountMap[photo.event_id] || 0) + 1;
@@ -108,22 +83,6 @@ const ManageUsersPage = () => {
     fetchEvents();
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        logoPopoverRef.current &&
-        !logoPopoverRef.current.contains(event.target as Node) &&
-        !(event.target as Element).closest('img')
-      ) {
-        setShowLogoPopover(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   const handleDelete = async (email: string) => {
     console.log('Deleting user:', email);
@@ -152,7 +111,6 @@ const ManageUsersPage = () => {
     }
   };
 
-  // Xử lý xóa event
   const handleDeleteEvent = async (eventId: string) => {
     const { error } = await supabase.from('events').delete().eq('id', eventId);
     if (!error) {
@@ -172,7 +130,6 @@ const ManageUsersPage = () => {
     }
   };
 
-  // Xử lý xóa ảnh của event
   const handleDeleteEventImages = async (eventId: string) => {
     const { error } = await supabase.from('photos').delete().eq('event_id', eventId);
     if (!error) {
@@ -218,11 +175,9 @@ const ManageUsersPage = () => {
     }
   };
 
-  // Thêm hàm export images cho event
-  const handleExportEventImages = async (event: any) => {
+  const handleExportEventImages = async (event: { id: string; event_title: string }) => {
     try {
       toast({ title: 'Exporting...', description: 'Preparing images for download', variant: 'default' });
-      // Lấy danh sách photos của event
       const { data: photos, error } = await supabase
         .from('photos')
         .select('blob_id, tusky_id')
@@ -241,7 +196,6 @@ const ManageUsersPage = () => {
         const photo = photos[i];
         let photoUrl = null;
         if (photo.blob_id) {
-          // Nếu dùng Supabase Storage
           photoUrl = supabase.storage.from('photos-bucket').getPublicUrl(photo.blob_id).data.publicUrl;
         } else if (photo.tusky_id) {
           photoUrl = `https://cdn.tusky.io/${photo.tusky_id}`;
@@ -254,8 +208,7 @@ const ManageUsersPage = () => {
             const fileName = `photo_${String(i + 1).padStart(3, '0')}.jpg`;
             zip.file(fileName, blob);
             successCount++;
-          } catch (err) {
-            // Bỏ qua ảnh lỗi
+          } catch {
           }
         }
       }
@@ -273,12 +226,11 @@ const ManageUsersPage = () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       toast({ title: 'Exported', description: `Successfully exported ${successCount} photos.`, variant: 'default' });
-    } catch (err) {
+    } catch {
       toast({ title: 'Export failed', description: 'Failed to export photos. Please try again.', variant: 'destructive' });
     }
   };
 
-  // Fetch role mới nhất từ database
   useEffect(() => {
     console.log('Current user:', user);
     const fetchRole = async () => {
@@ -295,7 +247,6 @@ const ManageUsersPage = () => {
         .single();
       if (!error && data?.role) {
         console.log('Fetched role:', data.role);
-        setFreshRole(data.role);
         if (data.role !== 'super_admin') {
           setRedirecting(true);
           setTimeout(() => {
@@ -311,7 +262,7 @@ const ManageUsersPage = () => {
       }
     };
     fetchRole();
-  }, [user?.email]);
+  }, [user?.email, user, router]);
 
   if (redirecting) {
     return (
@@ -396,7 +347,7 @@ const ManageUsersPage = () => {
                           }}
                         >
                           <Calendar className="w-4 h-4 text-red-500" />
-                          DELETE USER'S EVENTS
+                          DELETE USER&apos;S EVENTS
                         </button>
                         <button
                           className="flex w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 items-center gap-2 font-semibold"

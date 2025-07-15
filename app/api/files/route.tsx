@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
 const tuskyApiKey = process.env.TUSKY_API_KEY || '';
-const tuskyVaultID = process.env.NEXT_PUBLIC_TUSKY_VAULT_ID || '';
 
 export async function GET(request: Request) {
   try {
@@ -25,7 +24,7 @@ export async function GET(request: Request) {
     // Map logic for message
     let message = 'Fetch file successful';
     if (result && Array.isArray(result)) {
-      message = result.map((item: any) => item.message || 'No message').join('; ');
+      message = result.map((item: { message?: string }) => item.message || 'No message').join('; ');
     } else if (result && result.message) {
       message = result.message;
     }

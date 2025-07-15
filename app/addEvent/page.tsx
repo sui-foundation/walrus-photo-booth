@@ -4,7 +4,6 @@ import { ArrowLeft } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { supabase } from '@/lib/supabaseClient';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,9 +11,6 @@ import { format } from 'date-fns';
 import { useForm } from 'react-hook-form';
 import { z, ZodType } from 'zod';
 
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Form,
   FormControl,
@@ -24,69 +20,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 import { Input } from '@/components/ui/input';
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 
 import Loading from '@/components/Loading';
 
 const tuskyVaultID = process.env.NEXT_PUBLIC_TUSKY_VAULT_ID || '';
 
-const timezones = [
-  { value: '-12:00', name: '(GMT -12:00) International Date Line West' },
-  { value: '-11:00', name: '(GMT -11:00) Midway Island, Samoa' },
-  { value: '-10:00', name: '(GMT -10:00) Hawaii' },
-  { value: '-09:00', name: '(GMT -9:00) Alaska' },
-  { value: '-08:00', name: '(GMT -8:00) Pacific Time (US & Canada)' },
-  { value: '-07:00', name: '(GMT -7:00) Mountain Time (US & Canada)' },
-  {
-    value: '-06:00',
-    name: '(GMT -6:00) Central Time (US & Canada), Mexico City',
-  },
-  {
-    value: '-05:00',
-    name: '(GMT -5:00) Eastern Time (US & Canada), Bogota, Lima',
-  },
-  {
-    value: '-04:00',
-    name: '(GMT -4:00) Atlantic Time (Canada), Caracas, La Paz',
-  },
-  { value: '-03:30', name: '(GMT -3:30) Newfoundland' },
-  { value: '-03:00', name: '(GMT -3:00) Brazil, Buenos Aires, Georgetown' },
-  { value: '-02:00', name: '(GMT -2:00) Mid-Atlantic' },
-  { value: '-01:00', name: '(GMT -1:00) Azores, Cape Verde Islands' },
-  { value: '+00:00', name: '(GMT) Western Europe Time, London, Lisbon, Casablanca' },
-  { value: '+01:00', name: '(GMT +1:00) Brussels, Copenhagen, Madrid, Paris' },
-  { value: '+02:00', name: '(GMT +2:00) Kaliningrad, South Africa' },
-  { value: '+03:00', name: '(GMT +3:00) Baghdad, Riyadh, Moscow, St. Petersburg' },
-  { value: '+03:30', name: '(GMT +3:30) Tehran' },
-  { value: '+04:00', name: '(GMT +4:00) Abu Dhabi, Muscat, Baku, Tbilisi' },
-  { value: '+04:30', name: '(GMT +4:30) Kabul' },
-  { value: '+05:00', name: '(GMT +5:00) Ekaterinburg, Islamabad, Karachi, Tashkent' },
-  { value: '+05:30', name: '(GMT +5:30) Bombay, Calcutta, Madras, New Delhi' },
-  { value: '+05:45', name: '(GMT +5:45) Kathmandu' },
-  { value: '+06:00', name: '(GMT +6:00) Almaty, Dhaka, Colombo' },
-  { value: '+06:30', name: '(GMT +6:30) Yangon, Cocos Islands' },
-  { value: '+07:00', name: '(GMT +7:00) Bangkok, Hanoi, Jakarta' },
-  { value: '+08:00', name: '(GMT +8:00) Beijing, Perth, Singapore, Hong Kong' },
-  { value: '+09:00', name: '(GMT +9:00) Tokyo, Seoul, Osaka, Sapporo, Yakutsk' },
-  { value: '+09:30', name: '(GMT +9:30) Adelaide, Darwin' },
-  { value: '+10:00', name: '(GMT +10:00) Eastern Australia, Guam, Vladivostok' },
-  { value: '+11:00', name: '(GMT +11:00) Magadan, Solomon Islands, New Caledonia' },
-  { value: '+12:00', name: '(GMT +12:00) Auckland, Wellington, Fiji, Kamchatka' },
-];
 // Then use this array to populate your select element
 const hours = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'] as const;
 const mins = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')) as [string, ...string[]];
@@ -149,7 +90,6 @@ const AddEvent: React.FC = () => {
   const [error, setError] = useState<Error | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hideDateTime, setHideDateTime] = useState(true); // always true for now
   const [slugChecking, setSlugChecking] = useState(false);
   const [slugExists, setSlugExists] = useState(false);
 
@@ -213,7 +153,6 @@ const AddEvent: React.FC = () => {
   });
 
 
-  // Hàm kiểm tra slug tồn tại
   const checkSlugExists = useCallback(async (slug: string) => {
     if (!slug) return false;
     setSlugChecking(true);
@@ -231,7 +170,7 @@ const AddEvent: React.FC = () => {
       setSlugExists(!!(data && data.length > 0));
       setSlugChecking(false);
       return !!(data && data.length > 0);
-    } catch (e) {
+    } catch {
       setSlugChecking(false);
       return false;
     }
@@ -335,7 +274,6 @@ const AddEvent: React.FC = () => {
     setIsSubmitting(false);
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL || '';
 
   if (isLoading) {
     return <Loading />;
@@ -388,7 +326,7 @@ const AddEvent: React.FC = () => {
                         style={{fontFamily: 'monospace'}}
                         {...field}
                         onChange={e => {
-                          field.onChange(e); // cập nhật eventTitle
+                          field.onChange(e);
                           const eventTitle = e.target.value ?? '';
                           const slug = eventTitle
                             .normalize('NFD')
@@ -407,7 +345,6 @@ const AddEvent: React.FC = () => {
                   </FormItem>
                 )}
               />
-              {/* EventSlug chỉ hiển thị, không cho nhập tay */}
               <FormField
                 control={form.control}
                 name='eventSlug'

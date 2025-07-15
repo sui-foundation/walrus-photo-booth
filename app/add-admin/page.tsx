@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import UnifiedHeader from "@/components/UnifiedHeader";
 
 export default function AddAdminPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

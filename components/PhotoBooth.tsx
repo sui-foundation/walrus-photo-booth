@@ -2,9 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Camera, Check, Loader2 } from 'lucide-react';
 import JSConfetti from 'js-confetti';
-import { createClient } from '@supabase/supabase-js';
 import {
   Dialog,
   DialogContent,
@@ -18,13 +16,11 @@ import { supabase } from '@/lib/supabaseClient';
 interface Props {
   selectedEventId: number;
   selectedEventTitle: string;
-  selectedEventSlug: string;
   selectedTuskyId: string | null;
 }
 
 const PhotoBooth: React.FC<Props> = ({
   selectedEventTitle,
-  selectedEventSlug,
   selectedEventId,
   selectedTuskyId,
 }) => {
@@ -77,7 +73,7 @@ const PhotoBooth: React.FC<Props> = ({
           console.error('Error accessing camera:', err);
         });
     }
-  }, [isCameraOn, videoRef.current]);
+  }, [isCameraOn]);
 
   const takePhotoSequence = async () => {
     setIsCapturing(true);
@@ -320,7 +316,6 @@ const PhotoBooth: React.FC<Props> = ({
           </button>
         )}
       </div>
-      {/* Modal giữ nguyên */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className='w-screen h-screen max-w-none max-h-none bg-black/90 border-zinc-700 flex items-center justify-center p-4'>
           <div className='flex flex-col items-center justify-center w-full max-w-md'>

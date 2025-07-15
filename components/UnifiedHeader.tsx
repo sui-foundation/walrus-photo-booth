@@ -33,7 +33,7 @@ const UnifiedHeader: React.FC<HeaderProps> = ({
 }) => {
   const router = useRouter();
   const { isConnected, emailAddress, logout: walletLogout } = useCustomWallet();
-  const { user, handleLogout: authLogout } = useAuthentication();
+  const { handleLogout: authLogout } = useAuthentication();
   
   const [showMenu, setShowMenu] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);

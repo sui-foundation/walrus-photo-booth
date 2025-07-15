@@ -3,9 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { supabase } from '@/lib/supabaseClient';
-import ProfilePopover from '@/components/ProfilePopover';
 import Loading from '@/components/Loading';
-import Link from 'next/link';
 import { EventCard } from '@/components/EventCard';
 import UnifiedHeader from '@/components/UnifiedHeader';
 

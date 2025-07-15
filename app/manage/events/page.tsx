@@ -1,26 +1,19 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthentication } from '@/contexts/Authentication';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Loading from '@/components/Loading';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Menu } from 'lucide-react';
 import { format } from 'date-fns';
 import UnifiedHeader from '@/components/UnifiedHeader';
 
 const ManageEventsPage = () => {
   const { user } = useAuthentication();
   const router = useRouter();
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<Array<{ id: string; event_title: string; event_slug: string; event_date: string; showMenu: boolean; image_count?: number; owner_email?: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [showMenu, setShowMenu] = useState(false);
-  const [showLogoPopover, setShowLogoPopover] = useState(false);
-  const logoPopoverRef = useRef<HTMLDivElement>(null);
-  const adminRole = user?.role || 'admin';
   const isSuperAdmin = user?.role === 'super_admin';
 
   useEffect(() => {
@@ -44,13 +37,9 @@ const ManageEventsPage = () => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
       const isMenuClick = (target as Element).closest('.menu-button');
-      const isLogoPopoverClick = (target as Element).closest('img') || logoPopoverRef.current?.contains(target);
 
       if (!isMenuClick) {
         setEvents(prev => prev.map(e => ({ ...e, showMenu: false })));
-      }
-      if (!isLogoPopoverClick) {
-        setShowLogoPopover(false);
       }
     };
 
@@ -153,7 +142,7 @@ const ManageEventsPage = () => {
                       <button
                         className="flex w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100"
                         onClick={() => {
-                          handleDeleteEvent(event.id, event.owner_email);
+                          handleDeleteEvent(event.id, event.owner_email || '');
                           setEvents(prev => prev.map(e => ({ ...e, showMenu: false })));
                         }}
                         disabled={!isSuperAdmin && user?.email !== event.owner_email}

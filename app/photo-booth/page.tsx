@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
 import {
   Dialog,
@@ -139,7 +138,6 @@ const PhotoBoothPage: React.FC = () => {
     return (
       <PhotoBooth
         selectedEventTitle={selectedEvent.event_title}
-        selectedEventSlug={selectedEvent.event_slug}
         selectedEventId={selectedEvent.id}
         selectedTuskyId={null}
       />
@@ -192,7 +190,6 @@ const PhotoBoothPage: React.FC = () => {
           <div ref={photoBoothRef}>
             <PhotoBooth
               selectedEventTitle={selectedEvent.event_title}
-              selectedEventSlug={selectedEvent.event_slug}
               selectedEventId={selectedEvent.id}
               selectedTuskyId={null}
             />

@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     .single();
 
   if (existingAdmin) {
-    return NextResponse.json({ message: 'Email này đã tồn tại!' }, { status: 400 });
+    return NextResponse.json({ message: 'Email already exists!' }, { status: 400 });
   }
 
   const { data, error } = await supabase
@@ -22,8 +22,8 @@ export async function POST(req: Request) {
     .insert([{ email, role: role || 'admin' }]);
 
   if (error) {
-    return NextResponse.json({ message: 'Lỗi khi thêm Admin mới!', error }, { status: 500 });
+    return NextResponse.json({ message: 'Error adding new Admin!', error }, { status: 500 });
   }
 
-  return NextResponse.json({ message: 'Admin mới đã được thêm!', data }, { status: 201 });
+  return NextResponse.json({ message: 'New Admin added successfully!', data }, { status: 201 });
 }
