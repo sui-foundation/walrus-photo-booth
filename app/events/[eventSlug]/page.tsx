@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import ProfilePopover from '@/components/ProfilePopover';
 import { useCustomWallet } from '@/contexts/CustomWallet';
 import { Button } from '@/components/ui/button';
@@ -27,10 +27,7 @@ import {
   DialogTitle,
   DialogClose,
 } from '@/components/ui/dialog';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import UnifiedHeader from '@/components/UnifiedHeader';
 
 const AGGREGATOR_URL = process.env.NEXT_PUBLIC_AGGREGATOR_URL || 'https://aggregator.walrus-testnet.walrus.space';
 
@@ -41,6 +38,7 @@ interface Photo {
   object_id: string;
   event_id: number;
   user: string | null;
+  tusky_id: string;
 }
 
 interface Event {
@@ -50,6 +48,7 @@ interface Event {
   event_slug: string;
   event_date: string;
   admin_id: number;
+  tusky_id: string;
 }
 
 interface DateTimeFormatOptions {
@@ -70,7 +69,7 @@ const fadeInAnimation = `
   }
 `;
 
-const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
+const EventPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
   const resolvedParams = use(params);
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
   const [eventDetails, setEventDetails] = useState<Event | null>(null);
@@ -90,13 +89,56 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
   }, []);
 
   useEffect(() => {
+    // Function to get blob_id from Tusky API for photos without blob_id
+    const fetchTuskyPhotos = async () => {
+      if (!eventDetails?.id) return;
+
+      // Find photos that have tusky_id but no blob_id
+      const photosToUpdate = photos.filter(photo => !photo.blob_id && photo.tusky_id);
+
+      for (const photo of photosToUpdate) {
+        if (!photo.tusky_id) continue;
+        try {
+          const response = await fetch(`/api/files/${photo.tusky_id}`,
+            {
+              method: 'GET'
+            }
+          );
+          if (!response.ok) {
+            console.error(`Failed to fetch Tusky file for ${photo.tusky_id}: ${response.statusText}`);
+            continue;
+          }
+
+          const data = await response.json();
+          if (data && data.blob_id != "unknown") {
+            // Update photo in the state with the new blob_id
+            setPhotos(prevPhotos =>
+              prevPhotos.map(p =>
+                p.tusky_id === photo.tusky_id
+                  ? { ...p, blob_id: data.blob_id }
+                  : p
+              )
+            );
+
+            // Optionally update in database
+            await supabase
+              .from('photos')
+              .update({ blob_id: data.blob_id })
+              .eq('tusky_id', photo.tusky_id);
+          }
+        } catch (error) {
+          console.error(`Error fetching Tusky data for ${photo.tusky_id}:`, error);
+        }
+      }
+    };
+
     const fetchPhotos = async () => {
       if (!eventDetails?.id) return;
 
       setIsLoading(true);
       const { data, error } = await supabase
         .from('photos')
-        .select('blob_id, object_id, event_id, created_at')
+        .select('blob_id, object_id, event_id, created_at, tusky_id')
         .eq('event_id', eventDetails?.id)
         .order('created_at', { ascending: false });
 
@@ -107,9 +149,11 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
         setPhotos((data as Photo[]) || []);
       }
       setIsLoading(false);
+      fetchTuskyPhotos();
     };
 
     fetchPhotos();
+
   }, [eventDetails?.id]);
 
   useEffect(() => {
@@ -170,19 +214,19 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
     fetchCurrentAdmin();
   }, [emailAddress]);
 
-  const handleDeletePhoto = async (blob_id: string) => {
+  const handleDeletePhoto = async (tusky_id: string) => {
     setIsLoading(true);
 
     const { error } = await supabase
       .from('photos')
       .delete()
-      .eq('blob_id', blob_id);
+      .eq('tusky_id', tusky_id);
 
     if (error) {
       setError(error);
       console.error('Error deleting photo:', error);
     } else {
-      setPhotos(photos.filter((photo) => photo.blob_id !== blob_id));
+      setPhotos(photos.filter((photo) => photo.tusky_id !== tusky_id));
     }
     setIsLoading(false);
   };
@@ -196,49 +240,46 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
   }
 
   return (
-    <main className='min-h-screen bg-gradient-to-br from-sky-100 via-blue-50 to-white dark:from-sky-900 dark:via-blue-900 dark:to-gray-900'>
-      <div className='container mx-auto px-4 py-12'>
-        <div
-          className='w-full flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 
-                       bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm 
-                       rounded-xl p-6 shadow-lg'
-        >
-          <div className='space-y-2'>
-            <h1 className='text-4xl font-bold text-gray-900 dark:text-white'>
-              {eventDetails?.event_title}
-            </h1>
-            <h2 className='text-lg text-gray-600 dark:text-gray-300'>
+    <main className="min-h-screen bg-white text-black pb-6">
+      <UnifiedHeader
+        variant="minimal"
+        showBranding={true}
+        rightContent={
+          <Link
+            href="/"
+            className="rounded-lg p-1 hover:bg-neutral-800 transition flex items-center justify-center"
+            aria-label="Back to Home"
+            style={{ width: 40, height: 40 }}
+          >
+            <Image
+              src="/HeaderLogo.png"
+              alt="Exit"
+              width={28}
+              height={28}
+              className="rounded"
+              priority
+            />
+          </Link>
+        }
+      />
+      <div className="bg-neutral-900 text-white">
+        <div className="px-4 pb-4 pt-4">
+          <h1 className="text-2xl font-semibold tracking-wide uppercase">
+            {eventDetails?.event_title}
+          </h1>
+          <div className="h-1 w-32 bg-sky-400 mt-3 mb-4 rounded" />
+          <div className="flex items-center gap-3 text-gray-300 text-base font-mono">
+            <span>
               {eventDetails?.event_date}
-            </h2>
-            <Link
-              href='/'
-              className='inline-block text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors'
-            >
-              ← Back to Events
-            </Link>
-          </div>
-
-          <div className='flex items-center gap-4'>
-            {isConnected && currentAdminId && (
-              <>
-                <Link
-                  href='/addEvent'
-                  className='flex items-center justify-center rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors py-2.5 px-6'
-                >
-                  + Event
-                </Link>
-                <Link
-                  href='/photo-booth'
-                  className='flex items-center justify-center rounded-lg text-sm font-medium text-gray-900 bg-gray-100 hover:bg-gray-200 transition-colors py-2.5 px-6'
-                >
-                  Photo Booth
-                </Link>
-              </>
-            )}
-            <ProfilePopover />
+            </span>
+            <span className="mx-2">•</span>
+            <span>
+              {photos.length.toLocaleString()} photos
+            </span>
           </div>
         </div>
-
+      </div>
+      <div className="container mx-auto px-4 py-12">
         {photos.length === 0 ? (
           <div className='text-center py-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl'>
             <p className='text-lg text-gray-600 dark:text-gray-400'>
@@ -249,117 +290,146 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
           <>
             <style>{fadeInAnimation}</style>
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 p-3'>
-              {photos.map((photo, index) => (
-                <div
-                  key={photo.blob_id}
-                  style={{
-                    animation: `fadeIn 0.6s ease-out ${index * 0.1}s both`,
-                  }}
-                  className='relative bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg shadow-sm
-                             aspect-square flex flex-col items-center justify-center mb-3
-                             transform-gpu hover:scale-[1.02] hover:shadow-lg transition-all duration-300
-                             break-inside-avoid group'
-                >
+              {photos.map((photo, index) => {
+                // Tạo 4 segment cover cho mỗi ảnh
+                const photoUrl = photo?.blob_id && photo?.blob_id !== 'unknown'
+                  ? `${AGGREGATOR_URL}/v1/blobs/${photo?.blob_id}`
+                  : `https://cdn.tusky.io/${photo?.tusky_id}`;
+                return (
                   <div
-                    className='absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 
-                                transition-all duration-300 rounded-lg'
-                  />
+                    key={photo.tusky_id}
+                    style={{
+                      animation: `fadeIn 0.6s ease-out ${index * 0.1}s both`,
+                    }}
+                    className='relative bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg shadow-sm aspect-square flex flex-col items-center justify-center mb-3 transform-gpu hover:scale-[1.02] hover:shadow-lg transition-all duration-300 break-inside-avoid group'
+                  >
 
-                  <Dialog open={selectedPhotoId === photo.blob_id} onOpenChange={(isOpen) => setSelectedPhotoId(isOpen ? photo.blob_id : null)}>
-                    <DialogTrigger asChild>
-                      <div 
-                        className='relative w-[80%] h-full cursor-pointer z-10'
-                        onClick={() => setSelectedPhotoId(photo.blob_id)}
-                      >
-                        <Image
-                          src={`${AGGREGATOR_URL}/v1/blobs/${photo.blob_id}`}
-                          alt={`Photo ${photo.blob_id}`}
-                          className='rounded-md transition-all duration-300 object-contain'
-                          fill
-                          sizes='(max-width: 768px) 40vw, 25vw'
-                          style={{ transform: 'translateZ(0)' }}
-                        />
-                        <div className='absolute inset-0 flex items-center justify-center'>
-                          <span className='opacity-0 group-hover:opacity-100 text-white text-sm bg-black px-3 py-1 rounded-full transition-opacity'>
-                            View
-                          </span>
-                        </div>
-                      </div>
-                    </DialogTrigger>
-                    <DialogContent
-                      className='max-w-[80vw] max-h-[80vh] p-0 !bg-black/80 border-none 
-                                             data-[state=open]:!bg-black/80 dark:!bg-black/80'
-                    >
-                      <DialogTitle className='sr-only'>
-                        Photo from {eventDetails?.event_title}
-                      </DialogTitle>
-                      <div className='relative w-full h-[80vh] !bg-black/80'>
-                        <DialogClose
-                          className='absolute top-4 right-4 z-50 
-                                                bg-black/60 hover:bg-black/80
-                                                w-8 h-8
-                                                flex items-center justify-center
-                                                shadow-lg transition-all 
-                                                hover:scale-110 focus:outline-none'
-                          aria-label='Close dialog'
+                    <Dialog open={selectedPhotoId === photo.tusky_id} onOpenChange={(isOpen) => setSelectedPhotoId(isOpen ? photo.tusky_id : null)}>
+                      <DialogTrigger asChild>
+                        <div
+                          className='relative w-[80%] h-full cursor-pointer z-10'
+                          onClick={() => setSelectedPhotoId(photo.tusky_id)}
                         >
-                          <span className='text-white text-xl leading-none font-semibold'>
-                            ×
-                          </span>
-                        </DialogClose>
-                        <Image
-                          src={`${AGGREGATOR_URL}/v1/blobs/${photo.blob_id}`}
-                          alt={`Photo ${photo.blob_id}`}
-                          className='object-contain transition-opacity duration-300'
-                          fill
-                          sizes='80vw'
-                          priority
-                        />
-                        <div className='absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm'>
-                          <span className=''>
-                            Tap and hold image to download
-                          </span>
+                          {/* <Image
+                            // src={`${AGGREGATOR_URL}/v1/blobs/${photo.blob_id}`}
+                            src={photo?.blob_id && photo?.blob_id !== 'unknown' ? `${AGGREGATOR_URL}/v1/blobs/${photo?.blob_id}` : `https://cdn.tusky.io/${photo?.tusky_id}`}
+                            alt={`Photo ${photo.blob_id}`}
+                            className='rounded-md transition-all duration-300 object-contain'
+                            fill
+                            sizes='(max-width: 768px) 40vw, 25vw'
+                            style={{ transform: 'translateZ(0)' }}
+                          /> */}
+                          <div className="grid grid-cols-2 grid-rows-2 gap-2 w-full h-40 mb-4">
+                            {Array.from({ length: 4 }).map((_, idx) => (
+                              <div key={idx} className="relative w-full aspect-[4/3] bg-gray-100 rounded overflow-hidden">
+                                <Image
+                                  src={photoUrl}
+                                  alt={`Photo segment ${idx + 1}`}
+                                  fill
+                                  className="object-cover rounded"
+                                  style={{
+                                    objectPosition:
+                                      idx === 1
+                                        ? '0% 33%'
+                                        : idx === 2
+                                          ? '0% 66%'
+                                          : idx === 3
+                                            ? '0% 99%'
+                                            : '0% 0%',
+                                    transform: 'scale(1.1)',
+                                  }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                          <div className='absolute inset-0 flex items-center justify-center'>
+                            <span className='opacity-0 group-hover:opacity-100 text-white text-sm bg-black px-3 py-1 rounded-full transition-opacity'>
+                              View
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                      </DialogTrigger>
+                      <DialogContent
+                        className='max-w-[420px] w-full p-0 bg-black/90 border-none rounded-xl overflow-hidden flex flex-col items-center'
+                        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35)', maxHeight: '100vh' }}
+                      >
+                        {/* Header */}
+                        <div className="w-full flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/90">
+                          <span className="text-lg font-semibold text-white">Your Photo Strip</span>
+                          <DialogClose
+                            className='text-white text-2xl font-bold hover:bg-white/10 rounded-full w-8 h-8 flex items-center justify-center transition'
+                            aria-label='Close dialog'
+                          >
+                            ×
+                          </DialogClose>
+                        </div>
+                        {/* Photo */}
+                        <div className="w-full flex items-center justify-center py-6 px-4 bg-black">
+                          <div className="relative w-full" style={{ aspectRatio: '1/2.2', maxWidth: 320, height: '70vh' }}>
+                            <Image
+                              src={photo?.blob_id && photo?.blob_id !== 'unknown' ? `${AGGREGATOR_URL}/v1/blobs/${photo?.blob_id}` : `https://cdn.tusky.io/${photo?.tusky_id}`}
+                              alt={`Photo ${photo.blob_id}`}
+                              className='rounded-lg object-contain bg-white'
+                              fill
+                              sizes='320px'
+                              priority
+                              style={{ objectFit: 'contain' }}
+                            />
+                          </div>
+                        </div>
+                        {/* Download Button */}
+                        <div className="w-full px-0 pb-0" style={{ background: '#232323', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                          <a
+                            href={photo?.blob_id && photo?.blob_id !== 'unknown' ? `${AGGREGATOR_URL}/v1/blobs/${photo?.blob_id}` : `https://cdn.tusky.io/${photo?.tusky_id}`}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full text-white text-lg font-semibold tracking-wide text-center py-4"
+                            style={{ letterSpacing: 2 }}
+                          >
+                            DOWNLOAD
+                          </a>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
 
-                  {isConnected && eventDetails?.admin_id === currentAdminId && (
-                    <div className='mt-3 w-full z-10'>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button className='w-full bg-red-600/90 hover:bg-red-700 text-white transition-colors text-sm'>
-                            <TrashIcon className='mr-2 h-3 w-3' />
-                            Delete
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className='bg-white dark:bg-gray-800'>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className='text-gray-900 dark:text-white'>
-                              Are you sure?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription className='text-gray-600 dark:text-gray-400'>
-                              Delete photo {photo.blob_id}? This action cannot
-                              be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className='bg-gray-100 hover:bg-gray-200 text-gray-900'>
-                              Cancel
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeletePhoto(photo.blob_id)}
-                              className='bg-red-600 hover:bg-red-700 text-white'
-                            >
+                    {isConnected && eventDetails?.admin_id === currentAdminId && (
+                      <div className='mt-3 w-full z-10'>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button className='w-full bg-red-600/90 hover:bg-red-700 text-white transition-colors text-sm'>
+                              <TrashIcon className='mr-2 h-3 w-3' />
                               Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  )}
-                </div>
-              ))}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className='bg-white dark:bg-gray-800'>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className='text-gray-900 dark:text-white'>
+                                Are you sure?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className='text-gray-600 dark:text-gray-400'>
+                                Delete photo {photo.tusky_id}? This action cannot
+                                be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className='bg-gray-100 hover:bg-gray-200 text-gray-900'>
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeletePhoto(photo.tusky_id)}
+                                className='bg-red-600 hover:bg-red-700 text-white'
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </>
         )}
@@ -368,4 +438,4 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
   );
 };
 
-export default PhotosPage;
+export default EventPage;

@@ -86,7 +86,7 @@ export default function ProfilePopover() {
         redirectToAuthUrl();
       }}
     >
-      Admin Sign In
+       Sign In
     </Button>
   );
 }

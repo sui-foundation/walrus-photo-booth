@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
-
 import { ProvidersAndLayout } from './ProvidersAndLayout';
+
+
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -47,7 +49,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${mondwest.variable} antialiased`}
       >
-        <ProvidersAndLayout>{children}</ProvidersAndLayout>
+        {/* ✅ Bọc TooltipProvider quanh nội dung */}
+        <TooltipProvider>
+          <ProvidersAndLayout>{children}</ProvidersAndLayout>
+        </TooltipProvider>
         <Analytics />
       </body>
     </html>

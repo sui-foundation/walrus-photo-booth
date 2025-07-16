@@ -40,4 +40,6 @@ To configure the application, you need to set up environment variables. Follow t
    - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`: google client id for authentication
    - `NEXT_PUBLIC_WEBSITE_BASE_URL`: your website url 
    - `NEXT_PUBLIC_PUBLISHER_URL`: the url for the walrus publisher service
-   - `NEXT_PUBLIC_AGGREGATOR_URL`: the url for the walrus aggregator service 
+   - `NEXT_PUBLIC_AGGREGATOR_URL`: the url for the walrus aggregator service
+   - `TUSKY_API_KEY`: the api key of your tusky 
+   - `NEXT_PUBLIC_TUSKY_VAULT_ID`: the vault id of your tusky
