@@ -119,6 +119,7 @@ const HomePage: React.FC = () => {
   };
 
   if (error) {
+    console.error('Error loading events:', error);
     return <div>Error loading events</div>;
   }
 

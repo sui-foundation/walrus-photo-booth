@@ -101,6 +101,7 @@ const PhotoBoothPage: React.FC = () => {
   }, [selectedEvent, showEventSelectedModal]);
 
   if (error) {
+    console.error('Error loading events:', error);
     return <div>Error loading events</div>;
   }
 
