@@ -98,6 +98,7 @@ export default function CustomWalletProvider({children}: {children: React.ReactN
             : "anonymous",
         email: (decoded as any).email,
         picture: "",
+        avatar_url: null,
       });  
     }
   }, [isConnected, isWalletConnected, handleLoginAs, zkLoginSession]);
